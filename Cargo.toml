@@ -1,0 +1,7 @@
+[package]
+name = "glifparser"
+version = "0.1.0"
+authors = ["Fredrick Brennan <copypaste@kittens.ph>"]
+
+[dependencies]
+xmltree = "0.10.1"
