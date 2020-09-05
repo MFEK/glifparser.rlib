@@ -257,9 +257,7 @@ fn create_quadratic_outline<T>(goutline: &GlifOutline) -> Outline<T> {
             });
         }
 
-        //eprintln!("{:?}", &temp_contour);
         temp_outline.push_back(temp_contour);
-        //eprintln!("{:?}", stack);
         assert_eq!(stack.len(), 0);
     }
 
@@ -267,13 +265,11 @@ fn create_quadratic_outline<T>(goutline: &GlifOutline) -> Outline<T> {
         let mut contour: Contour<T> = Vec::new();
 
         for gp in gc.iter() {
-            eprintln!("Processing point: {:?}", &gp);
             match gp.ptype {
                 PointType::OffCurve => {
                     stack.push_back(&gp);
                 }
                 _ => {
-                    eprintln!("{}", stack.len());
                     assert!(stack.len() < 2);
                     let h1 = stack.pop_front();
 
