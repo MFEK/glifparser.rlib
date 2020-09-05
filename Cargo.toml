@@ -1,6 +1,6 @@
 [package]
 name = "glifparser"
-version = "0.1.0"
+version = "0.0.0"
 authors = ["Fredrick Brennan <copypaste@kittens.ph>"]
 
 [dependencies]

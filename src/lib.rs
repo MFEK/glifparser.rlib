@@ -1,4 +1,4 @@
-#![feature(assoc_char_funcs)]
+#![feature(assoc_char_funcs, let_chains)]
 #[derive(Debug, Copy, Clone, PartialEq)]
 pub enum PointType {
     Undefined,
@@ -34,7 +34,7 @@ impl From<Option<&GlifPoint>> for Handle {
 }
 
 // A "close to the source <point>"
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 struct GlifPoint {
     x: f32,
     y: f32,
@@ -74,6 +74,7 @@ pub enum WhichHandle {
     A,
     B,
 }
+
 impl<T> Point<T> {
     pub fn new() -> Point<T> {
         Point {
@@ -83,7 +84,7 @@ impl<T> Point<T> {
             b: Handle::Colocated,
             ptype: PointType::Undefined,
             name: None,
-            data: None
+            data: None,
         }
     }
 
@@ -126,7 +127,16 @@ impl Anchor {
 pub type Contour<T> = Vec<Point<T>>;
 pub type Outline<T> = Vec<Contour<T>>;
 
-#[derive(Debug, PartialEq)]
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub enum OutlineType {
+    Cubic,
+    Quadratic,
+    // As yet unimplemented.
+    // Will be in <lib> with cubic Bezier equivalents in <outline>.
+    Spiro,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub enum Codepoint {
     Hex(char),
     Undefined,
@@ -148,6 +158,7 @@ impl fmt::LowerHex for Codepoint {
 #[derive(Debug)]
 pub struct Glif<T> {
     pub outline: Option<Outline<T>>,
+    pub order: OutlineType,
     pub anchors: Option<Vec<Anchor>>,
     pub width: u64,
     pub unicode: Codepoint,
@@ -174,16 +185,188 @@ fn parse_point_type(pt: Option<&str>) -> PointType {
     }
 }
 
+fn midpoint(x1: f32, x2: f32, y1: f32, y2: f32) -> (f32, f32) {
+    ((x1 + x2) / 2., (y1 + y2) / 2.)
+}
+
+fn get_outline_type(goutline: &GlifOutline) -> OutlineType {
+    for gc in goutline.iter() {
+        for gp in gc.iter() {
+            match gp.ptype {
+                PointType::Curve => return OutlineType::Cubic,
+                PointType::QCurve => return OutlineType::Quadratic,
+                _ => {}
+            }
+        }
+    }
+
+    OutlineType::Cubic // path has no off-curve point, only lines
+}
+
+// UFO uses the same compact format as TTF, so we need to expand it.
+fn create_quadratic_outline<T>(goutline: &GlifOutline) -> Outline<T> {
+    let mut outline: Outline<T> = Vec::new();
+
+    let mut temp_outline: VecDeque<VecDeque<GlifPoint>> = VecDeque::new();
+
+    let mut stack: VecDeque<&GlifPoint> = VecDeque::new();
+
+    for gc in goutline.iter() {
+        let mut temp_contour = VecDeque::new();
+
+        for gp in gc.iter() {
+            match gp.ptype {
+                PointType::OffCurve => {
+                    stack.push_back(&gp);
+                }
+                _ => {}
+            }
+
+            if stack.len() == 2 {
+                let h1 = stack.pop_front().unwrap();
+                let h2 = stack.pop_front().unwrap();
+                let mp = midpoint(h1.x, h2.x, h1.y, h2.y);
+
+                temp_contour.push_back(h1.clone());
+                temp_contour.push_back(GlifPoint {
+                    x: mp.0,
+                    y: mp.1,
+                    ptype: PointType::QCurve,
+                    smooth: true,
+                    name: gp.name.clone(),
+                });
+                stack.push_back(h2);
+            } else if gp.ptype != PointType::OffCurve {
+                let h1 = stack.pop_front();
+                match h1 {
+                    Some(h) => temp_contour.push_back(h.clone()),
+                    _ => {}
+                }
+                temp_contour.push_back(gp.clone());
+            }
+        }
+        if let (Some(h1), Some(h2)) = (stack.pop_front(), temp_contour.get(0)) {
+            let mp = midpoint(h1.x, h2.x, h1.y, h2.y);
+            temp_contour.push_back(h1.clone());
+            temp_contour.push_back(GlifPoint {
+                x: mp.0,
+                y: mp.1,
+                ptype: PointType::QCurve,
+                smooth: true,
+                name: None,
+            });
+        }
+
+        //eprintln!("{:?}", &temp_contour);
+        temp_outline.push_back(temp_contour);
+        //eprintln!("{:?}", stack);
+        assert_eq!(stack.len(), 0);
+    }
+
+    for gc in temp_outline.iter() {
+        let mut contour: Contour<T> = Vec::new();
+
+        for gp in gc.iter() {
+            eprintln!("Processing point: {:?}", &gp);
+            match gp.ptype {
+                PointType::OffCurve => {
+                    stack.push_back(&gp);
+                }
+                _ => {
+                    eprintln!("{}", stack.len());
+                    assert!(stack.len() < 2);
+                    let h1 = stack.pop_front();
+
+                    if let Some(h) = h1 {
+                        contour.last_mut().map(|p| p.a = Handle::from(h1));
+                    }
+
+                    contour.push(Point {
+                        x: gp.x,
+                        y: gp.y,
+                        a: Handle::Colocated,
+                        b: Handle::Colocated,
+                        name: gp.name.clone(),
+                        ptype: gp.ptype,
+                        data: None,
+                    });
+                }
+            }
+        }
+        outline.push(contour);
+    }
+
+    outline
+}
+
+// Stack based outline builder. Push all offcurve points onto the stack, pop them when we see an on
+// curve point. For each point, we add one handle to the current point, and one to the last. We
+// then connect the last point to the first to make the loop, (if path is closed).
+fn create_cubic_outline<T>(goutline: &GlifOutline) -> Outline<T> {
+    let mut outline: Outline<T> = Vec::new();
+
+    let mut stack: VecDeque<&GlifPoint> = VecDeque::new();
+
+    for gc in goutline.iter() {
+        let mut contour: Contour<T> = Vec::new();
+
+        for gp in gc.iter() {
+            match gp.ptype {
+                PointType::OffCurve => {
+                    stack.push_back(&gp);
+                }
+                PointType::Line | PointType::Curve => {
+                    let h1 = stack.pop_front();
+                    let h2 = stack.pop_front();
+
+                    contour.last_mut().map(|p| p.a = Handle::from(h1));
+
+                    contour.push(Point {
+                        x: gp.x,
+                        y: gp.y,
+                        a: Handle::Colocated,
+                        b: Handle::from(h2),
+                        name: gp.name.clone(),
+                        ptype: gp.ptype,
+                        data: None,
+                    });
+                }
+                PointType::QCurve => {
+                    unreachable!("Quadratic point in cubic glyph! File is corrupt.")
+                }
+                _ => {}
+            }
+        }
+
+        let h1 = stack.pop_front();
+        let h2 = stack.pop_front();
+
+        contour.last_mut().map(|p| p.a = Handle::from(h1));
+
+        if contour.len() > 0 && contour[0].ptype != PointType::Move {
+            contour.first_mut().map(|p| p.b = Handle::from(h2));
+        }
+
+        outline.push(contour);
+    }
+
+    outline
+}
+
+// From .glif XML, return a parse tree
 pub fn read_ufo_glif<T>(glif: &str) -> Glif<T> {
     let mut glif = xmltree::Element::parse(glif.as_bytes()).expect("Invalid XML");
+
     let mut ret = Glif {
         outline: None,
+        order: OutlineType::Cubic, // default when only corners
         anchors: None,
         width: 0,
         unicode: Codepoint::Undefined,
         name: String::new(),
         format: 2,
     };
+
     assert_eq!(glif.name, "glyph", "Root element not <glyph>");
     assert_eq!(
         glif.attributes
@@ -192,6 +375,7 @@ pub fn read_ufo_glif<T>(glif: &str) -> Glif<T> {
         "2",
         "<glyph> format not 2"
     );
+
     ret.name = glif
         .attributes
         .get("name")
@@ -200,6 +384,7 @@ pub fn read_ufo_glif<T>(glif: &str) -> Glif<T> {
     let advance = glif
         .take_child("advance")
         .expect("<glyph> missing <advance> child");
+
     let unicode = glif.take_child("unicode");
     ret.width = advance
         .attributes
@@ -288,43 +473,13 @@ pub fn read_ufo_glif<T>(glif: &str) -> Glif<T> {
         }
     }
 
-    let mut goiter = goutline.iter();
+    ret.order = get_outline_type(&goutline);
 
-    let mut outline: Outline<T> = Vec::new();
-
-    let mut stack: VecDeque<&GlifPoint> = VecDeque::new();
-
-    for gc in goutline.iter() {
-        let mut contour: Contour<T> = Vec::new();
-        for gp in gc.iter() {
-            match gp.ptype {
-                PointType::OffCurve => {
-                    stack.push_back(&gp);
-                }
-                _ => {
-                    let h1 = stack.pop_front();
-                    let h2 = stack.pop_front();
-                    contour.last_mut().map(|p| p.a = Handle::from(h1));
-                    contour.push(Point {
-                        x: gp.x,
-                        y: gp.y,
-                        a: Handle::Colocated,
-                        b: Handle::from(h2),
-                        name: gp.name.clone(),
-                        ptype: gp.ptype,
-                        data: None
-                    });
-                }
-            }
-        }
-        let h1 = stack.pop_front();
-        let h2 = stack.pop_front();
-        contour.last_mut().map(|p| p.a = Handle::from(h1));
-        if contour.len() > 0 && contour[0].ptype != PointType::Move {
-            contour.first_mut().map(|p| p.b = Handle::from(h2));
-        }
-        outline.push(contour);
-    }
+    let outline = match ret.order {
+        OutlineType::Cubic => create_cubic_outline(&goutline),
+        OutlineType::Quadratic => create_quadratic_outline(&goutline),
+        OutlineType::Spiro => unreachable!("Spiro as yet unimplemented"),
+    };
 
     if outline.len() > 0 {
         ret.outline = Some(outline);
