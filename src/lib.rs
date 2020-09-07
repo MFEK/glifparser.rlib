@@ -88,6 +88,18 @@ impl<T> Point<T> {
         }
     }
 
+    pub fn from_x_y_type(at: (f32, f32), ptype: PointType) -> Point<T> {
+        Point {
+            x: at.0,
+            y: at.1,
+            a: Handle::Colocated,
+            b: Handle::Colocated,
+            ptype: ptype,
+            name: None,
+            data: None,
+        }
+    }
+
     pub fn handle_or_colocated(
         &self,
         which: WhichHandle,
