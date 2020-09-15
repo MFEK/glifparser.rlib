@@ -5,6 +5,7 @@ pub enum PointType {
     Move,
     Curve,
     QCurve,
+    QClose,
     Line,
     OffCurve,
 } // Undefined used by new(), shouldn't appear in Point<T> structs
@@ -259,14 +260,25 @@ fn create_quadratic_outline<T>(goutline: &GlifOutline) -> Outline<T> {
         }
         if let (Some(h1), Some(h2)) = (stack.pop_front(), temp_contour.get(0)) {
             let mp = midpoint(h1.x, h2.x, h1.y, h2.y);
+            let (t, tx, ty) = (h2.ptype, h2.x, h2.y);
             temp_contour.push_back(h1.clone());
-            temp_contour.push_back(GlifPoint {
-                x: mp.0,
-                y: mp.1,
-                ptype: PointType::QCurve,
-                smooth: true,
-                name: None,
-            });
+            if t == PointType::OffCurve {
+                temp_contour.push_back(GlifPoint {
+                    x: mp.0,
+                    y: mp.1,
+                    ptype: PointType::QCurve,
+                    smooth: true,
+                    name: None,
+                });
+            } else {
+                temp_contour.push_back(GlifPoint {
+                    x: tx,
+                    y: ty,
+                    ptype: PointType::QClose,
+                    smooth: true,
+                    name: None,
+                });
+            }
         }
 
         temp_outline.push_back(temp_contour);
