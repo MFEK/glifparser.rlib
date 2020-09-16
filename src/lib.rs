@@ -71,7 +71,9 @@ pub struct Point<T> {
     pub data: Option<T>,
 }
 
+#[derive(Debug, Copy, Clone, PartialEq)]
 pub enum WhichHandle {
+    Neither,
     A,
     B,
 }
@@ -110,6 +112,7 @@ impl<T> Point<T> {
         let handle = match which {
             WhichHandle::A => self.a,
             WhichHandle::B => self.b,
+            WhichHandle::Neither => Handle::Colocated,
         };
         match handle {
             Handle::At(x, y) => (transform_x(x), transform_y(y)),
