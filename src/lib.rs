@@ -1,4 +1,5 @@
 #![feature(assoc_char_funcs, let_chains)]
+extern crate log;
 #[derive(Debug, Copy, Clone, PartialEq)]
 pub enum PointType {
     Undefined,
@@ -319,6 +320,8 @@ fn create_quadratic_outline<T>(goutline: &GlifOutline) -> Outline<T> {
 
         if contour.len() > 0 {
             outline.push(contour);
+        } else {
+            log::warn!("Dropped empty contour. Lone `move` point in .glif? GlifContour: {:?}", &gc);
         }
     }
 
@@ -375,6 +378,8 @@ fn create_cubic_outline<T>(goutline: &GlifOutline) -> Outline<T> {
 
         if contour.len() > 0 {
             outline.push(contour);
+        } else {
+            log::warn!("Dropped empty contour. Lone `move` point in .glif? GlifContour: {:?}", &gc);
         }
     }
 
