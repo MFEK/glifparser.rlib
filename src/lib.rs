@@ -316,7 +316,10 @@ fn create_quadratic_outline<T>(goutline: &GlifOutline) -> Outline<T> {
                 }
             }
         }
-        outline.push(contour);
+
+        if contour.len() > 0 {
+            outline.push(contour);
+        }
     }
 
     outline
@@ -370,7 +373,9 @@ fn create_cubic_outline<T>(goutline: &GlifOutline) -> Outline<T> {
             contour.first_mut().map(|p| p.b = Handle::from(h2));
         }
 
-        outline.push(contour);
+        if contour.len() > 0 {
+            outline.push(contour);
+        }
     }
 
     outline
