@@ -66,7 +66,7 @@ pub struct Point<T> {
     pub y: f32,
     pub a: Handle,
     pub b: Handle,
-    name: Option<String>,
+    pub name: Option<String>,
     pub ptype: PointType,
     pub data: Option<T>,
 }
