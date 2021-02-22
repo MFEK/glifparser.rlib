@@ -182,6 +182,7 @@ pub struct Glif<T> {
     pub unicode: Codepoint,
     pub name: String,
     pub format: u8, // we only understand 2
+    pub lib: Option<String>
 }
 
 
@@ -404,6 +405,7 @@ pub fn read_ufo_glif<T>(glif: &str) -> Glif<T> {
         unicode: Codepoint::Undefined,
         name: String::new(),
         format: 2,
+        lib: None
     };
 
     assert_eq!(glif.name, "glyph", "Root element not <glyph>");
@@ -512,6 +514,13 @@ pub fn read_ufo_glif<T>(glif: &str) -> Glif<T> {
         }
     }
 
+    if let Some(lib) = glif.take_child("lib") {
+        let mut lib_string = Vec::new();
+        let res = lib.write(&mut lib_string);
+        ret.lib = Some(String::from_utf8(lib_string).unwrap());
+        println!("{0}", ret.lib.as_ref().unwrap());
+    }
+
     ret.order = get_outline_type(&goutline);
 
     let outline = match ret.order {
@@ -544,7 +553,7 @@ fn point_type_to_string(ptype: PointType) -> Option<String>
     }
 }
 
-fn write_ufo_point_from_handle(mut writer: XmlWriter, handle: Handle) -> XmlWriter
+fn write_ufo_point_from_handle(writer: &mut XmlWriter, handle: Handle)
 {
     match handle {
         Handle::At(x, y) => {
@@ -555,8 +564,6 @@ fn write_ufo_point_from_handle(mut writer: XmlWriter, handle: Handle) -> XmlWrit
         },
         _ => {}
     }
-
-    return writer;
 }
 
 pub fn write_ufo_glif<T>(glif: Glif<T>) -> String
@@ -601,9 +608,8 @@ pub fn write_ufo_glif<T>(glif: Glif<T>) -> String
         Some(outline) => {
             writer.start_element("outline");
         
-            // if we find a move point at the start of things we set this to false
-
             for contour in outline {
+                // if we find a move point at the start of things we set this to false
                 let open_contour = if contour.first().unwrap().ptype == PointType::Move { true } else { false };
 
 
@@ -611,9 +617,9 @@ pub fn write_ufo_glif<T>(glif: Glif<T>) -> String
                 
                 let mut last_point = None;
                 for point in &contour {
-                    if let Some(lp) = last_point {
+                    if let Some(_lp) = last_point {
                         // if there was a point prior to this one we emit our b handle
-                        writer = write_ufo_point_from_handle(writer, point.b);
+                        write_ufo_point_from_handle(&mut writer, point.b);
                     }
 
 
@@ -637,7 +643,7 @@ pub fn write_ufo_glif<T>(glif: Glif<T>) -> String
                 
                     match point.ptype {
                         PointType::Line | PointType::Curve => {
-                            writer = write_ufo_point_from_handle(writer, point.a);
+                            write_ufo_point_from_handle(&mut writer, point.a);
                         },
 
                         PointType::QCurve => {
@@ -651,13 +657,22 @@ pub fn write_ufo_glif<T>(glif: Glif<T>) -> String
 
                 // if a move wasn't our first point then we gotta close the shape by emitting the first point's b handle
                 if !open_contour {
-                    writer = write_ufo_point_from_handle(writer, contour.first().unwrap().b);
+                    write_ufo_point_from_handle(&mut writer, contour.first().unwrap().b);
                 }
 
                 writer.end_element();
             }
             writer.end_element();
         },
+        None => {}
+    }
+
+    match glif.lib {
+        Some(strdump) => {
+            writer.start_element("lib");
+                writer.write_text(&strdump);
+            writer.end_element();
+        }
         None => {}
     }
 
