@@ -182,7 +182,7 @@ pub struct Glif<T> {
     pub unicode: Codepoint,
     pub name: String,
     pub format: u8, // we only understand 2
-    pub lib: Option<String>
+    pub lib: Option<xmltree::Element>
 }
 
 
@@ -190,9 +190,6 @@ extern crate xmltree;
 use std::collections::VecDeque;
 use std::error::Error;
 use std::fs;
-
-extern crate xmlwriter;
-use xmlwriter::*;
 
 fn parse_anchor(anchor_el: xmltree::Element) -> Result<Anchor, &'static str> {
     Err("Unimplemented")
@@ -393,6 +390,8 @@ fn create_cubic_outline<T>(goutline: &GlifOutline) -> Outline<T> {
     outline
 }
 
+use xmltree::EmitterConfig;
+
 // From .glif XML, return a parse tree
 pub fn read_ufo_glif<T>(glif: &str) -> Glif<T> {
     let mut glif = xmltree::Element::parse(glif.as_bytes()).expect("Invalid XML");
@@ -515,10 +514,7 @@ pub fn read_ufo_glif<T>(glif: &str) -> Glif<T> {
     }
 
     if let Some(lib) = glif.take_child("lib") {
-        let mut lib_string = Vec::new();
-        let res = lib.write(&mut lib_string);
-        ret.lib = Some(String::from_utf8(lib_string).unwrap());
-        println!("{0}", ret.lib.as_ref().unwrap());
+        ret.lib = Some(lib);
     }
 
     ret.order = get_outline_type(&goutline);
@@ -553,98 +549,94 @@ fn point_type_to_string(ptype: PointType) -> Option<String>
     }
 }
 
-fn write_ufo_point_from_handle(writer: &mut XmlWriter, handle: Handle)
+fn build_ufo_point_from_handle(handle: Handle) -> Option<xmltree::Element>
 {
     match handle {
         Handle::At(x, y) => {
-            writer.start_element("point");
-                writer.write_attribute("x", &x);
-                writer.write_attribute("y", &y);
-            writer.end_element();
+            let mut glyph = xmltree::Element::new("point");
+            glyph.attributes.insert("x".to_owned(), x.to_string());
+            glyph.attributes.insert("y".to_owned(), y.to_string());
+            return Some(glyph);
         },
         _ => {}
     }
+
+    None
 }
 
-pub fn write_ufo_glif<T>(glif: Glif<T>) -> String
+pub fn write_ufo_glif<T>(glif: &Glif<T>) -> String
 {
-    let mut writer = XmlWriter::new(Options::default());
+    let mut glyph = xmltree::Element::new("glyph");
+        glyph.attributes.insert("name".to_owned(), glif.name.to_string());
+        glyph.attributes.insert("format".to_owned(), glif.format.to_string());
 
-    writer.start_element("glyph");
-    writer.write_attribute("name", &glif.name);
-    writer.write_attribute("format", &glif.format);
-
-    writer.start_element("advance");
-    writer.write_attribute("width", &glif.width);
-    writer.end_element();
+    let mut advance = xmltree::Element::new("advance");
+        advance.attributes.insert("width".to_owned(), glif.width.to_string());
+        glyph.children.push(xmltree::XMLNode::Element(advance));
 
     match glif.unicode
     {
         Codepoint::Hex(hex) => {
-            writer.start_element("unicode");
-            writer.write_attribute("hex", &format!(r#"{:X}"#, hex as u32));
-            writer.end_element();
+            let mut unicode = xmltree::Element::new("unicode");
+                unicode.attributes.insert("hex".to_owned(), format!(r#"{:X}"#, hex as u32));
+                glyph.children.push(xmltree::XMLNode::Element(unicode));
         },
         Codepoint::Undefined => {}
     }
 
-    match glif.anchors
+    match &glif.anchors
     {
         Some(anchor_vec) => {
             for anchor in anchor_vec {
-                writer.start_element("anchor");
-                writer.write_attribute("x", &anchor.x);
-                writer.write_attribute("y", &anchor.y);
-                writer.write_attribute("name", &anchor.class);
-                // Anchor does not currently contain a color, or identifier attribute
-                writer.end_element();
+                let mut anchor_node = xmltree::Element::new("anchor");
+                    anchor_node.attributes.insert("x".to_owned(), anchor.x.to_string());
+                    anchor_node.attributes.insert("y".to_owned(), anchor.y.to_string());
+                    anchor_node.attributes.insert("name".to_owned(), anchor.class.to_string());
+                    glyph.children.push(xmltree::XMLNode::Element(anchor_node));
             }
         },
         None => {}
     }
 
-    match glif.outline
+    match &glif.outline
     {
         Some(outline) => {
-            writer.start_element("outline");
-        
+            let mut outline_node = xmltree::Element::new("outline");
             for contour in outline {
                 // if we find a move point at the start of things we set this to false
-                let open_contour = if contour.first().unwrap().ptype == PointType::Move { true } else { false };
-
-
-                writer.start_element("contour");
+                let open_contour = contour.first().unwrap().ptype == PointType::Move;
+                let mut contour_node = xmltree::Element::new("contour");
                 
                 let mut last_point = None;
-                for point in &contour {
+                for point in contour {
                     if let Some(_lp) = last_point {
                         // if there was a point prior to this one we emit our b handle
-                        write_ufo_point_from_handle(&mut writer, point.b);
+                        if let Some(handle_node) = build_ufo_point_from_handle(point.b) {
+                            contour_node.children.push(xmltree::XMLNode::Element(handle_node));
+                        }
                     }
 
-
-                
-                    writer.start_element("point");
-                        writer.write_attribute("x", &point.x);
-                        writer.write_attribute("y", &point.y);
+                    let mut point_node = xmltree::Element::new("point");
+                        point_node.attributes.insert("x".to_owned(), point.x.to_string());
+                        point_node.attributes.insert("y".to_owned(), point.y.to_string());
                 
                         match point_type_to_string(point.ptype) {
-                            Some(ptype_string) => writer.write_attribute("type", &ptype_string),
+                            Some(ptype_string) => {point_node.attributes.insert("type".to_owned(), ptype_string);},
                             None => {}
                         }
                 
                         match &point.name {
-                            Some(name) => writer.write_attribute("name", &name),
+                            Some(name) => {point_node.attributes.insert("name".to_owned(), name.to_string());},
                             None => {}
                         }
                 
                         // Point>T> does not contain fields for smooth, or identifier.
-                    writer.end_element();
-                
+                    contour_node.children.push(xmltree::XMLNode::Element(point_node));
                     match point.ptype {
-                        PointType::Line | PointType::Curve => {
-                            write_ufo_point_from_handle(&mut writer, point.a);
-                        },
+                        PointType::Line | PointType::Curve | PointType::Move => {
+                            if let Some(handle_node) = build_ufo_point_from_handle(point.a) {
+                                contour_node.children.push(xmltree::XMLNode::Element(handle_node));
+                            }                        },
 
                         PointType::QCurve => {
                             //QCurve currently unhandled. This needs to be implemented.
@@ -657,24 +649,29 @@ pub fn write_ufo_glif<T>(glif: Glif<T>) -> String
 
                 // if a move wasn't our first point then we gotta close the shape by emitting the first point's b handle
                 if !open_contour {
-                    write_ufo_point_from_handle(&mut writer, contour.first().unwrap().b);
+                    if let Some(handle_node) = build_ufo_point_from_handle(contour.first().unwrap().b) {
+                        contour_node.children.push(xmltree::XMLNode::Element(handle_node));
+                    }     
                 }
 
-                writer.end_element();
+                outline_node.children.push(xmltree::XMLNode::Element(contour_node));
             }
-            writer.end_element();
+
+            glyph.children.push(xmltree::XMLNode::Element(outline_node));
         },
         None => {}
     }
 
-    match glif.lib {
-        Some(strdump) => {
-            writer.start_element("lib");
-                writer.write_text(&strdump);
-            writer.end_element();
+    match &glif.lib {
+        Some(lib_node) => {
+            glyph.children.push(xmltree::XMLNode::Element(lib_node.clone()));
         }
         None => {}
     }
 
-    writer.end_document()
+    let mut ret_string: Vec<u8> = Vec::new();
+    let config = xmltree::EmitterConfig::new().perform_indent(true);
+    glyph.write_with_config(&mut ret_string, config).expect("Failed to write glyph!");
+
+    return String::from_utf8(ret_string).unwrap();
 }
