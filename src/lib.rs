@@ -173,7 +173,7 @@ impl fmt::LowerHex for Codepoint {
     }
 }
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct Glif<T> {
     pub outline: Option<Outline<T>>,
     pub order: OutlineType,
