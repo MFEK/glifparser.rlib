@@ -178,7 +178,7 @@ pub struct Glif<T> {
     pub outline: Option<Outline<T>>,
     pub order: OutlineType,
     pub anchors: Option<Vec<Anchor>>,
-    pub width: u64,
+    pub width: Option<u64>,
     pub unicode: Codepoint,
     pub name: String,
     pub format: u8, // we only understand 2
@@ -400,7 +400,7 @@ pub fn read_ufo_glif<T>(glif: &str) -> Glif<T> {
         outline: None,
         order: OutlineType::Cubic, // default when only corners
         anchors: None,
-        width: 0,
+        width: None,
         unicode: Codepoint::Undefined,
         name: String::new(),
         format: 2,
@@ -422,16 +422,15 @@ pub fn read_ufo_glif<T>(glif: &str) -> Glif<T> {
         .expect("<glyph> has no name")
         .clone();
     let advance = glif
-        .take_child("advance")
-        .expect("<glyph> missing <advance> child");
+        .take_child("advance");
 
     let unicode = glif.take_child("unicode");
-    ret.width = advance
-        .attributes
+    ret.width = advance.iter().next().map(|w| {
+        w.attributes
         .get("width")
         .expect("<advance> has no width")
         .parse()
-        .expect("<advance> width not int");
+        .expect("<advance> width not int")});
     match unicode {
         Some(unicode) => {
             let unicodehex = unicode
@@ -570,9 +569,14 @@ pub fn write_ufo_glif<T>(glif: &Glif<T>) -> String
         glyph.attributes.insert("name".to_owned(), glif.name.to_string());
         glyph.attributes.insert("format".to_owned(), glif.format.to_string());
 
-    let mut advance = xmltree::Element::new("advance");
-        advance.attributes.insert("width".to_owned(), glif.width.to_string());
-        glyph.children.push(xmltree::XMLNode::Element(advance));
+    match glif.width {
+        Some(w) => {
+            let mut advanceel = xmltree::Element::new("advance");
+            advanceel.attributes.insert("width".to_owned(), w.to_string());
+            glyph.children.push(xmltree::XMLNode::Element(advanceel));
+        },
+        None => {}
+    };
 
     match glif.unicode
     {
@@ -636,8 +640,8 @@ pub fn write_ufo_glif<T>(glif: &Glif<T>) -> String
                         PointType::Line | PointType::Curve | PointType::Move => {
                             if let Some(handle_node) = build_ufo_point_from_handle(point.a) {
                                 contour_node.children.push(xmltree::XMLNode::Element(handle_node));
-                            }                        },
-
+                            }                        
+                        },
                         PointType::QCurve => {
                             //QCurve currently unhandled. This needs to be implemented.
                         },
