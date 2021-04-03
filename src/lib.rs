@@ -10,7 +10,7 @@ pub enum PointType {
     QClose,
     Line,
     OffCurve,
-} // Undefined used by new(), shouldn't appear in Point<T> structs
+} // Undefined used by new(), shouldn't appear in Point<PointData> structs
 
 #[derive(Debug, Copy, Clone)]
 pub enum AnchorType {
@@ -60,17 +60,18 @@ impl GlifPoint {
 
 type GlifContour = Vec<GlifPoint>;
 type GlifOutline = Vec<GlifContour>;
+type PointData = Clone;
 
 // A Skia-friendly point
 #[derive(Debug, Clone)]
-pub struct Point<T> {
+pub struct Point<PointData> {
     pub x: f32,
     pub y: f32,
     pub a: Handle,
     pub b: Handle,
     pub name: Option<String>,
     pub ptype: PointType,
-    pub data: Option<T>,
+    pub data: Option<PointData>,
 }
 
 #[derive(Debug, Copy, Clone, PartialEq)]
@@ -80,8 +81,8 @@ pub enum WhichHandle {
     B,
 }
 
-impl<T> Point<T> {
-    pub fn new() -> Point<T> {
+impl<PointData> Point<PointData> {
+    pub fn new() -> Point<PointData> {
         Point {
             x: 0.,
             y: 0.,
@@ -93,7 +94,7 @@ impl<T> Point<T> {
         }
     }
 
-    pub fn from_x_y_type(at: (f32, f32), ptype: PointType) -> Point<T> {
+    pub fn from_x_y_type(at: (f32, f32), ptype: PointType) -> Point<PointData> {
         Point {
             x: at.0,
             y: at.1,
@@ -142,8 +143,8 @@ impl Anchor {
     }
 }
 
-pub type Contour<T> = Vec<Point<T>>;
-pub type Outline<T> = Vec<Contour<T>>;
+pub type Contour<PointData> = Vec<Point<PointData>>;
+pub type Outline<PointData> = Vec<Contour<PointData>>;
 
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub enum OutlineType {
@@ -174,8 +175,8 @@ impl fmt::LowerHex for Codepoint {
 }
 
 #[derive(Clone, Debug)]
-pub struct Glif<T> {
-    pub outline: Option<Outline<T>>,
+pub struct Glif<PointData> {
+    pub outline: Option<Outline<PointData>>,
     pub order: OutlineType,
     pub anchors: Option<Vec<Anchor>>,
     pub width: Option<u64>,
@@ -224,8 +225,8 @@ fn get_outline_type(goutline: &GlifOutline) -> OutlineType {
 }
 
 // UFO uses the same compact format as TTF, so we need to expand it.
-fn create_quadratic_outline<T>(goutline: &GlifOutline) -> Outline<T> {
-    let mut outline: Outline<T> = Vec::new();
+fn create_quadratic_outline<PointData>(goutline: &GlifOutline) -> Outline<PointData> {
+    let mut outline: Outline<PointData> = Vec::new();
 
     let mut temp_outline: VecDeque<VecDeque<GlifPoint>> = VecDeque::new();
 
@@ -293,7 +294,7 @@ fn create_quadratic_outline<T>(goutline: &GlifOutline) -> Outline<T> {
     }
 
     for gc in temp_outline.iter() {
-        let mut contour: Contour<T> = Vec::new();
+        let mut contour: Contour<PointData> = Vec::new();
 
         for gp in gc.iter() {
             match gp.ptype {
@@ -334,13 +335,13 @@ fn create_quadratic_outline<T>(goutline: &GlifOutline) -> Outline<T> {
 // Stack based outline builder. Push all offcurve points onto the stack, pop them when we see an on
 // curve point. For each point, we add one handle to the current point, and one to the last. We
 // then connect the last point to the first to make the loop, (if path is closed).
-fn create_cubic_outline<T>(goutline: &GlifOutline) -> Outline<T> {
-    let mut outline: Outline<T> = Vec::new();
+fn create_cubic_outline<PointData>(goutline: &GlifOutline) -> Outline<PointData> {
+    let mut outline: Outline<PointData> = Vec::new();
 
     let mut stack: VecDeque<&GlifPoint> = VecDeque::new();
 
     for gc in goutline.iter() {
-        let mut contour: Contour<T> = Vec::new();
+        let mut contour: Contour<PointData> = Vec::new();
 
         for gp in gc.iter() {
             match gp.ptype {
@@ -393,7 +394,7 @@ fn create_cubic_outline<T>(goutline: &GlifOutline) -> Outline<T> {
 use xmltree::EmitterConfig;
 
 // From .glif XML, return a parse tree
-pub fn read_ufo_glif<T>(glif: &str) -> Glif<T> {
+pub fn read_ufo_glif<PointData>(glif: &str) -> Glif<PointData> {
     let mut glif = xmltree::Element::parse(glif.as_bytes()).expect("Invalid XML");
 
     let mut ret = Glif {
@@ -563,7 +564,7 @@ fn build_ufo_point_from_handle(handle: Handle) -> Option<xmltree::Element>
     None
 }
 
-pub fn write_ufo_glif<T>(glif: &Glif<T>) -> String
+pub fn write_ufo_glif<PointData>(glif: &Glif<PointData>) -> String
 {
     let mut glyph = xmltree::Element::new("glyph");
         glyph.attributes.insert("name".to_owned(), glif.name.to_string());
