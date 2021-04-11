@@ -1,5 +1,10 @@
 #![feature(assoc_char_funcs, let_chains)]
+mod vws;
+
 extern crate log;
+extern crate strum_macros;
+use strum_macros::{Display, EnumString};
+pub use vws::*;
 
 #[derive(Debug, Copy, Clone, PartialEq)]
 pub enum PointType {
@@ -10,7 +15,7 @@ pub enum PointType {
     QClose,
     Line,
     OffCurve,
-} // Undefined used by new(), shouldn't appear in Point<T> structs
+} // Undefined used by new(), shouldn't appear in Point<PointData> structs
 
 #[derive(Debug, Copy, Clone)]
 pub enum AnchorType {
@@ -63,14 +68,14 @@ type GlifOutline = Vec<GlifContour>;
 
 // A Skia-friendly point
 #[derive(Debug, Clone)]
-pub struct Point<T> {
+pub struct Point<PointData> {
     pub x: f32,
     pub y: f32,
     pub a: Handle,
     pub b: Handle,
     pub name: Option<String>,
     pub ptype: PointType,
-    pub data: Option<T>,
+    pub data: Option<PointData>,
 }
 
 #[derive(Debug, Copy, Clone, PartialEq)]
@@ -80,8 +85,8 @@ pub enum WhichHandle {
     B,
 }
 
-impl<T> Point<T> {
-    pub fn new() -> Point<T> {
+impl<P: PointData> Point<P> {
+    pub fn new() -> Point<P> {
         Point {
             x: 0.,
             y: 0.,
@@ -93,7 +98,7 @@ impl<T> Point<T> {
         }
     }
 
-    pub fn from_x_y_type(at: (f32, f32), ptype: PointType) -> Point<T> {
+    pub fn from_x_y_type(at: (f32, f32), ptype: PointType) -> Point<P> {
         Point {
             x: at.0,
             y: at.1,
@@ -142,16 +147,44 @@ impl Anchor {
     }
 }
 
-pub type Contour<T> = Vec<Point<T>>;
-pub type Outline<T> = Vec<Contour<T>>;
+pub trait PointData: Clone + Sized {}
+impl PointData for () {}
+
+pub type Contour<PointData> = Vec<Point<PointData>>;
+pub type Outline<PointData> = Vec<Contour<PointData>>;
+
+#[derive(Clone, Debug)]
+pub enum ContourOp {
+    VariableWidthStroking {
+        contour: vws::VWSContour
+    }, 
+    PatternAlongPath, // TODO: Implement
+    NibStroking, // TODO: Implement
+}
+
+#[derive(Clone, Debug, EnumString, Display)]
+pub enum LayerOp {
+    Difference,
+    Intersect,
+    Union,
+    Xor,
+    Combine // this is the default behavior it just combines the layers into a single outline
+}
+
+#[derive(Clone, Debug)]
+pub struct Layer<P: PointData> {
+    pub outline: Option<Outline<P>>,
+    pub contour_ops: HashMap<usize, ContourOp>,
+    pub layer_op: LayerOp
+}
 
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub enum OutlineType {
     Cubic,
     Quadratic,
+    Spiro ,// TODO: Implement
     // As yet unimplemented.
     // Will be in <lib> with cubic Bezier equivalents in <outline>.
-    Spiro,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq)]
@@ -160,7 +193,7 @@ pub enum Codepoint {
     Undefined,
 }
 
-use std::fmt;
+use std::{collections::HashMap, fmt};
 impl fmt::LowerHex for Codepoint {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::result::Result<(), std::fmt::Error> {
         match self {
@@ -174,22 +207,20 @@ impl fmt::LowerHex for Codepoint {
 }
 
 #[derive(Clone, Debug)]
-pub struct Glif<T> {
-    pub outline: Option<Outline<T>>,
+pub struct Glif<P: PointData> {
+    pub layers: Vec<Layer<P>>,
     pub order: OutlineType,
     pub anchors: Option<Vec<Anchor>>,
     pub width: Option<u64>,
     pub unicode: Codepoint,
     pub name: String,
     pub format: u8, // we only understand 2
-    pub lib: Option<xmltree::Element>
 }
 
 
 extern crate xmltree;
 use std::collections::VecDeque;
-use std::error::Error;
-use std::fs;
+
 
 fn parse_anchor(anchor_el: xmltree::Element) -> Result<Anchor, &'static str> {
     Err("Unimplemented")
@@ -224,8 +255,8 @@ fn get_outline_type(goutline: &GlifOutline) -> OutlineType {
 }
 
 // UFO uses the same compact format as TTF, so we need to expand it.
-fn create_quadratic_outline<T>(goutline: &GlifOutline) -> Outline<T> {
-    let mut outline: Outline<T> = Vec::new();
+fn create_quadratic_outline<PointData>(goutline: &GlifOutline) -> Outline<PointData> {
+    let mut outline: Outline<PointData> = Vec::new();
 
     let mut temp_outline: VecDeque<VecDeque<GlifPoint>> = VecDeque::new();
 
@@ -293,7 +324,7 @@ fn create_quadratic_outline<T>(goutline: &GlifOutline) -> Outline<T> {
     }
 
     for gc in temp_outline.iter() {
-        let mut contour: Contour<T> = Vec::new();
+        let mut contour: Contour<PointData> = Vec::new();
 
         for gp in gc.iter() {
             match gp.ptype {
@@ -304,7 +335,7 @@ fn create_quadratic_outline<T>(goutline: &GlifOutline) -> Outline<T> {
                     assert!(stack.len() < 2);
                     let h1 = stack.pop_front();
 
-                    if let Some(h) = h1 {
+                    if let Some(_h) = h1 {
                         contour.last_mut().map(|p| p.a = Handle::from(h1));
                     }
 
@@ -334,13 +365,13 @@ fn create_quadratic_outline<T>(goutline: &GlifOutline) -> Outline<T> {
 // Stack based outline builder. Push all offcurve points onto the stack, pop them when we see an on
 // curve point. For each point, we add one handle to the current point, and one to the last. We
 // then connect the last point to the first to make the loop, (if path is closed).
-fn create_cubic_outline<T>(goutline: &GlifOutline) -> Outline<T> {
-    let mut outline: Outline<T> = Vec::new();
+fn create_cubic_outline<PointData>(goutline: &GlifOutline) -> Outline<PointData> {
+    let mut outline: Outline<PointData> = Vec::new();
 
     let mut stack: VecDeque<&GlifPoint> = VecDeque::new();
 
     for gc in goutline.iter() {
-        let mut contour: Contour<T> = Vec::new();
+        let mut contour: Contour<PointData> = Vec::new();
 
         for gp in gc.iter() {
             match gp.ptype {
@@ -390,21 +421,20 @@ fn create_cubic_outline<T>(goutline: &GlifOutline) -> Outline<T> {
     outline
 }
 
-use xmltree::EmitterConfig;
+use xmltree::XMLNode;
 
 // From .glif XML, return a parse tree
-pub fn read_ufo_glif<T>(glif: &str) -> Glif<T> {
+pub fn read_ufo_glif<P: PointData>(glif: &str) -> Glif<P> {
     let mut glif = xmltree::Element::parse(glif.as_bytes()).expect("Invalid XML");
 
     let mut ret = Glif {
-        outline: None,
+        layers: Vec::new(),
         order: OutlineType::Cubic, // default when only corners
         anchors: None,
         width: None,
         unicode: Codepoint::Undefined,
         name: String::new(),
         format: 2,
-        lib: None
     };
 
     assert_eq!(glif.name, "glyph", "Root element not <glyph>");
@@ -474,7 +504,7 @@ pub fn read_ufo_glif<T>(glif: &str) -> Glif<T> {
 
     let mut goutline: GlifOutline = Vec::new();
 
-    let mut outline_el = glif.take_child("outline");
+    let outline_el = glif.take_child("outline");
 
     if outline_el.is_some() {
         let mut outline_elu = outline_el.unwrap();
@@ -512,10 +542,6 @@ pub fn read_ufo_glif<T>(glif: &str) -> Glif<T> {
         }
     }
 
-    if let Some(lib) = glif.take_child("lib") {
-        ret.lib = Some(lib);
-    }
-
     ret.order = get_outline_type(&goutline);
 
     let outline = match ret.order {
@@ -525,7 +551,16 @@ pub fn read_ufo_glif<T>(glif: &str) -> Glif<T> {
     };
 
     if outline.len() > 0 {
-        ret.outline = Some(outline);
+        // we initialize the first layer here and then fill it with info from an <outline> less layer
+        // in the MFEK section in order to maintain compatability with standard UFO files
+
+        let first_layer = Layer {
+            outline: Some(outline),
+            layer_op: LayerOp::Combine,
+            contour_ops: HashMap::new()
+        };
+
+        ret.layers.push(first_layer);
     }
 
     if anchors.len() > 0 {
@@ -533,6 +568,52 @@ pub fn read_ufo_glif<T>(glif: &str) -> Glif<T> {
     }
 
     ret
+}
+
+fn parse_mfek_comment(mfek_comment: &str) {
+    let mfek_element = xmltree::Element::parse(mfek_comment.as_bytes()).expect("Invalid XML");
+
+    /*
+    let mfek_root = xmltree::Element::new("MFEK");
+
+    let mut first_layer = true;
+    for layer in &glif.layers {
+
+        let mut layer_element= xmltree::Element::new( "layer" );
+        layer_element.attributes.insert("op".to_owned(), layer.layer_op.to_string());
+
+        // we omit the outline element for the first layer
+        let outline_element= if !first_layer { write_outline(layer.outline.as_ref()) } else { None };
+
+        for outline in outline_element {
+            layer_element.children.push(XMLNode::Element(outline));
+        }
+
+        let mut ops_element = xmltree::Element::new( "contour_ops" );
+        for (idx, contour_op) in layer.contour_ops.iter(){
+            let op_element = match contour_op {
+                ContourOp::VariableWidthStroking { contour } => {
+                    write_vws_op(*idx, contour)
+                }
+                ContourOp::PatternAlongPath => { todo!("Implement!"); }
+                ContourOp::NibStroking => { todo!("Implement!"); }
+            };
+
+            ops_element.children.push(XMLNode::Element(op_element));
+        }
+
+        layer_element.children.push(XMLNode::Element(ops_element));
+
+
+        first_layer = false;
+    }
+
+    let mut ret_string: Vec<u8> = Vec::new();
+    let config = xmltree::EmitterConfig::new().perform_indent(true);
+    mfek_root.write_with_config(&mut ret_string, config).expect("Failed to write glyph!");
+
+    return String::from_utf8(ret_string).unwrap();
+    */
 }
 
 fn point_type_to_string(ptype: PointType) -> Option<String>
@@ -563,7 +644,7 @@ fn build_ufo_point_from_handle(handle: Handle) -> Option<xmltree::Element>
     None
 }
 
-pub fn write_ufo_glif<T>(glif: &Glif<T>) -> String
+pub fn write_ufo_glif<P: PointData>(glif: &Glif<P>) -> String
 {
     let mut glyph = xmltree::Element::new("glyph");
         glyph.attributes.insert("name".to_owned(), glif.name.to_string());
@@ -602,80 +683,129 @@ pub fn write_ufo_glif<T>(glif: &Glif<T>) -> String
         None => {}
     }
 
-    match &glif.outline
-    {
-        Some(outline) => {
-            let mut outline_node = xmltree::Element::new("outline");
-            for contour in outline {
-                // if we find a move point at the start of things we set this to false
-                let open_contour = contour.first().unwrap().ptype == PointType::Move;
-                let mut contour_node = xmltree::Element::new("contour");
-                
-                let mut last_point = None;
-                for point in contour {
-                    if let Some(_lp) = last_point {
-                        // if there was a point prior to this one we emit our b handle
-                        if let Some(handle_node) = build_ufo_point_from_handle(point.b) {
-                            contour_node.children.push(xmltree::XMLNode::Element(handle_node));
-                        }
-                    }
+    // handle the first layer in a way that standard UFO loaders can understand
+    for layer in &glif.layers.get(0) {
+        let outline_node = write_outline(layer.outline.as_ref());
 
-                    let mut point_node = xmltree::Element::new("point");
-                        point_node.attributes.insert("x".to_owned(), point.x.to_string());
-                        point_node.attributes.insert("y".to_owned(), point.y.to_string());
-                
-                        match point_type_to_string(point.ptype) {
-                            Some(ptype_string) => {point_node.attributes.insert("type".to_owned(), ptype_string);},
-                            None => {}
-                        }
-                
-                        match &point.name {
-                            Some(name) => {point_node.attributes.insert("name".to_owned(), name.to_string());},
-                            None => {}
-                        }
-                
-                        // Point>T> does not contain fields for smooth, or identifier.
-                    contour_node.children.push(xmltree::XMLNode::Element(point_node));
-                    match point.ptype {
-                        PointType::Line | PointType::Curve | PointType::Move => {
-                            if let Some(handle_node) = build_ufo_point_from_handle(point.a) {
-                                contour_node.children.push(xmltree::XMLNode::Element(handle_node));
-                            }                        
-                        },
-                        PointType::QCurve => {
-                            //QCurve currently unhandled. This needs to be implemented.
-                        },
-                        _ => { } // I don't think this should be reachable in a well formed Glif object?
-                    }    
-                    
-                    last_point = Some(point);
-                }
-
-                // if a move wasn't our first point then we gotta close the shape by emitting the first point's b handle
-                if !open_contour {
-                    if let Some(handle_node) = build_ufo_point_from_handle(contour.first().unwrap().b) {
-                        contour_node.children.push(xmltree::XMLNode::Element(handle_node));
-                    }     
-                }
-
-                outline_node.children.push(xmltree::XMLNode::Element(contour_node));
-            }
-
-            glyph.children.push(xmltree::XMLNode::Element(outline_node));
-        },
-        None => {}
-    }
-
-    match &glif.lib {
-        Some(lib_node) => {
-            glyph.children.push(xmltree::XMLNode::Element(lib_node.clone()));
+        for node in outline_node {
+            glyph.children.push(xmltree::XMLNode::Element(node));
         }
-        None => {}
     }
+
+    // now we handle the MFEK stuff in a seperate function that returns a node back to us
+    let mfek_comment = write_mfek_comment(glif);
+    glyph.children.push(XMLNode::Comment(mfek_comment));
 
     let mut ret_string: Vec<u8> = Vec::new();
     let config = xmltree::EmitterConfig::new().perform_indent(true);
     glyph.write_with_config(&mut ret_string, config).expect("Failed to write glyph!");
+
+    return String::from_utf8(ret_string).unwrap();
+}
+
+fn write_outline<PointData>(outline: Option<&Outline<PointData>>) -> Option<xmltree::Element> {
+    let mut outline_node = xmltree::Element::new("outline");
+
+    if !outline.is_some() { return None };
+    if outline.unwrap().len() < 1 { return None };
+
+    for contour in outline.unwrap() {
+        // if we find a move point at the start of things we set this to false
+        let open_contour = contour.first().unwrap().ptype == PointType::Move;
+        let mut contour_node = xmltree::Element::new("contour");
+        
+        let mut last_point = None;
+        for point in contour {
+            if let Some(_lp) = last_point {
+                // if there was a point prior to this one we emit our b handle
+                if let Some(handle_node) = build_ufo_point_from_handle(point.b) {
+                    contour_node.children.push(xmltree::XMLNode::Element(handle_node));
+                }
+            }
+
+            let mut point_node = xmltree::Element::new("point");
+                point_node.attributes.insert("x".to_owned(), point.x.to_string());
+                point_node.attributes.insert("y".to_owned(), point.y.to_string());
+        
+                match point_type_to_string(point.ptype) {
+                    Some(ptype_string) => {point_node.attributes.insert("type".to_owned(), ptype_string);},
+                    None => {}
+                }
+        
+                match &point.name {
+                    Some(name) => {point_node.attributes.insert("name".to_owned(), name.to_string());},
+                    None => {}
+                }
+        
+                // Point>T> does not contain fields for smooth, or identifier.
+            contour_node.children.push(xmltree::XMLNode::Element(point_node));
+            match point.ptype {
+                PointType::Line | PointType::Curve | PointType::Move => {
+                    if let Some(handle_node) = build_ufo_point_from_handle(point.a) {
+                        contour_node.children.push(xmltree::XMLNode::Element(handle_node));
+                    }                        
+                },
+                PointType::QCurve => {
+                    //QCurve currently unhandled. This needs to be implemented.
+                },
+                _ => { } // I don't think this should be reachable in a well formed Glif object?
+            }    
+            
+            last_point = Some(point);
+        }
+
+        // if a move wasn't our first point then we gotta close the shape by emitting the first point's b handle
+        if !open_contour {
+            if let Some(handle_node) = build_ufo_point_from_handle(contour.first().unwrap().b) {
+                contour_node.children.push(xmltree::XMLNode::Element(handle_node));
+            }     
+        }
+
+        outline_node.children.push(xmltree::XMLNode::Element(contour_node));
+        return Some(outline_node);
+    }
+
+    return None;
+}
+
+fn write_mfek_comment<P: PointData>(glif: &Glif<P>) -> String {
+    let mfek_root = xmltree::Element::new("MFEK");
+
+    let mut first_layer = true;
+    for layer in &glif.layers {
+
+        let mut layer_element= xmltree::Element::new( "layer" );
+        layer_element.attributes.insert("op".to_owned(), layer.layer_op.to_string());
+
+        // we omit the outline element for the first layer
+        let outline_element= if !first_layer { write_outline(layer.outline.as_ref()) } else { None };
+
+        for outline in outline_element {
+            layer_element.children.push(XMLNode::Element(outline));
+        }
+
+        let mut ops_element = xmltree::Element::new( "contour_ops" );
+        for (idx, contour_op) in layer.contour_ops.iter(){
+            let op_element = match contour_op {
+                ContourOp::VariableWidthStroking { contour } => {
+                    write_vws_op(*idx, contour)
+                }
+                ContourOp::PatternAlongPath => { todo!("Implement!"); }
+                ContourOp::NibStroking => { todo!("Implement!"); }
+            };
+
+            ops_element.children.push(XMLNode::Element(op_element));
+        }
+
+        layer_element.children.push(XMLNode::Element(ops_element));
+
+
+        first_layer = false;
+    }
+
+    let mut ret_string: Vec<u8> = Vec::new();
+    let config = xmltree::EmitterConfig::new().perform_indent(true);
+    mfek_root.write_with_config(&mut ret_string, config).expect("Failed to write glyph!");
 
     return String::from_utf8(ret_string).unwrap();
 }

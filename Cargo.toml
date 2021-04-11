@@ -6,3 +6,7 @@ authors = ["Fredrick Brennan <copypaste@kittens.ph>"]
 [dependencies]
 xmltree = "0.10.1"
 log = "0.4.11"
+
+#converting enums to strings
+strum = "0.20"
+strum_macros = "0.20"
