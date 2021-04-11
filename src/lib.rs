@@ -169,9 +169,9 @@ impl Codepoint for char {
 pub struct Glif<PointData> {
     pub outline: Option<Outline<PointData>>,
     pub order: OutlineType,
-    pub anchors: Option<Vec<Anchor>>,
+    pub anchors: Vec<Anchor>,
     pub width: Option<u64>,
-    pub unicode: Option<Vec<char>>,
+    pub unicode: Vec<char>,
     pub name: String,
     pub format: u8, // we only understand 2
     pub lib: Option<xmltree::Element>
@@ -388,9 +388,9 @@ pub fn read_ufo_glif<PointData>(glif: &str) -> Glif<PointData> {
     let mut ret = Glif {
         outline: None,
         order: OutlineType::Cubic, // default when only corners
-        anchors: None,
+        anchors: vec![],
         width: None,
-        unicode: None,
+        unicode: vec![],
         name: String::new(),
         format: 2,
         lib: None
@@ -432,11 +432,7 @@ pub fn read_ufo_glif<PointData>(glif: &str) -> Glif<PointData> {
         );
     }
 
-    if unicodes.len() > 0 {
-        ret.unicode = Some(unicodes);
-    } else {
-        ret.unicode = None;
-    }
+    ret.unicode = unicodes;
 
     let mut anchors: Vec<Anchor> = Vec::new();
 
@@ -462,6 +458,8 @@ pub fn read_ufo_glif<PointData>(glif: &str) -> Glif<PointData> {
             .clone();
         anchors.push(anchor);
     }
+
+    ret.anchors = anchors;
 
     let mut goutline: GlifOutline = Vec::new();
 
@@ -519,10 +517,6 @@ pub fn read_ufo_glif<PointData>(glif: &str) -> Glif<PointData> {
         ret.outline = Some(outline);
     }
 
-    if anchors.len() > 0 {
-        ret.anchors = Some(anchors);
-    }
-
     ret
 }
 
@@ -569,30 +563,18 @@ pub fn write_ufo_glif<PointData>(glif: &Glif<PointData>) -> String
         None => {}
     };
 
-    match &glif.unicode
-    {
-        Some(unicodes) => {
-            for hex in unicodes.iter() {
-                let mut unicode = xmltree::Element::new("unicode");
-                unicode.attributes.insert("hex".to_owned(), (hex as &dyn Codepoint).display());
-                glyph.children.push(xmltree::XMLNode::Element(unicode));
-            }
-        },
-        None => {}
+    for hex in glif.unicode.iter() {
+        let mut unicode = xmltree::Element::new("unicode");
+        unicode.attributes.insert("hex".to_owned(), (hex as &dyn Codepoint).display());
+        glyph.children.push(xmltree::XMLNode::Element(unicode));
     }
 
-    match &glif.anchors
-    {
-        Some(anchor_vec) => {
-            for anchor in anchor_vec {
-                let mut anchor_node = xmltree::Element::new("anchor");
-                    anchor_node.attributes.insert("x".to_owned(), anchor.x.to_string());
-                    anchor_node.attributes.insert("y".to_owned(), anchor.y.to_string());
-                    anchor_node.attributes.insert("name".to_owned(), anchor.class.to_string());
-                    glyph.children.push(xmltree::XMLNode::Element(anchor_node));
-            }
-        },
-        None => {}
+    for anchor in glif.anchors.iter() {
+        let mut anchor_node = xmltree::Element::new("anchor");
+            anchor_node.attributes.insert("x".to_owned(), anchor.x.to_string());
+            anchor_node.attributes.insert("y".to_owned(), anchor.y.to_string());
+            anchor_node.attributes.insert("name".to_owned(), anchor.class.to_string());
+            glyph.children.push(xmltree::XMLNode::Element(anchor_node));
     }
 
     match &glif.outline
