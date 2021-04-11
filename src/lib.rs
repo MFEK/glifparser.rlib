@@ -1,4 +1,4 @@
-#![feature(assoc_char_funcs, let_chains)]
+#![feature(let_chains)]
 extern crate log;
 
 #[derive(Debug, Copy, Clone, PartialEq)]
@@ -60,7 +60,7 @@ impl GlifPoint {
 
 type GlifContour = Vec<GlifPoint>;
 type GlifOutline = Vec<GlifContour>;
-type PointData = Clone;
+pub type PointData = dyn Clone;
 
 // A Skia-friendly point
 #[derive(Debug, Clone)]
@@ -155,22 +155,13 @@ pub enum OutlineType {
     Spiro,
 }
 
-#[derive(Clone, Copy, Debug, PartialEq)]
-pub enum Codepoint {
-    Hex(char),
-    Undefined,
+pub trait Codepoint {
+    fn display(&self) -> String;
 }
 
-use std::fmt;
-impl fmt::LowerHex for Codepoint {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::result::Result<(), std::fmt::Error> {
-        match self {
-            Self::Hex(c) => {
-                let cc = *c as u32;
-                fmt::LowerHex::fmt(&cc, f)
-            }
-            Self::Undefined => fmt::LowerHex::fmt(&-1, f),
-        }
+impl Codepoint for char {
+    fn display(&self) -> String {
+        format!("{:x}", *self as u32)
     }
 }
 
@@ -180,7 +171,7 @@ pub struct Glif<PointData> {
     pub order: OutlineType,
     pub anchors: Option<Vec<Anchor>>,
     pub width: Option<u64>,
-    pub unicode: Codepoint,
+    pub unicode: Option<Vec<char>>,
     pub name: String,
     pub format: u8, // we only understand 2
     pub lib: Option<xmltree::Element>
@@ -189,11 +180,10 @@ pub struct Glif<PointData> {
 
 extern crate xmltree;
 use std::collections::VecDeque;
-use std::error::Error;
-use std::fs;
 
+#[allow(unused)]
 fn parse_anchor(anchor_el: xmltree::Element) -> Result<Anchor, &'static str> {
-    Err("Unimplemented")
+    todo!()
 }
 
 fn parse_point_type(pt: Option<&str>) -> PointType {
@@ -305,7 +295,7 @@ fn create_quadratic_outline<PointData>(goutline: &GlifOutline) -> Outline<PointD
                     assert!(stack.len() < 2);
                     let h1 = stack.pop_front();
 
-                    if let Some(h) = h1 {
+                    if let Some(_) = h1 {
                         contour.last_mut().map(|p| p.a = Handle::from(h1));
                     }
 
@@ -391,8 +381,6 @@ fn create_cubic_outline<PointData>(goutline: &GlifOutline) -> Outline<PointData>
     outline
 }
 
-use xmltree::EmitterConfig;
-
 // From .glif XML, return a parse tree
 pub fn read_ufo_glif<PointData>(glif: &str) -> Glif<PointData> {
     let mut glif = xmltree::Element::parse(glif.as_bytes()).expect("Invalid XML");
@@ -402,7 +390,7 @@ pub fn read_ufo_glif<PointData>(glif: &str) -> Glif<PointData> {
         order: OutlineType::Cubic, // default when only corners
         anchors: None,
         width: None,
-        unicode: Codepoint::Undefined,
+        unicode: None,
         name: String::new(),
         format: 2,
         lib: None
@@ -425,27 +413,29 @@ pub fn read_ufo_glif<PointData>(glif: &str) -> Glif<PointData> {
     let advance = glif
         .take_child("advance");
 
-    let unicode = glif.take_child("unicode");
     ret.width = advance.iter().next().map(|w| {
         w.attributes
         .get("width")
         .expect("<advance> has no width")
         .parse()
         .expect("<advance> width not int")});
-    match unicode {
-        Some(unicode) => {
-            let unicodehex = unicode
-                .attributes
-                .get("hex")
-                .expect("<unicode> has no width");
-            ret.unicode = Codepoint::Hex(
-                char::from_u32(u32::from_str_radix(unicodehex, 16).expect("<unicode> hex not int"))
-                    .expect("<unicode> char conversion failed"),
-            );
-        }
-        None => {
-            ret.unicode = Codepoint::Undefined;
-        }
+
+    let mut unicodes = vec![];
+    while let Some(u) = glif.take_child("unicode") {
+        let unicodehex = u
+            .attributes
+            .get("hex")
+            .expect("<unicode> has no hex");
+        unicodes.push(
+            char::from_u32(u32::from_str_radix(unicodehex, 16).expect("<unicode> hex not int"))
+                .expect("<unicode> char conversion failed"),
+        );
+    }
+
+    if unicodes.len() > 0 {
+        ret.unicode = Some(unicodes);
+    } else {
+        ret.unicode = None;
     }
 
     let mut anchors: Vec<Anchor> = Vec::new();
@@ -475,7 +465,7 @@ pub fn read_ufo_glif<PointData>(glif: &str) -> Glif<PointData> {
 
     let mut goutline: GlifOutline = Vec::new();
 
-    let mut outline_el = glif.take_child("outline");
+    let outline_el = glif.take_child("outline");
 
     if outline_el.is_some() {
         let mut outline_elu = outline_el.unwrap();
@@ -579,14 +569,16 @@ pub fn write_ufo_glif<PointData>(glif: &Glif<PointData>) -> String
         None => {}
     };
 
-    match glif.unicode
+    match &glif.unicode
     {
-        Codepoint::Hex(hex) => {
-            let mut unicode = xmltree::Element::new("unicode");
-                unicode.attributes.insert("hex".to_owned(), format!(r#"{:X}"#, hex as u32));
+        Some(unicodes) => {
+            for hex in unicodes.iter() {
+                let mut unicode = xmltree::Element::new("unicode");
+                unicode.attributes.insert("hex".to_owned(), (hex as &dyn Codepoint).display());
                 glyph.children.push(xmltree::XMLNode::Element(unicode));
+            }
         },
-        Codepoint::Undefined => {}
+        None => {}
     }
 
     match &glif.anchors
