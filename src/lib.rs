@@ -132,6 +132,24 @@ pub struct Anchor {
     pub r#type: AnchorType,
 }
 
+#[derive(Debug, Copy, Clone, PartialEq)]
+pub enum IntegerOrFloat {
+    Integer(i32),
+    Float(f32)
+}
+
+#[allow(non_snake_case)] // to match UFO spec https://unifiedfontobject.org/versions/ufo3/glyphs/glif/#component
+#[derive(Clone, Debug)]
+pub struct GlifComponent {
+    base: String,
+    xScale: IntegerOrFloat,
+    xyScale: IntegerOrFloat,
+    yScale: IntegerOrFloat,
+    xOffset: IntegerOrFloat,
+    yOffset: IntegerOrFloat,
+    identifier: Option<String>
+}
+
 impl Anchor {
     pub fn new() -> Anchor {
         Anchor {
@@ -174,6 +192,7 @@ pub struct Glif<PointData> {
     pub unicode: Vec<char>,
     pub name: String,
     pub format: u8, // we only understand 2
+    pub filename: Option<String>,
     pub lib: Option<xmltree::Element>
 }
 
@@ -393,6 +412,7 @@ pub fn read_ufo_glif<PointData>(glif: &str) -> Glif<PointData> {
         unicode: vec![],
         name: String::new(),
         format: 2,
+        filename: None,
         lib: None
     };
 
