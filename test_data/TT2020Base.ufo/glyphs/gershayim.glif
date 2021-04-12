@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<glyph format="2" name="gershayim">
+  <advance width="547" />
+  <unicode hex="5f4" />
+  <outline>
+    <component yScale="1" xOffset="95" base="acute" xyScale="0" xScale="1" yOffset="-145" yxScale="0" />
+    <component yScale="1" yOffset="-145" xyScale="0" xScale="1" base="acute" yxScale="0" xOffset="-75" />
+  </outline>
+</glyph>

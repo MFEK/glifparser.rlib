@@ -8,8 +8,13 @@ Skia-friendly points. A cubic B&eacute;zier spline has two handles, `a` and
 with this. (A quadratic B&eacute;zier spline uses the same `Point` type but
 will always have handle `b` set to `Handle::Colocated`.)
 
-**NOTE**: This `.glif` parser is at the moment _unversioned_ (0.0.0); it has an
-unstable API. Don't use it in your own projects yet; if you insist, tell Cargo
-to use a `rev`. Right now it just panics instead of returning a `Result<Glif,
-E>` type and has no `Error` enum, which will be fixed in the final
-crates.io-friendly API.
+Another difference is that it supports glyph components more fully, and allows
+you to flatten the components to another Glif representing the outlines of all
+the components, plus the outlines in the original glyph.
+
+Yet a third difference is the support for private libraries, stored in
+comments. This is for support of the `<MFEK>` comment.
+
+Since this library considers .glif files as detached from .ufo files, its
+approach is much different from Norad's as well. This is because MFEKglif, the
+first software this was written for, is a detached UFO .glif editor.
