@@ -11,4 +11,4 @@ kurbo = "0.8"
 trees = "0.4"
 
 # Our submodules
-integer_or_float = { git = "https://github.com/MFEK/integer_or_float.rlib" }
+integer_or_float = { git = "https://github.com/MFEK/integer_or_float.rlib", branch = "main" }
