@@ -1,10 +1,10 @@
 #![feature(trait_alias)]
-#![feature(assoc_char_funcs)]
 
 pub mod error;
 
 mod anchor;
 mod codepoint; // Unicode codepoint formatter
+mod matrix;
 mod component;
 pub mod glif;
 mod outline;

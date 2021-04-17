@@ -4,6 +4,7 @@ use crate::point::{Handle, PointData, WhichHandle};
 use crate::outline::Outline;
 
 use integer_or_float::IntegerOrFloat;
+use kurbo::Affine;
 
 #[allow(non_snake_case)] // to match UFO spec https://unifiedfontobject.org/versions/ufo3/glyphs/glif/#component
 #[derive(Clone, Debug, PartialEq)]
@@ -33,25 +34,6 @@ impl GlifComponent {
     }
 }
 
-type ComponentMatrix = [IntegerOrFloat; 6];
-
-impl GlifComponent {
-    fn matrix(&self) -> ComponentMatrix {
-        [self.xScale, self.xyScale, self.yxScale, self.yScale, self.xOffset, self.yOffset]
-    }
-}
-
-trait FromComponentMatrix {
-    fn from_component_matrix(cm: &ComponentMatrix) -> Self;
-}
-
-use kurbo::Affine;
-impl FromComponentMatrix for Affine {
-    fn from_component_matrix(cm: &ComponentMatrix) -> Self {
-        Affine::new([cm[0].into(), cm[1].into(), cm[2].into(), cm[3].into(), cm[4].into(), cm[5].into()])
-    }
-}
-
 #[derive(Clone, Debug, PartialEq)]
 pub struct Component<PD: PointData> {
     pub glif: Glif<PD>,
@@ -73,7 +55,7 @@ impl GlifComponent {
         let gliffn = &glif.filename.as_ref().ok_or(GlifParserError::GlifFilenameNotSet(glif.name.clone()))?;
 
         let mut ret = Component::new();
-        ret.matrix = Affine::from_component_matrix(&self.matrix());
+        ret.matrix = self.matrix().into();
         ret.glif.name = self.base.clone();
         let mut retglifname = gliffn.to_path_buf();
         retglifname.set_file_name(ret.glif.name_to_filename());
