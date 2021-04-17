@@ -12,8 +12,9 @@ pub enum GlifParserError {
     GlifFilenameInsane(String),
     /// Components of the glyph form a loop
     GlifComponentsCyclical(String),
+
     /// Glif isn't UTF8
-    GlifNotUtf8(String),
+    GlifNotUtf8,
     /// The XML making up the glif is invalid
     XmlParseError(String),
     /// Failures when writing glif XML
@@ -31,12 +32,13 @@ impl Display for GlifParserError {
             Self::GlifFilenameInsane(s) => {
                 format!("Glyph filename not sane: {}", &s)
             },
-            Self::GlifNotUtf8(_) => {
+            Self::GlifNotUtf8 => {
                 format!("Glyph not utf-8")
             },
             Self::GlifComponentsCyclical(s) => {
                 format!("Glyph components are cyclical: {}", &s)
             },
+
             Self::XmlParseError(s) | Self::XmlWriteError(s) => {
                 format!("XML error: {}", &s)
             },
@@ -63,9 +65,8 @@ impl From<XMLTreeError> for GlifParserError {
 
 impl From<string::FromUtf8Error> for GlifParserError {
     fn from(_: string::FromUtf8Error) -> Self {
-        Self::GlifNotUtf8("".to_string())
+        Self::GlifNotUtf8
     }
 }
-
 
 impl Error for GlifParserError {}
