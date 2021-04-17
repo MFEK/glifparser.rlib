@@ -4,14 +4,16 @@ use xmltree;
 use crate::anchor::Anchor;
 use crate::component::GlifComponent;
 use crate::error::GlifParserError;
-use crate::point::{PointData};
+use crate::point::PointData;
 use crate::outline::{Outline, OutlineType};
 
 mod read;
 mod write;
+pub mod mfek;
 
 pub use read::read_ufo_glif as read;
 pub use write::write_ufo_glif as write;
+pub use mfek::*;
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct Glif<PD: PointData> {
