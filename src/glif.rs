@@ -31,6 +31,8 @@ pub struct Glif<PD: PointData> {
     pub width: Option<u64>,
     pub unicode: Vec<char>,
     pub name: String,
+    /// This is an arbitrary glyph comment, exactly like the comment field in FontForge SFD.
+    pub note: Option<String>,
     pub format: u8, // we only understand 2
     /// It's up to the API consumer to set this.
     pub filename: Option<path::PathBuf>,
@@ -56,6 +58,7 @@ impl<PD: PointData> Glif<PD> {
             width: None,
             unicode: vec![],
             name: String::new(),
+            note: None,
             format: 2,
             filename: None,
             lib: None,

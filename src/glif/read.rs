@@ -124,6 +124,10 @@ pub fn read_ufo_glif<PD: PointData>(glif: &str) -> Result<Glif<PD>, GlifParserEr
 
     ret.images = images;
 
+    if let Some(note_el) = glif.take_child("note") {
+        note_el.get_text().map(|t|ret.note=Some(t.into_owned()));
+    }
+
     let mut goutline: GlifOutline = Vec::new();
 
     let outline_el = glif.take_child("outline");

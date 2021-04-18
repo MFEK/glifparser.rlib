@@ -145,6 +145,12 @@ pub fn write_ufo_glif<PD: PointData>(glif: &Glif<PD>) -> Result<String, GlifPars
         glyph.children.push(xmltree::XMLNode::Element(image_node));
     }
 
+    if let Some(note) = &glif.note {
+        let mut note_node = xmltree::Element::new("note");
+        note_node.children.push(xmltree::XMLNode::Text(note.clone()));
+        glyph.children.push(xmltree::XMLNode::Element(note_node));
+    }
+
     match &glif.lib {
         Some(lib_node) => {
             glyph.children.push(xmltree::XMLNode::Element(lib_node.clone()));
