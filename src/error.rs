@@ -28,6 +28,9 @@ pub enum GlifParserError {
     ImageNotLoaded,
     /// OS error when reading image
     ImageIoError(Option<Rc<io::Error>>),
+
+    /// Color (for guidelines, images, etc) not RGBA
+    ColorNotRGBA,
 }
 
 impl Display for GlifParserError {
@@ -58,6 +61,10 @@ impl Display for GlifParserError {
             },
             Self::ImageIoError(ioe) => {
                 format!("System error when loading image: {:?}", ioe)
+            },
+
+            Self::ColorNotRGBA => {
+                format!("Color not RGBA")
             }
         })
     }

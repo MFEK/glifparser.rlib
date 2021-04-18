@@ -60,10 +60,10 @@ pub fn write_ufo_glif<PD: PointData>(glif: &Glif<PD>) -> Result<String, GlifPars
 
     for anchor in glif.anchors.iter() {
         let mut anchor_node = xmltree::Element::new("anchor");
-            anchor_node.attributes.insert("x".to_owned(), anchor.x.to_string());
-            anchor_node.attributes.insert("y".to_owned(), anchor.y.to_string());
-            anchor_node.attributes.insert("name".to_owned(), anchor.class.to_string());
-            glyph.children.push(xmltree::XMLNode::Element(anchor_node));
+        anchor_node.attributes.insert("x".to_owned(), anchor.x.to_string());
+        anchor_node.attributes.insert("y".to_owned(), anchor.y.to_string());
+        anchor_node.attributes.insert("name".to_owned(), anchor.class.to_string());
+        glyph.children.push(xmltree::XMLNode::Element(anchor_node));
     }
 
     let mut outline_node = xmltree::Element::new("outline");
@@ -143,6 +143,23 @@ pub fn write_ufo_glif<PD: PointData>(glif: &Glif<PD>) -> Result<String, GlifPars
         image_node.attributes.insert("fileName".to_string(), image.filename.to_str().ok_or(GlifParserError::GlifFilenameInsane("image filename not UTF8!".to_string()))?.to_string());
         write_matrix_and_identifier!(image_node, image);
         glyph.children.push(xmltree::XMLNode::Element(image_node));
+    }
+
+    for guideline in &glif.guidelines {
+        let mut guideline_node = xmltree::Element::new("guideline");
+        guideline_node.attributes.insert("x".to_string(), guideline.at.x.to_string());
+        guideline_node.attributes.insert("y".to_string(), guideline.at.y.to_string());
+        guideline_node.attributes.insert("angle".to_string(), guideline.angle.to_string());
+        if let Some(c) = guideline.color {
+            guideline_node.attributes.insert("color".to_string(), c.to_string());
+        }
+        if let Some(n) = &guideline.name {
+            guideline_node.attributes.insert("name".to_string(), n.clone());
+        }
+        if let Some(i) = &guideline.identifier {
+            guideline_node.attributes.insert("identifier".to_string(), i.clone());
+        }
+        glyph.children.push(xmltree::XMLNode::Element(guideline_node));
     }
 
     if let Some(note) = &glif.note {
