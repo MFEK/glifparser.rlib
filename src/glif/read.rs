@@ -1,4 +1,5 @@
 use std::convert::TryInto;
+use std::path;
 
 use log::warn;
 
@@ -8,10 +9,24 @@ use crate::component::GlifComponent;
 use crate::outline::{self, get_outline_type, GlifContour, GlifOutline, OutlineType};
 use crate::point::{GlifPoint, PointData, parse_point_type};
 use crate::anchor::Anchor;
+use crate::image::GlifImage;
 
 macro_rules! input_error {
     ($str:expr) => {
         GlifInputError($str.to_string())
+    }
+}
+
+// Both components and images have the same matrix/identifier values. This is DRY.
+macro_rules! load_matrix_and_identifier {
+    ($xml_el:ident, $struct:ident) => {
+        $xml_el.attributes.get("xScale").map(|e|{ $struct.xScale = e.as_str().try_into().unwrap(); });
+        $xml_el.attributes.get("xyScale").map(|e|{ $struct.xyScale = e.as_str().try_into().unwrap(); });
+        $xml_el.attributes.get("yxScale").map(|e|{ $struct.yxScale = e.as_str().try_into().unwrap(); });
+        $xml_el.attributes.get("yScale").map(|e|{ $struct.yScale = e.as_str().try_into().unwrap(); });
+        $xml_el.attributes.get("xOffset").map(|e|{ $struct.xOffset = e.as_str().try_into().unwrap(); });
+        $xml_el.attributes.get("yOffset").map(|e|{ $struct.yOffset = e.as_str().try_into().unwrap(); });
+        $xml_el.attributes.get("identifier").map(|e|{ $struct.identifier = Some(e.clone()); });
     }
 }
 
@@ -92,6 +107,23 @@ pub fn read_ufo_glif<PD: PointData>(glif: &str) -> Result<Glif<PD>, GlifParserEr
 
     ret.anchors = anchors;
 
+    let mut images: Vec<GlifImage> = Vec::new();
+
+    while let Some(image_el) = glif.take_child("image") {
+        let filename = path::PathBuf::from(image_el
+            .attributes
+            .get("fileName")
+            .ok_or(input_error!("<image> missing x"))?);
+
+        let mut gimage = GlifImage::from_filename(filename)?;
+
+        load_matrix_and_identifier!(image_el, gimage);
+
+        images.push(gimage);
+    }
+
+    ret.images = images;
+
     let mut goutline: GlifOutline = Vec::new();
 
     let outline_el = glif.take_child("outline");
@@ -133,13 +165,7 @@ pub fn read_ufo_glif<PD: PointData>(glif: &str) -> Result<Glif<PD>, GlifParserEr
         
         while let Some(component_el) = outline_elu.take_child("component") {
             let mut gcomponent = GlifComponent::new();
-            component_el.attributes.get("xScale").map(|e|{ gcomponent.xScale = e.as_str().try_into().unwrap(); });
-            component_el.attributes.get("xyScale").map(|e|{ gcomponent.xyScale = e.as_str().try_into().unwrap(); });
-            component_el.attributes.get("yxScale").map(|e|{ gcomponent.yxScale = e.as_str().try_into().unwrap(); });
-            component_el.attributes.get("yScale").map(|e|{ gcomponent.yScale = e.as_str().try_into().unwrap(); });
-            component_el.attributes.get("xOffset").map(|e|{ gcomponent.xOffset = e.as_str().try_into().unwrap(); });
-            component_el.attributes.get("yOffset").map(|e|{ gcomponent.yOffset = e.as_str().try_into().unwrap(); });
-            component_el.attributes.get("identifier").map(|e|{ gcomponent.identifier = Some(e.clone()); });
+            load_matrix_and_identifier!(component_el, gcomponent);
             gcomponent.base = component_el.attributes.get("base").ok_or(input_error!("<component> missing base"))?.clone();
             ret.components.push(gcomponent);
         }

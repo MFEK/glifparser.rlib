@@ -1,5 +1,7 @@
-use std::fmt::{Formatter, Display};
 use std::error::Error;
+use std::fmt::{Formatter, Display};
+use std::io;
+use std::rc::Rc;
 use std::string;
 
 use xmltree::{ParseError, Error as XMLTreeError};
@@ -21,6 +23,11 @@ pub enum GlifParserError {
     XmlWriteError(String),
     /// The XML is valid, but doesn't meet the UFO .glif spec
     GlifInputError(String),
+
+    /// Image not yet read
+    ImageNotLoaded,
+    /// OS error when reading image
+    ImageIoError(Option<Rc<io::Error>>),
 }
 
 impl Display for GlifParserError {
@@ -45,6 +52,13 @@ impl Display for GlifParserError {
             Self::GlifInputError(s) => {
                 format!("Glif format spec error: {}", &s)
             },
+
+            Self::ImageNotLoaded => {
+                format!("Tried to access data for image whose data hasn't been loaded")
+            },
+            Self::ImageIoError(ioe) => {
+                format!("System error when loading image: {:?}", ioe)
+            }
         })
     }
 }

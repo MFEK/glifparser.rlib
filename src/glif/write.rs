@@ -20,6 +20,22 @@ fn build_ufo_point_from_handle(handle: Handle) -> Option<xmltree::Element>
     None
 }
 
+// Both components and images have the same matrix/identifier values. This is DRY.
+macro_rules! write_matrix_and_identifier {
+    ($xml_el:ident, $struct:ident) => {
+        match $struct.identifier {
+            Some(ref id) => {$xml_el.attributes.insert("identifier".to_string(), id.clone());},
+            None  => {}
+        }
+        $xml_el.attributes.insert("xScale".to_string(), $struct.xScale.to_string());
+        $xml_el.attributes.insert("xyScale".to_string(), $struct.xyScale.to_string());
+        $xml_el.attributes.insert("yxScale".to_string(), $struct.yxScale.to_string());
+        $xml_el.attributes.insert("yScale".to_string(), $struct.yScale.to_string());
+        $xml_el.attributes.insert("xOffset".to_string(), $struct.xOffset.to_string());
+        $xml_el.attributes.insert("yOffset".to_string(), $struct.yOffset.to_string());
+    }
+}
+
 /// Write Glif struct to UFO .glif XML 
 pub fn write_ufo_glif<PD: PointData>(glif: &Glif<PD>) -> Result<String, GlifParserError>
 {
@@ -116,20 +132,18 @@ pub fn write_ufo_glif<PD: PointData>(glif: &Glif<PD>) -> Result<String, GlifPars
     for component in &glif.components {
         let mut component_node = xmltree::Element::new("component");
         component_node.attributes.insert("base".to_string(), component.base.clone());
-        match component.identifier {
-            Some(ref id) => {component_node.attributes.insert("identifier".to_string(), id.clone());},
-            None  => {}
-        }
-        component_node.attributes.insert("xScale".to_string(), component.xScale.to_string());
-        component_node.attributes.insert("xyScale".to_string(), component.xyScale.to_string());
-        component_node.attributes.insert("yxScale".to_string(), component.yxScale.to_string());
-        component_node.attributes.insert("yScale".to_string(), component.yScale.to_string());
-        component_node.attributes.insert("xOffset".to_string(), component.xOffset.to_string());
-        component_node.attributes.insert("yOffset".to_string(), component.yOffset.to_string());
+        write_matrix_and_identifier!(component_node, component);
         outline_node.children.push(xmltree::XMLNode::Element(component_node));
     }
 
     glyph.children.push(xmltree::XMLNode::Element(outline_node));
+
+    for image in &glif.images {
+        let mut image_node = xmltree::Element::new("image");
+        image_node.attributes.insert("fileName".to_string(), image.filename.to_str().ok_or(GlifParserError::GlifFilenameInsane("image filename not UTF8!".to_string()))?.to_string());
+        write_matrix_and_identifier!(image_node, image);
+        glyph.children.push(xmltree::XMLNode::Element(image_node));
+    }
 
     match &glif.lib {
         Some(lib_node) => {

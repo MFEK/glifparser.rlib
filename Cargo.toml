@@ -12,3 +12,6 @@ trees = "0.4"
 
 # Our submodules
 integer_or_float = { git = "https://github.com/MFEK/integer_or_float.rlib", branch = "main" }
+
+[dev-dependencies]
+env_logger = "0.8"
