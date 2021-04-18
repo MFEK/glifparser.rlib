@@ -17,4 +17,10 @@ comments. This is for support of the `<MFEK>` comment.
 
 Since this library considers .glif files as detached from .ufo files, its
 approach is much different from Norad's as well. This is because MFEKglif, the
-first software this was written for, is a detached UFO .glif editor.
+first software this was written for, is both a _detached_ and an _attached_ UFO 
+.glif editor (and viewer). `glifparser` can do more if it knows the .glif is in
+a UFO. For example, the aforementioned components feature. It can also read the
+image data if it knows that the .glif is part of a parent UFO. However, it is
+designed from the beginning to work in both modes: you have to upgrade the 
+`GlifImage` it provides you to a regular `Image` which will contain the data if
+it indeed exists in the parent UFO; same for `GlifComponent` vs. `Component`.
