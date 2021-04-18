@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 use std::path;
 
 use crate::{Anchor, Glif, GlifComponent, Outline, outline::OutlineType, point::PointData};
@@ -71,6 +71,7 @@ pub struct HistoryEntry<PD: PointData> {
     pub layer_idx: Option<usize>,
     pub contour_idx: Option<usize>,
     pub point_idx: Option<usize>,
+    pub selected: Option<HashSet<(usize, usize)>>,
     pub layer: Layer<PD>,
     pub kind: HistoryType
 }
