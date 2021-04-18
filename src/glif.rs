@@ -4,6 +4,7 @@ use xmltree;
 use crate::anchor::Anchor;
 use crate::component::GlifComponent;
 use crate::error::GlifParserError;
+use crate::image::GlifImage;
 use crate::point::PointData;
 use crate::outline::{Outline, OutlineType};
 
@@ -23,6 +24,10 @@ pub struct Glif<PD: PointData> {
     /// Note that these components are not yet parsed or checked for infinite loops. You need to
     /// call either ``GlifComponent::to_component_of`` on each of these, or ``Glif::flatten``.
     pub components: Vec<GlifComponent>,
+    /// glifparser does support reading the data of images and guessing their format, but in order
+    /// to allow you to handle possibly erroneous files we don't do so by default. You need to call
+    /// ``GlifImage::to_image_of`` to get an ``Image`` with data.
+    pub images: Vec<GlifImage>,
     pub width: Option<u64>,
     pub unicode: Vec<char>,
     pub name: String,
@@ -47,6 +52,7 @@ impl<PD: PointData> Glif<PD> {
             order: OutlineType::Cubic, // default when only corners
             anchors: vec![],
             components: vec![],
+            images: vec![],
             width: None,
             unicode: vec![],
             name: String::new(),

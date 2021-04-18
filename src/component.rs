@@ -1,5 +1,6 @@
 use crate::error::GlifParserError;
 use crate::glif::{self, Glif};
+use crate::matrix::GlifMatrix;
 use crate::point::{Handle, PointData, WhichHandle};
 use crate::outline::Outline;
 
@@ -31,6 +32,12 @@ impl GlifComponent {
             yOffset: IntegerOrFloat::Integer(0),
             identifier: None
         }
+    }
+}
+
+impl GlifComponent {
+    pub fn matrix(&self) -> GlifMatrix {
+        GlifMatrix(self.xScale, self.xyScale, self.yxScale, self.yScale, self.xOffset, self.yOffset)
     }
 }
 
