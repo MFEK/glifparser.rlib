@@ -1,11 +1,14 @@
 use std::convert::TryInto;
 use std::path;
 
+use integer_or_float::IntegerOrFloat;
+
 use log::warn;
 
 use super::Glif;
 use crate::error::{GlifParserError::{self, GlifInputError}};
 use crate::component::GlifComponent;
+use crate::guideline::Guideline;
 use crate::outline::{self, get_outline_type, GlifContour, GlifOutline, OutlineType};
 use crate::point::{GlifPoint, PointData, parse_point_type};
 use crate::anchor::Anchor;
@@ -19,13 +22,15 @@ macro_rules! input_error {
 
 // Both components and images have the same matrix/identifier values. This is DRY.
 macro_rules! load_matrix_and_identifier {
-    ($xml_el:ident, $struct:ident) => {
-        $xml_el.attributes.get("xScale").map(|e|{ $struct.xScale = e.as_str().try_into().unwrap(); });
-        $xml_el.attributes.get("xyScale").map(|e|{ $struct.xyScale = e.as_str().try_into().unwrap(); });
-        $xml_el.attributes.get("yxScale").map(|e|{ $struct.yxScale = e.as_str().try_into().unwrap(); });
-        $xml_el.attributes.get("yScale").map(|e|{ $struct.yScale = e.as_str().try_into().unwrap(); });
-        $xml_el.attributes.get("xOffset").map(|e|{ $struct.xOffset = e.as_str().try_into().unwrap(); });
-        $xml_el.attributes.get("yOffset").map(|e|{ $struct.yOffset = e.as_str().try_into().unwrap(); });
+    ($xml_el:ident, $struct:ident, ($($attr:ident),+)) => {
+        $(
+            let maybe_err = $xml_el.attributes.get(stringify!($attr)).map(|e| -> Result<(),GlifParserError> { 
+                let v = e.as_str().try_into().or(Err(input_error!(concat!("Matrix member ", stringify!($attr), " not float"))))?;
+                $struct.$attr = v;
+                Ok(())
+            });
+            if let Some(Err(e)) = maybe_err { Err(e)?; };
+        )+
         $xml_el.attributes.get("identifier").map(|e|{ $struct.identifier = Some(e.clone()); });
     }
 }
@@ -113,16 +118,54 @@ pub fn read_ufo_glif<PD: PointData>(glif: &str) -> Result<Glif<PD>, GlifParserEr
         let filename = path::PathBuf::from(image_el
             .attributes
             .get("fileName")
-            .ok_or(input_error!("<image> missing x"))?);
+            .ok_or(input_error!("<image> missing fileName"))?);
 
         let mut gimage = GlifImage::from_filename(filename)?;
 
-        load_matrix_and_identifier!(image_el, gimage);
+        load_matrix_and_identifier!(image_el, gimage, (xScale, xyScale, yxScale, yScale, xOffset, yOffset));
 
         images.push(gimage);
     }
 
     ret.images = images;
+
+    let mut guidelines: Vec<Guideline> = Vec::new();
+
+    while let Some(guideline_el) = glif.take_child("guideline") {
+        let gx = guideline_el
+            .attributes
+            .get("x")
+            .ok_or(input_error!("<guideline> missing x"))?
+            .parse()
+            .or(Err(input_error!("<guideline> x not float")))?;
+        let gy = guideline_el
+            .attributes
+            .get("y")
+            .ok_or(input_error!("<guideline> missing y"))?
+            .parse()
+            .or(Err(input_error!("<guideline> x not float")))?;
+        let angle: IntegerOrFloat = guideline_el
+            .attributes
+            .get("angle")
+            .ok_or(input_error!("<guideline> missing angle"))?
+            .as_str()
+            .try_into()
+            .or(Err(input_error!("<guideline> angle not float")))?;
+
+        let mut guideline = Guideline::from_x_y_angle(gx, gy, angle);
+
+        if let Some(color) = guideline_el.attributes.get("color") {
+            guideline.color = Some(color.parse()?);
+        }
+
+        guideline.name = guideline_el.attributes.get("name").map(|n|n.clone());
+
+        guideline.identifier = guideline_el.attributes.get("identifier").map(|i|i.clone());
+
+        guidelines.push(guideline);
+    }
+
+    ret.guidelines = guidelines;
 
     if let Some(note_el) = glif.take_child("note") {
         note_el.get_text().map(|t|ret.note=Some(t.into_owned()));
@@ -169,7 +212,7 @@ pub fn read_ufo_glif<PD: PointData>(glif: &str) -> Result<Glif<PD>, GlifParserEr
         
         while let Some(component_el) = outline_elu.take_child("component") {
             let mut gcomponent = GlifComponent::new();
-            load_matrix_and_identifier!(component_el, gcomponent);
+            load_matrix_and_identifier!(component_el, gcomponent, (xScale, xyScale, yxScale, yScale, xOffset, yOffset));
             gcomponent.base = component_el.attributes.get("base").ok_or(input_error!("<component> missing base"))?.clone();
             ret.components.push(gcomponent);
         }

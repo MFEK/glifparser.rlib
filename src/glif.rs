@@ -4,6 +4,7 @@ use xmltree;
 use crate::anchor::Anchor;
 use crate::component::GlifComponent;
 use crate::error::GlifParserError;
+use crate::guideline::Guideline;
 use crate::image::GlifImage;
 use crate::point::PointData;
 use crate::outline::{Outline, OutlineType};
@@ -24,6 +25,12 @@ pub struct Glif<PD: PointData> {
     /// Note that these components are not yet parsed or checked for infinite loops. You need to
     /// call either ``GlifComponent::to_component_of`` on each of these, or ``Glif::flatten``.
     pub components: Vec<GlifComponent>,
+    /// .glif guidelines. Note: glif may have more guidelines, not listed here. It will also have
+    /// an asecender and a descender, not listed here. You can get this info from `norad`, reading
+    /// the parent UFO and telling it not to read glif's (via UfoDataRequest) since you're using
+    /// this for that.
+    // Command line MFEK programs can also get it from MFEKmetadata.
+    pub guidelines: Vec<Guideline>,
     /// glifparser does support reading the data of images and guessing their format, but in order
     /// to allow you to handle possibly erroneous files we don't do so by default. You need to call
     /// ``GlifImage::to_image_of`` to get an ``Image`` with data.
@@ -54,6 +61,7 @@ impl<PD: PointData> Glif<PD> {
             order: OutlineType::Cubic, // default when only corners
             anchors: vec![],
             components: vec![],
+            guidelines: vec![],
             images: vec![],
             width: None,
             unicode: vec![],
