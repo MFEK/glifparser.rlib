@@ -9,9 +9,13 @@ xmltree = "0.10.3"
 log = "0.4"
 kurbo = "0.8"
 trees = "0.4"
+skia-safe = {version = "0.38", optional = true}
 
 # Our submodules
 integer_or_float = { git = "https://github.com/MFEK/integer_or_float.rlib", branch = "main" }
 
 [dev-dependencies]
 env_logger = "0.8"
+
+[features]
+skia = ["skia-safe"]

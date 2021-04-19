@@ -11,7 +11,7 @@ mod component;
 pub mod glif;
 mod guideline;
 mod image;
-mod outline;
+pub mod outline;
 mod point;
 
 pub use anchor::Anchor;
