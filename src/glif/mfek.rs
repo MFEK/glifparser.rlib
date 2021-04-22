@@ -1,11 +1,12 @@
 use std::collections::{HashMap, HashSet};
 use std::path;
 
-use crate::{Anchor, Glif, GlifComponent, Outline, outline::OutlineType, point::PointData};
+use crate::{Anchor, Glif, GlifComponent, Guideline, Outline, outline::OutlineType, point::PointData};
 // This is an intermediary form used in MFEKglif and other tools. You can .into() a glif into this
 // make changes to MFEK data and then turn it back into a standard UFO glif before saving.
 #[derive(Clone, Debug)]
 pub struct MFEKGlif<PD: PointData> {
+    pub source_glif: Glif<PD>,
     pub layers: Vec<Layer<PD>>,
     pub history: Vec<HistoryEntry<PD>>,
     pub order: OutlineType,
@@ -13,6 +14,7 @@ pub struct MFEKGlif<PD: PointData> {
     /// Note that these components are not yet parsed or checked for infinite loops. You need to
     /// call either ``GlifComponent::to_component_of`` on each of these, or ``Glif::flatten``.
     pub components: Vec<GlifComponent>,
+    pub guidelines: Vec<Guideline>,
     pub width: Option<u64>,
     pub unicode: Vec<char>,
     pub name: String,
@@ -36,24 +38,29 @@ impl<PD: PointData> From<Glif<PD>> for MFEKGlif<PD>
             let mut layers = Vec::new();
             let history = Vec::new();
 
-            layers.push(Layer {
-                outline: glif.outline,
-                contour_ops: HashMap::new(),
-            });
-
-            MFEKGlif {
-                layers: layers,
+            let mut ret = MFEKGlif {
+                source_glif: glif.clone(),
+                layers: vec![],
                 history: history,
                 order: glif.order,
                 anchors: glif.anchors,
                 components: glif.components,
+                guidelines: glif.guidelines,
                 width: glif.width,
                 unicode: glif.unicode,
                 name: glif.name,
                 format: glif.format,
                 filename: glif.filename,
                 lib: glif.lib,
-            }
+            };
+
+            layers.push(Layer {
+                outline: glif.outline,
+                contour_ops: HashMap::new(),
+            });
+            ret.layers = layers;
+
+            ret
         }
     }
 }
