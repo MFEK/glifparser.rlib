@@ -56,6 +56,21 @@ impl<PD: PointData> Component<PD> {
     }
 }
 
+#[derive(Clone, Debug, PartialEq)]
+pub struct ComponentRect {
+    pub minx: f32,
+    pub miny: f32,
+    pub maxx: f32,
+    pub maxy: f32,
+    pub name: String,
+}
+
+impl ComponentRect {
+    pub fn from_rect_and_name(minx: f32, miny: f32, maxx: f32, maxy: f32, name: String) -> Self {
+        Self { minx, miny, maxx, maxy, name }
+    }
+}
+
 use std::fs;
 impl GlifComponent {
     pub fn to_component_of<PD: PointData>(&self, glif: &Glif<PD>) -> Result<Component<PD>, GlifParserError> {
@@ -89,12 +104,18 @@ impl<PD: PointData> Glif<PD> {
     // describe the transformation of the glyph's points, and continuously apply them until we run
     // out of nodes of the tree. Finally, we set our outline to be the final transformed outline,
     // and consider ourselves as no longer being made up of components.
-    pub fn flatten(mut self) -> Result<Self, GlifParserError> {
-        let components_r: Result<Forest<Component<PD>>, _> = (&self).into();
+    pub fn to_flattened(&self, rects: Option<&mut Vec<ComponentRect>>) -> Result<Self, GlifParserError> {
+        let mut ret = self.clone();
+        let components_r: Result<Forest<Component<PD>>, _> = (&ret).into();
         let components = components_r?;
         let mut final_outline: Outline<PD> = Outline::new();
+        let mut component_rects = vec![];
 
         for mut component in components {
+            let (mut minx, mut miny, mut maxx, mut maxy) = (0., 0., 0., 0.);
+            // This unwrap is safe because at this point we know we haven't yet exhausted the
+            // Forest<Component>.
+            let component_name = component.front().unwrap().data().glif.name.clone();
             while let Some(last) = component.back_mut() {
                 let mut matrices = vec![];
                 matrices.push((*last).data().matrix);
@@ -111,10 +132,15 @@ impl<PD: PointData> Glif<PD> {
                         let mut to_transform = o.clone();
                         for i in 0..to_transform.len() {
                             for j in 0..to_transform[i].len() {
+                                let is_first = i == 0 && j == 0;
                                 let mut p = to_transform[i][j].clone();
                                 let kbp = matrices.iter().fold(KurboPoint::new(p.x as f64, p.y as f64), |p, m| *m * p);
                                 p.x = kbp.x as f32;
                                 p.y = kbp.y as f32;
+                                if p.x < minx || is_first { minx = p.x; }
+                                if p.y < miny || is_first { miny = p.y; }
+                                if p.x > maxx || is_first { maxx = p.x; }
+                                if p.y > maxy || is_first { maxy = p.y; }
 
                                 if p.a != Handle::Colocated {
                                     let (ax, ay) = p.handle_or_colocated(WhichHandle::A, |f|f, |f|f);
@@ -138,14 +164,19 @@ impl<PD: PointData> Glif<PD> {
 
                 component.pop_back();
             }
+            component_rects.push(ComponentRect { minx, maxx, miny, maxy, name: component_name });
         }
 
-        self.outline = Some(final_outline);
+        ret.outline = Some(final_outline);
 
         // If we were to leave this here, then API consumers would potentially draw component outlines on top of components.
-        self.components = vec![];
+        ret.components = vec![];
 
-        Ok(self)
+        if let Some(ptr) = rects {
+            *ptr = component_rects;
+        }
+
+        Ok(ret)
     }
 }
 
