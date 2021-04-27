@@ -2,6 +2,10 @@ use std::collections::{HashMap, HashSet};
 use std::path;
 
 use crate::{Anchor, Glif, GlifComponent, Guideline, Outline, outline::OutlineType, point::PointData};
+
+#[derive(Debug, Clone)]
+pub struct MFEKPointData;
+
 // This is an intermediary form used in MFEKglif and other tools. You can .into() a glif into this
 // make changes to MFEK data and then turn it back into a standard UFO glif before saving.
 #[derive(Clone, Debug)]
@@ -57,6 +61,7 @@ impl<PD: PointData> From<Glif<PD>> for MFEKGlif<PD>
             layers.push(Layer {
                 outline: glif.outline,
                 contour_ops: HashMap::new(),
+                operation: None,
             });
             ret.layers = layers;
 
@@ -86,15 +91,10 @@ pub struct HistoryEntry<PD: PointData> {
 #[derive(Clone, Debug)]
 pub struct Layer<PD: PointData> {
     pub outline: Option<Outline<PD>>,
-    pub contour_ops: HashMap<usize, ContourOp>
+    pub contour_ops: HashMap<usize, ContourOp>,
+    pub operation: Option<LayerOperation>
 }
 
-#[derive(Clone, Debug)]
-pub enum LayerOp {
-    Combine,
-    Union,
-    //TODO: add all SKPathOps and implement
-}
 #[derive(Clone, Debug)]
 pub enum ContourOp {
     VariableWidthStroke {
@@ -107,7 +107,9 @@ pub struct VWSContour {
     pub handles: Vec<VWSHandle>,
     pub join_type: JoinType,
     pub cap_start_type: CapType,
-    pub cap_end_type: CapType
+    pub cap_end_type: CapType,
+    pub remove_internal: bool,
+    pub remove_external: bool,
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -128,6 +130,7 @@ pub struct VWSHandle {
 pub enum JoinType {
     Bevel,
     Miter,
+    Circle,
     Round
 }
 
@@ -135,5 +138,14 @@ pub enum JoinType {
 pub enum CapType {
     Round,
     Square,
+    Circle,
     Custom
+}
+
+#[derive(Clone, Debug)]
+pub enum LayerOperation {
+    Difference,
+    Union,
+    XOR,
+    Intersect
 }
