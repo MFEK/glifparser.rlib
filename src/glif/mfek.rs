@@ -10,7 +10,6 @@ pub struct MFEKPointData;
 // make changes to MFEK data and then turn it back into a standard UFO glif before saving.
 #[derive(Clone, Debug)]
 pub struct MFEKGlif<PD: PointData> {
-    pub source_glif: Glif<PD>,
     pub layers: Vec<Layer<PD>>,
     pub history: Vec<HistoryEntry<PD>>,
     pub order: OutlineType,
@@ -43,7 +42,6 @@ impl<PD: PointData> From<Glif<PD>> for MFEKGlif<PD>
             let history = Vec::new();
 
             let mut ret = MFEKGlif {
-                source_glif: glif.clone(),
                 layers: vec![],
                 history: history,
                 order: glif.order,
