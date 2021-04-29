@@ -19,3 +19,4 @@ env_logger = "0.8"
 
 [features]
 skia = ["skia-safe"]
+mfek = []

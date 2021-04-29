@@ -136,7 +136,7 @@ pub fn write_ufo_glif<PD: PointData>(glif: &Glif<PD>) -> Result<String, GlifPars
         None => {}
     }
 
-    for component in &glif.components {
+    for component in &glif.components.vec {
         let mut component_node = xmltree::Element::new("component");
         component_node.attributes.insert("base".to_string(), component.base.clone());
         write_matrix_and_identifier!(component_node, component);

@@ -3,6 +3,8 @@
   <advance width="547" />
   <unicode hex="60" />
   <outline>
+    <component yxScale="0" xyScale="0" yScale="1" base="NULL" xScale="-1" yOffset="0" xOffset="496.285" />
+    <component yxScale="0" xyScale="0" yScale="1" base="NULL" xScale="-1" yOffset="0" xOffset="0" />
     <contour>
       <point x="330.54276" type="curve" y="488.85776" />
       <point x="295.44174" y="531.4338" />

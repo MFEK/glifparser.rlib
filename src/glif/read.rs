@@ -1,5 +1,6 @@
 use std::convert::TryInto;
 use std::path;
+use std::rc::Rc;
 
 use integer_or_float::IntegerOrFloat;
 
@@ -37,15 +38,25 @@ macro_rules! load_matrix_and_identifier {
 
 use std::fs;
 use std::path::Path;
+/// If you have a known filename, it is always preferable to call this function, as it sets the
+/// filename on the Glif<PD> as well as on its GlifComponent's, easing their transition into
+/// Component's.
 pub fn read_ufo_glif_from_filename<F: AsRef<Path> + Clone, PD: PointData>(filename: F) -> Result<Glif<PD>, GlifParserError> {
-    let glifxml = fs::read_to_string(&filename).expect("Failed to read file");
+    let glifxml = match fs::read_to_string(&filename) {
+        Ok(s) => s,
+        Err(ioe) => Err(GlifParserError::GlifFileIoError(Some(Rc::new(ioe))))?
+    };
     let mut glif: Glif<PD> = read_ufo_glif(&glifxml)?;
-    glif.filename = Some(filename.as_ref().to_path_buf());
+    let filenamepb = filename.as_ref().to_path_buf();
+    for component in glif.components.vec.iter_mut() {
+        component.set_file_name(&filenamepb);
+    }
+    glif.filename = Some(filenamepb);
     Ok(glif)
 }
 
-// From .glif XML, return a parse tree
-/// Read UFO .glif XML to Glif struct
+/// Read UFO .glif XML to Glif struct. This should only be used when you have no known filename,
+/// and the glif is unattached from a UFO.
 pub fn read_ufo_glif<PD: PointData>(glif: &str) -> Result<Glif<PD>, GlifParserError> {
     let mut glif = xmltree::Element::parse(glif.as_bytes())?;
 
@@ -64,6 +75,8 @@ pub fn read_ufo_glif<PD: PointData>(glif: &str) -> Result<Glif<PD>, GlifParserEr
         .get("name")
         .ok_or(input_error!("<glyph> has no name"))?
         .clone();
+    ret.components.root = ret.name.clone();
+
     let advance = glif
         .take_child("advance");
 
@@ -184,8 +197,7 @@ pub fn read_ufo_glif<PD: PointData>(glif: &str) -> Result<Glif<PD>, GlifParserEr
 
     let outline_el = glif.take_child("outline");
 
-    if outline_el.is_some() {
-        let mut outline_elu = outline_el.unwrap();
+    if let Some(mut outline_elu) = outline_el {
         while let Some(mut contour_el) = outline_elu.take_child("contour") {
             let mut gcontour: GlifContour = Vec::new();
             while let Some(point_el) = contour_el.take_child("point") {
@@ -223,7 +235,7 @@ pub fn read_ufo_glif<PD: PointData>(glif: &str) -> Result<Glif<PD>, GlifParserEr
             let mut gcomponent = GlifComponent::new();
             load_matrix_and_identifier!(component_el, gcomponent, (xScale, xyScale, yxScale, yScale, xOffset, yOffset));
             gcomponent.base = component_el.attributes.get("base").ok_or(input_error!("<component> missing base"))?.clone();
-            ret.components.push(gcomponent);
+            ret.components.vec.push(gcomponent);
         }
     }
 

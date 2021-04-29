@@ -1,5 +1,3 @@
-use crate::component::GlifComponent;
-
 use integer_or_float::IntegerOrFloat;
 
 pub struct GlifMatrix(pub IntegerOrFloat, pub IntegerOrFloat, pub IntegerOrFloat, pub IntegerOrFloat, pub IntegerOrFloat, pub IntegerOrFloat);

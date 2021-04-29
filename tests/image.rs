@@ -12,7 +12,7 @@ fn init() {
 fn test_image() {
     init();
 
-    let gliffn = "test_data/TT2020Base.ufo/glyphs/eight.glif";
+    let gliffn = "test_data/TT2020Base.ufo/glyphs/N_U_L_L_.glif";
     let glif_outxml;
     // Read
     {
