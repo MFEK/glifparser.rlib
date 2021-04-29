@@ -18,7 +18,7 @@ pub use crate::anchor::Anchor;
 pub use crate::codepoint::Codepoint;
 pub use crate::color::Color;
 pub use crate::component::{GlifComponent, Component, ComponentRect};
-pub use crate::glif::{Glif, read, write};
+pub use crate::glif::{Glif, read, read_from_filename, write, write_to_filename};
 pub use crate::glif::mfek::{MFEKGlif, VWSContour, JoinType, CapType};
 pub use crate::guideline::{Guideline, GuidelinePoint};
 pub use crate::image::{GlifImage, Image, ImageCodec};

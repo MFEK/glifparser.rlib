@@ -14,7 +14,9 @@ mod write;
 pub mod mfek;
 
 pub use read::read_ufo_glif as read;
+pub use read::read_ufo_glif_from_filename as read_from_filename;
 pub use write::write_ufo_glif as write;
+pub use write::write_ufo_glif_to_filename as write_to_filename;
 pub use mfek::*;
 
 #[derive(Clone, Debug, PartialEq)]
