@@ -2,7 +2,7 @@ use std::path;
 use xmltree;
 
 use crate::anchor::Anchor;
-use crate::component::GlifComponent;
+use crate::component::GlifComponents;
 use crate::error::GlifParserError;
 use crate::guideline::Guideline;
 use crate::image::GlifImage;
@@ -11,12 +11,15 @@ use crate::outline::{Outline, OutlineType};
 
 mod read;
 mod write;
+#[cfg(feature = "mfek")]
 pub mod mfek;
 
 pub use read::read_ufo_glif as read;
 pub use read::read_ufo_glif_from_filename as read_from_filename;
 pub use write::write_ufo_glif as write;
 pub use write::write_ufo_glif_to_filename as write_to_filename;
+
+#[cfg(feature = "mfek")]
 pub use mfek::*;
 
 #[derive(Clone, Debug, PartialEq)]
@@ -26,7 +29,7 @@ pub struct Glif<PD: PointData> {
     pub anchors: Vec<Anchor>,
     /// Note that these components are not yet parsed or checked for infinite loops. You need to
     /// call either ``GlifComponent::to_component_of`` on each of these, or ``Glif::flatten``.
-    pub components: Vec<GlifComponent>,
+    pub components: GlifComponents,
     /// .glif guidelines. Note: glif may have more guidelines, not listed here. It will also have
     /// an asecender and a descender, not listed here. You can get this info from `norad`, reading
     /// the parent UFO and telling it not to read glif's (via UfoDataRequest) since you're using
@@ -62,7 +65,7 @@ impl<PD: PointData> Glif<PD> {
             outline: None,
             order: OutlineType::Cubic, // default when only corners
             anchors: vec![],
-            components: vec![],
+            components: GlifComponents::new(),
             guidelines: vec![],
             images: vec![],
             width: None,
@@ -78,16 +81,7 @@ impl<PD: PointData> Glif<PD> {
     }
 
     pub fn name_to_filename(&self) -> String {
-        let mut ret = String::new();
-        let chars: Vec<char> = self.name.chars().collect();
-        for c in chars {
-            ret.push(c);
-            if ('A'..'Z').contains(&c) {
-                ret.push('_');
-            }
-        }
-        ret.push_str(".glif");
-        ret
+        name_to_filename(&self.name)
     }
 
     pub fn filename_is_sane(&self) -> Result<bool, GlifParserError> {
@@ -106,3 +100,15 @@ impl<PD: PointData> Glif<PD> {
 
 }
 
+pub fn name_to_filename(name: &str) -> String {
+    let mut ret = String::new();
+    let chars: Vec<char> = name.chars().collect();
+    for c in chars {
+        ret.push(c);
+        if ('A'..'Z').contains(&c) {
+            ret.push('_');
+        }
+    }
+    ret.push_str(".glif");
+    ret
+}

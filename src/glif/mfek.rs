@@ -1,7 +1,10 @@
 use std::collections::{HashMap, HashSet};
 use std::path;
 
-use crate::{Anchor, Glif, GlifComponent, Guideline, Outline, outline::OutlineType, point::PointData};
+use crate::{
+    outline::OutlineType, point::PointData, Anchor, ComponentRect, Glif, component::GlifComponents, Guideline,
+    Outline,
+};
 
 #[derive(Debug, Clone)]
 pub struct MFEKPointData;
@@ -16,7 +19,9 @@ pub struct MFEKGlif<PD: PointData> {
     pub anchors: Vec<Anchor>,
     /// Note that these components are not yet parsed or checked for infinite loops. You need to
     /// call either ``GlifComponent::to_component_of`` on each of these, or ``Glif::flatten``.
-    pub components: Vec<GlifComponent>,
+    pub components: GlifComponents,
+    pub flattened: Option<Outline<PD>>, // holds cached flattened glif (components to points)
+    pub component_rects: Option<Vec<ComponentRect>>, // holds cached flattened component rects
     pub guidelines: Vec<Guideline>,
     pub width: Option<u64>,
     pub unicode: Vec<char>,
@@ -31,11 +36,9 @@ pub struct MFEKGlif<PD: PointData> {
     pub lib: Option<xmltree::Element>,
 }
 
-
-impl<PD: PointData> From<Glif<PD>> for MFEKGlif<PD>
-{
-    fn from(glif: Glif<PD>) -> Self { 
-        if let Some(mfek_lib) = glif.private_lib {
+impl<PD: PointData> From<Glif<PD>> for MFEKGlif<PD> {
+    fn from(glif: Glif<PD>) -> Self {
+        if let Some(_mfek_lib) = glif.private_lib {
             todo!("Actually load private lib.")
         } else {
             let mut layers = Vec::new();
@@ -44,6 +47,8 @@ impl<PD: PointData> From<Glif<PD>> for MFEKGlif<PD>
             let mut ret = MFEKGlif {
                 layers: vec![],
                 history: history,
+                flattened: None,
+                component_rects: None,
                 order: glif.order,
                 anchors: glif.anchors,
                 components: glif.components,
@@ -72,7 +77,7 @@ impl<PD: PointData> From<Glif<PD>> for MFEKGlif<PD>
 pub enum HistoryType {
     LayerModified,
     LayerAdded,
-    LayerDeleted
+    LayerDeleted,
 }
 
 #[derive(Clone, Debug)]
@@ -83,21 +88,19 @@ pub struct HistoryEntry<PD: PointData> {
     pub point_idx: Option<usize>,
     pub selected: Option<HashSet<(usize, usize)>>,
     pub layer: Layer<PD>,
-    pub kind: HistoryType
+    pub kind: HistoryType,
 }
 
 #[derive(Clone, Debug)]
 pub struct Layer<PD: PointData> {
     pub outline: Option<Outline<PD>>,
     pub contour_ops: HashMap<usize, ContourOp>,
-    pub operation: Option<LayerOperation>
+    pub operation: Option<LayerOperation>,
 }
 
 #[derive(Clone, Debug)]
 pub enum ContourOp {
-    VariableWidthStroke {
-        contour: VWSContour
-    }
+    VariableWidthStroke { contour: VWSContour },
 }
 #[derive(Debug, Clone)]
 pub struct VWSContour {
@@ -113,7 +116,7 @@ pub struct VWSContour {
 #[derive(Debug, Clone, Copy)]
 pub enum InterpolationType {
     Linear,
-    Null
+    Null,
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -121,7 +124,7 @@ pub struct VWSHandle {
     pub left_offset: f64,
     pub right_offset: f64,
     pub tangent_offset: f64,
-    pub interpolation: InterpolationType
+    pub interpolation: InterpolationType,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq)]
@@ -129,7 +132,7 @@ pub enum JoinType {
     Bevel,
     Miter,
     Circle,
-    Round
+    Round,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq)]
@@ -137,7 +140,7 @@ pub enum CapType {
     Round,
     Square,
     Circle,
-    Custom
+    Custom,
 }
 
 #[derive(Clone, Debug)]
@@ -145,5 +148,5 @@ pub enum LayerOperation {
     Difference,
     Union,
     XOR,
-    Intersect
+    Intersect,
 }

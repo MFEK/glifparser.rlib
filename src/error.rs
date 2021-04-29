@@ -8,6 +8,9 @@ use xmltree::{ParseError, Error as XMLTreeError};
 
 #[derive(Debug, Clone)]
 pub enum GlifParserError {
+    /// OS error when reading glif
+    GlifFileIoError(Option<Rc<io::Error>>),
+
     /// Glif filename not set
     GlifFilenameNotSet(String),
     /// Glif filename doesn't match name in XML
@@ -36,6 +39,9 @@ pub enum GlifParserError {
 impl Display for GlifParserError {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result<(), std::fmt::Error> { 
         write!(f, "glifparser error: {}", match self {
+            Self::GlifFileIoError(ioe) => {
+                format!("System error when loading glif file: {:?}", ioe)
+            },
             Self::GlifFilenameNotSet(s) => {
                 format!("Glyph filename not set: {}", &s)
             },
