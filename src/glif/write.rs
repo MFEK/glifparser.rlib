@@ -36,6 +36,13 @@ macro_rules! write_matrix_and_identifier {
     }
 }
 
+use std::fs;
+use std::path::Path;
+pub fn write_ufo_glif_to_filename<F: AsRef<Path> + Clone, PD: PointData>(glif: &Glif<PD>, filename: F) -> Result<(), GlifParserError> {
+    let glifxml: String = write_ufo_glif(glif)?;
+    fs::write(filename, glifxml).or( Err(GlifParserError::XmlWriteError( "Failed to write to filename".to_string() )) )
+}
+
 /// Write Glif struct to UFO .glif XML 
 pub fn write_ufo_glif<PD: PointData>(glif: &Glif<PD>) -> Result<String, GlifParserError>
 {

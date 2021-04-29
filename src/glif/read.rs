@@ -35,6 +35,15 @@ macro_rules! load_matrix_and_identifier {
     }
 }
 
+use std::fs;
+use std::path::Path;
+pub fn read_ufo_glif_from_filename<F: AsRef<Path> + Clone, PD: PointData>(filename: F) -> Result<Glif<PD>, GlifParserError> {
+    let glifxml = fs::read_to_string(&filename).expect("Failed to read file");
+    let mut glif: Glif<PD> = read_ufo_glif(&glifxml)?;
+    glif.filename = Some(filename.as_ref().to_path_buf());
+    Ok(glif)
+}
+
 // From .glif XML, return a parse tree
 /// Read UFO .glif XML to Glif struct
 pub fn read_ufo_glif<PD: PointData>(glif: &str) -> Result<Glif<PD>, GlifParserError> {
