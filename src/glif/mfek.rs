@@ -78,6 +78,10 @@ pub enum HistoryType {
     LayerModified,
     LayerAdded,
     LayerDeleted,
+    LayerMoved{
+        to: usize,
+        from: usize,
+    }
 }
 
 #[derive(Clone, Debug)]
