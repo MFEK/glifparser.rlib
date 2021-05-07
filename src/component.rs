@@ -129,7 +129,6 @@ pub trait FlattenedGlif where Self: Clone {
     fn flattened(&self, rects: &mut Option<Vec<ComponentRect>>) -> Result<Self, GlifParserError>;
 }
 
-use std::pin::Pin;
 fn apply_component_rect<PD: PointData>(last: &Node<Component<PD>>, minx: &mut f32, miny: &mut f32, maxx: &mut f32, maxy: &mut f32, final_outline: &mut Outline<PD>) {
     let mut matrices = vec![];
     matrices.push((*last).data().matrix);
