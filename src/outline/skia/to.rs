@@ -55,7 +55,7 @@ impl<PD: PointData> ToSkiaPaths for Outline<PD> {
         let mut open = skia::Path::new();
         let mut closed = skia::Path::new();
 
-        for (idx, contour) in self.iter().enumerate() {
+        for contour in self {
             let firstpoint: &Point<PD> = match contour.first() {
                 Some(p) => p,
                 None => { continue } // contour has no points
