@@ -63,6 +63,8 @@ impl<PD: PointData> From<Glif<PD>> for MFEKGlif<PD> {
 
             layers.push(Layer {
                 name: "Layer 0".to_string(),
+                visible: true,
+                color: [0., 0., 0., 1.],
                 outline: glif.outline,
                 contour_ops: HashMap::new(),
                 operation: None,
@@ -99,6 +101,8 @@ pub struct HistoryEntry<PD: PointData> {
 #[derive(Clone, Debug)]
 pub struct Layer<PD: PointData> {
     pub name: String,
+    pub visible: bool,
+    pub color: [f32; 4],
     pub outline: Option<Outline<PD>>,
     pub contour_ops: HashMap<usize, ContourOp>,
     pub operation: Option<LayerOperation>,
