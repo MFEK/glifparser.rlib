@@ -1,7 +1,9 @@
+use std::io;
 use std::fs;
 use std::path;
 use std::rc::Rc;
 
+use crate::color::Color;
 use crate::error::GlifParserError;
 use crate::glif::Glif;
 use crate::matrix::GlifMatrix;
@@ -9,30 +11,53 @@ use crate::matrix::GlifMatrix;
 use integer_or_float::IntegerOrFloat;
 use kurbo::Affine;
 use log::warn;
+use image::{DynamicImage, ImageFormat, io::Reader};
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum DataLoadState {
+    /// Image loading hasn't even been attempted yet
     NotTried,
+    /// Image loading tried, but failed to read from disk
     TriedAndFailed,
-    Succeeded
+    /// Image loaded from disk to data, but not yet decoded
+    Loaded,
+    /// Image loaded, but decoding it to a bitmap failed
+    LoadedDecodeFailed,
+    /// Image has been loaded and decoded to a bitmap
+    Decoded,
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub enum DataOrBitmap {
+    Data(Vec<u8>),
+    Bitmap{pixels: Vec<u8>, width: u32, height: u32}
+}
+
+impl DataOrBitmap {
+    fn unwrap_data(&self) -> &Vec<u8> {
+        match self {
+            DataOrBitmap::Data(v) => &v,
+            DataOrBitmap::Bitmap{..} => panic!("Unwrapped data of bitmap variant")
+        }
+    }
 }
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct ImageData {
-    data: Vec<u8>,
-    state: DataLoadState
+    pub data: DataOrBitmap,
+    pub state: DataLoadState
 }
 
 impl ImageData {
     fn new() -> Self {
         Self {
-            data: vec![],
+            data: DataOrBitmap::Data(vec![]),
             state: DataLoadState::NotTried
         }
     }
 
     pub fn guess_codec(&self) -> ImageCodec {
-        let codec = match self.data.chunks(12).next() {
+        let codec = match self.data.unwrap_data().chunks(12).next() {
             Some(&[0x42, 0x4D, _, _, _, _, _, _, _, _, _, _]) => ImageCodec::BMP,
             Some(&[0xFF, 0xD8, _, _, _, _, _, _, _, _, _, _]) => ImageCodec::JPEG,
             Some(&[0x89, 0x50, 0x4E, 0x47, _, _, _, _, _, _, _, _]) => ImageCodec::PNG,
@@ -59,15 +84,17 @@ pub struct GlifImage {
     pub yScale: IntegerOrFloat,
     pub xOffset: IntegerOrFloat,
     pub yOffset: IntegerOrFloat,
-    pub identifier: Option<String>
+    pub identifier: Option<String>,
+    pub color: Option<Color>,
 }
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct Image {
     pub filename: path::PathBuf,
-    data: ImageData,
+    pub data: ImageData,
     pub codec: ImageCodec,
     pub matrix: Affine,
+    pub color: Option<Color>,
 }
 
 #[derive(Debug, Clone, PartialEq)]
@@ -90,7 +117,8 @@ impl GlifImage {
             yScale: IntegerOrFloat::Integer(1),
             xOffset: IntegerOrFloat::Integer(0),
             yOffset: IntegerOrFloat::Integer(0),
-            identifier: None
+            identifier: None,
+            color: None,
         }
     }
 
@@ -118,34 +146,36 @@ impl GlifImage {
         ret.filename = filename;
         ret.load()?;
         ret.matrix = self.matrix().into();
+        ret.color = self.color;
         Ok(ret)
     }
 }
 
 impl Image {
-    /*pub fn from_filename<P: Into<path::PathBuf>>(p: P) -> Result<Self, GlifParserError> {
+    pub fn from_filename<P: Into<path::PathBuf>>(p: P) -> Result<Self, GlifParserError> {
         let mut ret = Self::new();
         ret.filename = p.into();
         ret.load()?;
         Ok(ret)
-    }*/
+    }
 
     fn new() -> Self {
         Self {
             filename: path::PathBuf::new(),
             data: ImageData::new(),
             codec: ImageCodec::Unknown,
-            matrix: Affine::IDENTITY
+            matrix: Affine::IDENTITY,
+            color: None,
         }
     }
 
     pub fn load(&mut self) -> Result<(), GlifParserError> {
-        self.data.data = fs::read(&self.filename).or_else(|e| {
+        self.data.data = DataOrBitmap::Data(fs::read(&self.filename).or_else(|e| {
             self.data.state = DataLoadState::TriedAndFailed;
             Err(GlifParserError::ImageIoError(Some(Rc::new(e))))
-        })?;
+        })?);
         self.codec = self.data.guess_codec();
-        self.data.state = DataLoadState::Succeeded;
+        self.data.state = DataLoadState::Loaded;
         Ok(())
     }
 
@@ -153,7 +183,39 @@ impl Image {
         match self.data.state {
             DataLoadState::NotTried => Err(GlifParserError::ImageNotLoaded),
             DataLoadState::TriedAndFailed => Err(GlifParserError::ImageIoError(None)),
-            DataLoadState::Succeeded => Ok(self.data.data)
+            DataLoadState::Loaded => Ok(self.data.data.unwrap_data().clone()),
+            _ => unimplemented!()
         }
+    }
+
+    /// bitmap is guaranteed to always be in RGBA8888 format. Meaning, for each pixel, there's a
+    /// [u8; 4]. So a 3x1 image may look like [3, 3, 3, 255, 3, 3, 3, 255, 3, 3, 3, 255].to_vec().
+    pub fn decode(&mut self) -> Result<(), GlifParserError> {
+        let raw_data = match &self.data.data {
+            DataOrBitmap::Data(d) => d,
+            DataOrBitmap::Bitmap { .. } => Err(GlifParserError::ImageIoError(None))?
+        };
+        let reader = Reader::new(io::Cursor::new(raw_data)).with_guessed_format().or_else(|e|Err(GlifParserError::ImageIoError(Some(Rc::new(e)))))?;
+        if !(reader.format() == Some(ImageFormat::Png)) {
+            Err(GlifParserError::ImageNotPNG)?
+        }
+        let bitmap = reader.decode().or_else(|_|Err(GlifParserError::ImageNotDecodable))?;
+
+        let mut pixels;
+        if let Some(color) = self.color {
+            pixels = DynamicImage::ImageLuma8(bitmap.to_luma8()).to_rgba8();
+            for pixel in pixels.chunks_mut(4) {
+                pixel[0] = (pixel[0] * color.r).into();
+                pixel[1] = (pixel[1] * color.g).into();
+                pixel[2] = (pixel[2] * color.b).into();
+                pixel[3] = (pixel[3] * color.a).into();
+            }
+        } else {
+            pixels = bitmap.to_rgba8();
+        }
+
+        self.data.data = DataOrBitmap::Bitmap { pixels: pixels.to_vec(), width: pixels.width(), height: pixels.height() };
+        self.data.state = DataLoadState::Decoded;
+        Ok(())
     }
 }

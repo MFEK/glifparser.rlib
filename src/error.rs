@@ -29,6 +29,10 @@ pub enum GlifParserError {
 
     /// Image not yet read
     ImageNotLoaded,
+    /// Image not PNG
+    ImageNotPNG,
+    /// Image not decodable
+    ImageNotDecodable,
     /// OS error when reading image
     ImageIoError(Option<Rc<io::Error>>),
 
@@ -64,6 +68,12 @@ impl Display for GlifParserError {
 
             Self::ImageNotLoaded => {
                 format!("Tried to access data for image whose data hasn't been loaded")
+            },
+            Self::ImageNotPNG => {
+                format!("Image not formatted as PNG. The glif file format only supports PNG. If you want to support other types, you have to work on the data yourself.")
+            }
+            Self::ImageNotDecodable => {
+                format!("Image not decodable")
             },
             Self::ImageIoError(ioe) => {
                 format!("System error when loading image: {:?}", ioe)
