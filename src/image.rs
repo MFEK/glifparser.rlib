@@ -197,9 +197,13 @@ impl Image {
         };
         let reader = Reader::new(io::Cursor::new(raw_data)).with_guessed_format().or_else(|e|Err(GlifParserError::ImageIoError(Some(Rc::new(e)))))?;
         if !(reader.format() == Some(ImageFormat::Png)) {
+            self.data.state = DataLoadState::LoadedDecodeFailed;
             Err(GlifParserError::ImageNotPNG)?
         }
-        let bitmap = reader.decode().or_else(|_|Err(GlifParserError::ImageNotDecodable))?;
+        let bitmap = reader.decode().or_else(|_| {
+            self.data.state = DataLoadState::LoadedDecodeFailed;
+            Err(GlifParserError::ImageNotDecodable)
+        })?;
 
         let mut pixels;
         if let Some(color) = self.color {
