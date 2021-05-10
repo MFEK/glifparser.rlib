@@ -9,7 +9,7 @@ mod matrix;
 mod component;
 pub mod glif;
 mod guideline;
-mod image;
+pub mod image;
 pub mod outline;
 mod point;
 

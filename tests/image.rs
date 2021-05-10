@@ -1,6 +1,8 @@
 use std::fs;
 use std::path;
+use integer_or_float::IntegerOrFloat;
 use glifparser;
+use glifparser::{Image, Color, image::DataOrBitmap};
 
 use env_logger;
 
@@ -9,7 +11,7 @@ fn init() {
 }
 
 #[test]
-fn test_image() {
+fn test_load_image() {
     init();
 
     let gliffn = "test_data/TT2020Base.ufo/glyphs/N_U_L_L_.glif";
@@ -31,4 +33,16 @@ fn test_image() {
     let im = glif_roundtrip.images[0].to_image_of(&glif_roundtrip).unwrap();
     assert_eq!(im.codec, glifparser::ImageCodec::WebP);
     assert_eq!(im.data().unwrap().len(), 44370);
+}
+
+#[test]
+fn test_image_png() {
+    let mut image = Image::from_filename("test_data/logo.png").unwrap();
+    image.color = Some( Color{ r: IntegerOrFloat::Integer(0), g: IntegerOrFloat::Integer(0), b: IntegerOrFloat::Integer(1), a: IntegerOrFloat::Integer(1) } );
+    image.decode().unwrap();
+    match image.data.data {
+        //DataOrBitmap::Bitmap { pixels, width, height } => eprintln!("{:?} {}x{}", pixels, width, height),
+        DataOrBitmap::Bitmap { width, height, .. } => eprintln!("{}x{}", width, height),
+        _ => panic!("Decode failed")
+    }
 }

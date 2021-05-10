@@ -146,6 +146,10 @@ pub fn read_ufo_glif<PD: PointData>(glif: &str) -> Result<Glif<PD>, GlifParserEr
 
         load_matrix_and_identifier!(image_el, gimage, (xScale, xyScale, yxScale, yScale, xOffset, yOffset));
 
+        if let Some(color) = image_el.attributes.get("color") {
+            gimage.color = Some(color.parse()?);
+        }
+
         images.push(gimage);
     }
 
