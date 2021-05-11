@@ -1,6 +1,11 @@
 use std::collections::{HashMap, HashSet};
 use std::path;
 
+use skia_safe as skia;
+use skia::{Path};
+
+use crate::{PointType, outline::skia::{SkiaPaths, SkiaPointTransforms, ToSkiaPath, ToSkiaPaths}, point::Point};
+
 use crate::{
     outline::OutlineType, point::PointData, Anchor, ComponentRect, Glif, component::GlifComponents, Guideline,
     Outline,
@@ -65,7 +70,7 @@ impl<PD: PointData> From<Glif<PD>> for MFEKGlif<PD> {
                 name: "Layer 0".to_string(),
                 visible: true,
                 color: None,
-                outline: glif.outline,
+                outline: glif.outline.unwrap_or(Vec::new()).iter().map(|contour| contour.into() ).collect(),
                 contour_ops: HashMap::new(),
                 operation: None,
             });
@@ -99,11 +104,72 @@ pub struct HistoryEntry<PD: PointData> {
 }
 
 #[derive(Clone, Debug)]
+pub struct MFEKContour<PD: PointData> {
+    pub inner: Vec<Point<PD>>,
+    pub operation: Option<ContourOp>,
+}
+
+impl<PD: PointData> From<&Vec<Point<PD>>> for MFEKContour<PD> {
+    fn from(contour: &Vec<Point<PD>>) -> Self {
+        Self {
+            inner: contour.clone(),
+            operation: None,
+        }
+    }
+}
+
+impl<PD: PointData> From<Vec<Point<PD>>> for MFEKContour<PD> {
+    fn from(contour: Vec<Point<PD>>) -> Self {
+        Self {
+            inner: contour.clone(),
+            operation: None,
+        }
+    }
+}
+
+pub type MFEKOutline<PD: PointData> = Vec<MFEKContour<PD>>;
+
+impl<PD: PointData> ToSkiaPaths for MFEKOutline<PD> {
+    fn to_skia_paths(&self, spt: Option<SkiaPointTransforms>) -> SkiaPaths {
+        let mut ret = SkiaPaths {
+            open: None,
+            closed: None
+        };
+
+        let mut open = Path::new();
+        let mut closed = Path::new();
+
+        for contour in self {
+            let firstpoint: &Point<PD> = match contour.inner.first() {
+                Some(p) => p,
+                None => { continue } // contour has no points
+            };
+            let skpath = contour.inner.to_skia_path(spt).unwrap(); // therefore we know it'll be Some
+            if firstpoint.ptype == PointType::Move {
+                &mut open
+            } else {
+                &mut closed
+            }.add_path(&skpath, (0., 0.), skia::path::AddPathMode::Append);
+        }
+
+        if open.count_points() > 0 {
+            ret.open = Some(open);
+        }
+
+        if closed.count_points() > 0 {
+            ret.closed = Some(closed);
+        }
+
+        ret
+    }
+}
+
+#[derive(Clone, Debug)]
 pub struct Layer<PD: PointData> {
     pub name: String,
     pub visible: bool,
     pub color: Option<[f32; 4]>,
-    pub outline: Option<Outline<PD>>,
+    pub outline: MFEKOutline<PD>,
     pub contour_ops: HashMap<usize, ContourOp>,
     pub operation: Option<LayerOperation>,
 }
