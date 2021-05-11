@@ -9,7 +9,7 @@ xmltree = "0.10.3"
 log = "0.4"
 kurbo = "0.8"
 trees = "0.4"
-skia-safe = {version = "0.38", optional = true}
+skia-safe = {version = "0.39", optional = true}
 image = { version = "0.23", features = ["png"], default-features = false }
 
 # Our submodules

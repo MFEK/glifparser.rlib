@@ -30,6 +30,7 @@ pub enum DataLoadState {
 #[derive(Debug, Clone, PartialEq)]
 pub enum DataOrBitmap {
     Data(Vec<u8>),
+    /// `pixels` always RGBA8888
     Bitmap{pixels: Vec<u8>, width: u32, height: u32}
 }
 
