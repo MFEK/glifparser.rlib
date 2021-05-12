@@ -4,7 +4,7 @@ use std::path;
 use skia_safe as skia;
 use skia::{Path};
 
-use crate::{PointType, outline::skia::{SkiaPaths, SkiaPointTransforms, ToSkiaPath, ToSkiaPaths}, point::Point};
+use crate::{PointType, outline::skia::{SkiaPaths, SkiaPointTransforms, ToSkiaPath, ToSkiaPaths}, point::Point, image::GlifImage};
 
 use crate::{
     outline::OutlineType, point::PointData, Anchor, ComponentRect, Glif, component::GlifComponents, Guideline,
@@ -28,6 +28,10 @@ pub struct MFEKGlif<PD: PointData> {
     pub flattened: Option<Outline<PD>>, // holds cached flattened glif (components to points)
     pub component_rects: Option<Vec<ComponentRect>>, // holds cached flattened component rects
     pub guidelines: Vec<Guideline>,
+    /// glifparser does support reading the data of images and guessing their format, but in order
+    /// to allow you to handle possibly erroneous files we don't do so by default. You need to call
+    /// ``GlifImage::to_image_of`` to get an ``Image`` with data.
+    pub images: Vec<GlifImage>,
     pub width: Option<u64>,
     pub unicode: Vec<char>,
     pub name: String,
@@ -58,6 +62,7 @@ impl<PD: PointData> From<Glif<PD>> for MFEKGlif<PD> {
                 anchors: glif.anchors,
                 components: glif.components,
                 guidelines: glif.guidelines,
+                images: glif.images,
                 width: glif.width,
                 unicode: glif.unicode,
                 name: glif.name,
