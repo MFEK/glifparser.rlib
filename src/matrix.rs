@@ -1,5 +1,9 @@
+#[cfg(feature = "skia")]
+pub mod skia;
+
 use integer_or_float::IntegerOrFloat;
 
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub struct GlifMatrix(pub IntegerOrFloat, pub IntegerOrFloat, pub IntegerOrFloat, pub IntegerOrFloat, pub IntegerOrFloat, pub IntegerOrFloat);
 
 use kurbo::Affine;
