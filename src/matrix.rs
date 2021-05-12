@@ -1,5 +1,7 @@
 #[cfg(feature = "skia")]
 pub mod skia;
+#[cfg(feature = "skia")]
+pub use skia::ToSkiaMatrix;
 
 use integer_or_float::IntegerOrFloat;
 
