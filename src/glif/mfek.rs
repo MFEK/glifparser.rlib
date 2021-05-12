@@ -2,7 +2,8 @@ use std::collections::{HashMap, HashSet};
 use std::path;
 
 use skia_safe as skia;
-use skia::{Path};
+use skia::{Matrix as SkMatrix, Path};
+use kurbo::Affine;
 
 use crate::{PointType, outline::skia::{SkiaPaths, SkiaPointTransforms, ToSkiaPath, ToSkiaPaths}, point::Point, image::GlifImage};
 
@@ -28,10 +29,6 @@ pub struct MFEKGlif<PD: PointData> {
     pub flattened: Option<Outline<PD>>, // holds cached flattened glif (components to points)
     pub component_rects: Option<Vec<ComponentRect>>, // holds cached flattened component rects
     pub guidelines: Vec<Guideline>,
-    /// glifparser does support reading the data of images and guessing their format, but in order
-    /// to allow you to handle possibly erroneous files we don't do so by default. You need to call
-    /// ``GlifImage::to_image_of`` to get an ``Image`` with data.
-    pub images: Vec<GlifImage>,
     pub width: Option<u64>,
     pub unicode: Vec<char>,
     pub name: String,
@@ -62,7 +59,6 @@ impl<PD: PointData> From<Glif<PD>> for MFEKGlif<PD> {
                 anchors: glif.anchors,
                 components: glif.components,
                 guidelines: glif.guidelines,
-                images: glif.images,
                 width: glif.width,
                 unicode: glif.unicode,
                 name: glif.name,
@@ -71,6 +67,7 @@ impl<PD: PointData> From<Glif<PD>> for MFEKGlif<PD> {
                 lib: glif.lib,
             };
 
+            use crate::matrix::skia::ToSkiaMatrix;
             layers.push(Layer {
                 name: "Layer 0".to_string(),
                 visible: true,
@@ -78,6 +75,10 @@ impl<PD: PointData> From<Glif<PD>> for MFEKGlif<PD> {
                 outline: glif.outline.unwrap_or(Vec::new()).iter().map(|contour| contour.into() ).collect(),
                 contour_ops: HashMap::new(),
                 operation: None,
+                images: glif.images.iter().map(|im| {
+                    let temp_affine: Affine = im.matrix().into();
+                    (im.clone(), temp_affine.to_skia_matrix())
+                }).collect(),
             });
             ret.layers = layers;
 
@@ -177,6 +178,7 @@ pub struct Layer<PD: PointData> {
     pub outline: MFEKOutline<PD>,
     pub contour_ops: HashMap<usize, ContourOp>,
     pub operation: Option<LayerOperation>,
+    pub images: Vec<(GlifImage, SkMatrix)>,
 }
 
 #[derive(Clone, Debug)]
@@ -230,4 +232,15 @@ pub enum LayerOperation {
     Union,
     XOR,
     Intersect,
+}
+
+use super::GlifLike;
+
+impl<PD: PointData> GlifLike for MFEKGlif<PD> {
+    fn filename(&self) -> &Option<path::PathBuf> {
+        &self.filename
+    }
+    fn name(&self) -> &String {
+        &self.name
+    }
 }
