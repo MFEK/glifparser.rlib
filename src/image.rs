@@ -5,7 +5,7 @@ use std::rc::Rc;
 
 use crate::color::Color;
 use crate::error::GlifParserError;
-use crate::glif::Glif;
+use crate::glif::GlifLike;
 use crate::matrix::GlifMatrix;
 
 use integer_or_float::IntegerOrFloat;
@@ -30,6 +30,7 @@ pub enum DataLoadState {
 #[derive(Debug, Clone, PartialEq)]
 pub enum DataOrBitmap {
     Data(Vec<u8>),
+    /// `pixels` always RGBA8888
     Bitmap{pixels: Vec<u8>, width: u32, height: u32}
 }
 
@@ -137,9 +138,9 @@ impl GlifImage {
 
 use crate::point::PointData;
 impl GlifImage {
-    pub fn to_image_of<PD: PointData>(&self, glif: &Glif<PD>) -> Result<Image, GlifParserError> {
+    pub fn to_image_of(&self, glif: &dyn GlifLike) -> Result<Image, GlifParserError> {
         let mut ret = Image::new();
-        let mut filename = glif.filename.as_ref().ok_or(GlifParserError::GlifFilenameNotSet(glif.name.clone()))?.clone().parent().ok_or(GlifParserError::GlifFilenameInsane("Failed to parent".to_string()))?.to_path_buf();
+        let mut filename = glif.filename().as_ref().ok_or(GlifParserError::GlifFilenameNotSet(glif.name().clone()))?.clone().parent().ok_or(GlifParserError::GlifFilenameInsane("Failed to parent".to_string()))?.to_path_buf();
         filename.push("..");
         filename.push("images");
         filename.push(self.filename.clone());

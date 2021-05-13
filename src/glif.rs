@@ -100,6 +100,20 @@ impl<PD: PointData> Glif<PD> {
 
 }
 
+pub trait GlifLike {
+    fn name(&self) -> &String;
+    fn filename(&self) -> &Option<path::PathBuf>;
+}
+
+impl<PD: PointData> GlifLike for Glif<PD> {
+    fn name(&self) -> &String {
+        &self.name
+    }
+    fn filename(&self) -> &Option<path::PathBuf> {
+        &self.filename
+    }
+}
+
 pub fn name_to_filename(name: &str) -> String {
     let mut ret = String::new();
     let chars: Vec<char> = name.chars().collect();

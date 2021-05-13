@@ -2,9 +2,10 @@ use std::collections::HashSet;
 use std::path;
 
 use skia_safe as skia;
-use skia::{Path};
+use skia::{Matrix as SkMatrix, Path};
+use kurbo::Affine;
 
-use crate::{PointType, outline::skia::{SkiaPaths, SkiaPointTransforms, ToSkiaPath, ToSkiaPaths}, point::Point};
+use crate::{PointType, outline::skia::{SkiaPaths, SkiaPointTransforms, ToSkiaPath, ToSkiaPaths}, point::Point, image::GlifImage};
 
 use crate::{
     outline::OutlineType, point::PointData, Anchor, ComponentRect, Glif, component::GlifComponents, Guideline,
@@ -66,12 +67,17 @@ impl<PD: PointData> From<Glif<PD>> for MFEKGlif<PD> {
                 lib: glif.lib,
             };
 
+            use crate::matrix::skia::ToSkiaMatrix;
             layers.push(Layer {
                 name: "Layer 0".to_string(),
                 visible: true,
                 color: None,
                 outline: glif.outline.unwrap_or(Vec::new()).iter().map(|contour| contour.into() ).collect(),
                 operation: None,
+                images: glif.images.iter().map(|im| {
+                    let temp_affine: Affine = im.matrix().into();
+                    (im.clone(), temp_affine.to_skia_matrix())
+                }).collect(),
             });
             ret.layers = layers;
 
@@ -170,6 +176,7 @@ pub struct Layer<PD: PointData> {
     pub color: Option<[f32; 4]>,
     pub outline: MFEKOutline<PD>,
     pub operation: Option<LayerOperation>,
+    pub images: Vec<(GlifImage, SkMatrix)>,
 }
 
 #[derive(Clone, Debug)]
@@ -264,4 +271,15 @@ pub enum LayerOperation {
     Union,
     XOR,
     Intersect,
+}
+
+use super::GlifLike;
+
+impl<PD: PointData> GlifLike for MFEKGlif<PD> {
+    fn filename(&self) -> &Option<path::PathBuf> {
+        &self.filename
+    }
+    fn name(&self) -> &String {
+        &self.name
+    }
 }

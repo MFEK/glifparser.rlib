@@ -1,11 +1,11 @@
-#![feature(trait_alias)]
+#![feature(trait_alias, array_map)]
 
 pub mod error;
 
 mod anchor;
 mod codepoint; // Unicode codepoint formatter
 mod color; // glif RGBA color for guidelines etc
-mod matrix;
+pub mod matrix;
 mod component;
 pub mod glif;
 mod guideline;
