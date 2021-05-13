@@ -1,4 +1,4 @@
-use std::collections::{HashMap, HashSet};
+use std::collections::HashSet;
 use std::path;
 
 use skia_safe as skia;
@@ -73,7 +73,6 @@ impl<PD: PointData> From<Glif<PD>> for MFEKGlif<PD> {
                 visible: true,
                 color: None,
                 outline: glif.outline.unwrap_or(Vec::new()).iter().map(|contour| contour.into() ).collect(),
-                contour_ops: HashMap::new(),
                 operation: None,
                 images: glif.images.iter().map(|im| {
                     let temp_affine: Affine = im.matrix().into();
@@ -112,7 +111,7 @@ pub struct HistoryEntry<PD: PointData> {
 #[derive(Clone, Debug)]
 pub struct MFEKContour<PD: PointData> {
     pub inner: Vec<Point<PD>>,
-    pub operation: Option<ContourOp>,
+    pub operation: Option<ContourOperations>,
 }
 
 impl<PD: PointData> From<&Vec<Point<PD>>> for MFEKContour<PD> {
@@ -176,18 +175,58 @@ pub struct Layer<PD: PointData> {
     pub visible: bool,
     pub color: Option<[f32; 4]>,
     pub outline: MFEKOutline<PD>,
-    pub contour_ops: HashMap<usize, ContourOp>,
     pub operation: Option<LayerOperation>,
     pub images: Vec<(GlifImage, SkMatrix)>,
 }
 
 #[derive(Clone, Debug)]
-pub enum ContourOp {
-    VariableWidthStroke { contour: VWSContour },
+pub enum ContourOperations {
+    VariableWidthStroke { data: VWSContour },
+    PatternAlongPath { data: PAPContour }
 }
+
+#[derive(Debug, Clone)]
+pub enum PatternCopies {
+    Single,
+    Repeated,
+    Fixed(usize) // TODO: Implement
+}
+
+// pff - no splitting
+// simple - split each curve at it's midpoint
+// angle - split the input pattern each x degrees in change in direction on the path
+#[derive(Debug, Clone)]
+pub enum PatternSubdivide {
+    Off,
+    Simple(usize), // The value here is how many times we'll subdivide simply
+    //Angle(f64) TODO: Implement.
+}
+
+#[derive(Debug, Clone)]
+pub enum PatternHandleDiscontinuity {
+    Off, // no handling
+    Split(f64) 
+    // Cut TODO: implement
+}
+
+
+#[derive(Debug, Clone)]
+pub struct PAPContour {
+    pub pattern: MFEKOutline<MFEKPointData>,
+    pub copies: PatternCopies,
+    pub subdivide: PatternSubdivide,
+    pub is_vertical: bool, // TODO: Implement this. Might replace it with a general rotation parameter to make it more useful.
+    pub stretch: bool,
+    pub spacing: f64,
+    pub simplify: bool,
+    pub normal_offset: f64,
+    pub tangent_offset: f64,
+    pub pattern_scale: (f64, f64),
+    pub center_pattern: bool
+}
+
 #[derive(Debug, Clone)]
 pub struct VWSContour {
-    pub id: usize,
     pub handles: Vec<VWSHandle>,
     pub join_type: JoinType,
     pub cap_start_type: CapType,
