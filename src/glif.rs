@@ -19,6 +19,10 @@ pub use read::read_ufo_glif_from_filename as read_from_filename;
 pub use write::write_ufo_glif as write;
 pub use write::write_ufo_glif_to_filename as write_to_filename;
 
+use serde::{Deserialize, Deserializer, Serialize, Serializer, ser::SerializeStruct};
+use serde::ser::Error as SerdeError;
+use serde::de::Error as SerdeDeError;
+
 #[cfg(feature = "mfek")]
 pub use mfek::*;
 
@@ -54,9 +58,37 @@ pub struct Glif<PD: PointData> {
     /// parse plist from xmltree::Element. Might change some day to a ``plist::Dictionary``.
     pub lib: Option<xmltree::Element>,
     /// This is an XML structure that will be written into a comment in the .glif file.
-    pub private_lib: Option<xmltree::Element>,
+    pub private_lib: Option<String>,
     /// By default <MFEK>. Allows you to choose another root for your private lib.
     pub private_lib_root: &'static str
+}
+
+impl<PD: PointData> Serialize for Glif<PD> {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        // 3 is the number of fields in the struct.
+        let mut state = serializer.serialize_struct("Glif", 1)?;
+        let self_string = write(&self);
+        if self_string.is_err() { return Err(SerdeError::custom("Could not serialize glif!")) }
+        state.serialize_field("inner", &self_string.unwrap())?;
+        state.end()
+    }
+}
+
+
+impl<'de, PD: PointData> Deserialize<'de> for Glif<PD> {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        let s = String::deserialize(deserializer)?;
+        let loaded_glif = read(&s);
+        if loaded_glif.is_err() { return Err(SerdeDeError::custom("Could not deserialize glif!")) }
+
+        return Ok(loaded_glif.unwrap());
+    }
 }
 
 impl<PD: PointData> Glif<PD> {

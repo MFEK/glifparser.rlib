@@ -250,16 +250,7 @@ pub fn read_ufo_glif<PD: PointData>(glif: &str) -> Result<Glif<PD>, GlifParserEr
     // This will read the first XML comment understandable as itself containing XML.
     for child in &glif.children {
         if let xmltree::XMLNode::Comment(c) = child {
-            let tree = xmltree::Element::parse(c.as_bytes());
-            match tree {
-                Ok(plib) => {
-                    ret.private_lib = Some(plib);
-                    break
-                },
-                Err(_) => {
-                    warn!("Private dictionary found but unreadable");
-                }
-            }
+            ret.private_lib = Some(c.clone());
         }
     }
 

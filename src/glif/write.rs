@@ -186,10 +186,7 @@ pub fn write_ufo_glif<PD: PointData>(glif: &Glif<PD>) -> Result<String, GlifPars
 
     match &glif.private_lib {
         Some(lib_node) => {
-            let mut private_xml = Vec::new();
-            lib_node.write_with_config(&mut private_xml, config)?;
-            let private_xml = String::from_utf8(private_xml)?;
-            glyph.children.push(xmltree::XMLNode::Comment(private_xml));
+            glyph.children.push(xmltree::XMLNode::Comment(lib_node.clone()));
         },
         None => {}
     }

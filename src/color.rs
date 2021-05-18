@@ -1,8 +1,8 @@
 use integer_or_float::IntegerOrFloat;
 
 use crate::error::GlifParserError;
-
-#[derive(Debug, Copy, Clone, PartialEq)]
+use serde::{Serialize, Deserialize};
+#[derive(Debug, Copy, Clone, PartialEq, Serialize, Deserialize)]
 pub struct Color {
     pub r: IntegerOrFloat,
     pub g: IntegerOrFloat,

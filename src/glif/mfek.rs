@@ -4,6 +4,7 @@ use std::path;
 use skia_safe as skia;
 use skia::{Matrix as SkMatrix, Path};
 use kurbo::Affine;
+use serde::{Serialize, Deserialize};
 
 use crate::{PointType, outline::skia::{SkiaPaths, SkiaPointTransforms, ToSkiaPath, ToSkiaPaths}, point::Point, image::GlifImage};
 
@@ -12,12 +13,12 @@ use crate::{
     Outline,
 };
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct MFEKPointData;
 
 // This is an intermediary form used in MFEKglif and other tools. You can .into() a glif into this
 // make changes to MFEK data and then turn it back into a standard UFO glif before saving.
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct MFEKGlif<PD: PointData> {
     pub layers: Vec<Layer<PD>>,
     pub history: Vec<HistoryEntry<PD>>,
@@ -35,17 +36,12 @@ pub struct MFEKGlif<PD: PointData> {
     pub format: u8, // we only understand 2
     /// It's up to the API consumer to set this.
     pub filename: Option<path::PathBuf>,
-    /// We give you the <lib> as an XML Element. Note, however, that in the UFO spec it is a plist
-    /// dictionary. You're going to need to parse this with a plist parser, such as plist.rs. You
-    /// may want to tell xmltree to write it back to a string first; however, it may be possible to
-    /// parse plist from xmltree::Element. Might change some day to a ``plist::Dictionary``.
-    pub lib: Option<xmltree::Element>,
 }
 
-impl<PD: PointData> From<Glif<PD>> for MFEKGlif<PD> {
-    fn from(glif: Glif<PD>) -> Self {
-        if let Some(_mfek_lib) = glif.private_lib {
-            todo!("Actually load private lib.")
+impl From<Glif<MFEKPointData>> for MFEKGlif<MFEKPointData> {
+    fn from(glif: Glif<MFEKPointData>) -> Self {
+        if let Some(mfek_lib) = glif.private_lib {
+            return serde_json::from_str(mfek_lib.as_str()).unwrap();
         } else {
             let mut layers = Vec::new();
             let history = Vec::new();
@@ -64,7 +60,6 @@ impl<PD: PointData> From<Glif<PD>> for MFEKGlif<PD> {
                 name: glif.name,
                 format: glif.format,
                 filename: glif.filename,
-                lib: glif.lib,
             };
 
             use crate::matrix::skia::ToSkiaMatrix;
@@ -76,7 +71,7 @@ impl<PD: PointData> From<Glif<PD>> for MFEKGlif<PD> {
                 operation: None,
                 images: glif.images.iter().map(|im| {
                     let temp_affine: Affine = im.matrix().into();
-                    (im.clone(), temp_affine.to_skia_matrix())
+                    (im.clone(), temp_affine)
                 }).collect(),
             });
             ret.layers = layers;
@@ -86,7 +81,37 @@ impl<PD: PointData> From<Glif<PD>> for MFEKGlif<PD> {
     }
 }
 
-#[derive(Clone, Debug)]
+impl<PD: PointData> From<MFEKGlif<PD>> for Glif<PD> {
+    fn from(glif: MFEKGlif<PD>) -> Self {
+        let outline = glif.layers[0].outline.iter().map(|contour| 
+            contour.inner.clone()
+        ).collect();
+
+        let images = glif.layers[0].images.iter().map(|tupes| {
+            tupes.0.clone()
+        }).collect();
+
+        Glif {
+            order: glif.order,
+            anchors: glif.anchors.clone(),
+            components: glif.components.clone(),
+            guidelines: glif.guidelines.clone(),
+            width: glif.width,
+            unicode: glif.unicode.clone(),
+            name: glif.name.clone(),
+            format: glif.format,
+            filename: glif.filename.clone(),
+            outline: Some(outline),
+            images: images,
+            note: None,
+            lib: None,
+            private_lib: Some(serde_json::to_string(&glif).unwrap()),
+            private_lib_root: "MFEK",
+        }
+    }
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub enum HistoryType {
     LayerModified,
     LayerAdded,
@@ -97,7 +122,7 @@ pub enum HistoryType {
     }
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct HistoryEntry<PD: PointData> {
     pub description: String,
     pub layer_idx: Option<usize>,
@@ -108,7 +133,7 @@ pub struct HistoryEntry<PD: PointData> {
     pub kind: HistoryType,
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct MFEKContour<PD: PointData> {
     pub inner: Vec<Point<PD>>,
     pub operation: Option<ContourOperations>,
@@ -131,6 +156,7 @@ impl<PD: PointData> From<Vec<Point<PD>>> for MFEKContour<PD> {
         }
     }
 }
+
 
 pub type MFEKOutline<PD: PointData> = Vec<MFEKContour<PD>>;
 
@@ -169,23 +195,23 @@ impl<PD: PointData> ToSkiaPaths for MFEKOutline<PD> {
     }
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Layer<PD: PointData> {
     pub name: String,
     pub visible: bool,
     pub color: Option<[f32; 4]>,
     pub outline: MFEKOutline<PD>,
     pub operation: Option<LayerOperation>,
-    pub images: Vec<(GlifImage, SkMatrix)>,
+    pub images: Vec<(GlifImage, Affine)>,
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub enum ContourOperations {
     VariableWidthStroke { data: VWSContour },
     PatternAlongPath { data: PAPContour }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub enum PatternCopies {
     Single,
     Repeated,
@@ -195,14 +221,14 @@ pub enum PatternCopies {
 // pff - no splitting
 // simple - split each curve at it's midpoint
 // angle - split the input pattern each x degrees in change in direction on the path
-#[derive(Debug, Clone)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub enum PatternSubdivide {
     Off,
     Simple(usize), // The value here is how many times we'll subdivide simply
     //Angle(f64) TODO: Implement.
 }
 
-#[derive(Debug, Clone)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub enum PatternHandleDiscontinuity {
     Off, // no handling
     Split(f64) 
@@ -210,7 +236,7 @@ pub enum PatternHandleDiscontinuity {
 }
 
 
-#[derive(Debug, Clone)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct PAPContour {
     pub pattern: MFEKOutline<MFEKPointData>,
     pub copies: PatternCopies,
@@ -225,7 +251,7 @@ pub struct PAPContour {
     pub center_pattern: bool
 }
 
-#[derive(Debug, Clone)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct VWSContour {
     pub handles: Vec<VWSHandle>,
     pub join_type: JoinType,
@@ -235,13 +261,13 @@ pub struct VWSContour {
     pub remove_external: bool,
 }
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Clone, Copy, Debug, Serialize, Deserialize)]
 pub enum InterpolationType {
     Linear,
     Null,
 }
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Clone, Copy, Debug, Serialize, Deserialize)]
 pub struct VWSHandle {
     pub left_offset: f64,
     pub right_offset: f64,
@@ -249,7 +275,7 @@ pub struct VWSHandle {
     pub interpolation: InterpolationType,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
 pub enum JoinType {
     Bevel,
     Miter,
@@ -257,7 +283,7 @@ pub enum JoinType {
     Round,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
 pub enum CapType {
     Round,
     Square,
@@ -265,7 +291,7 @@ pub enum CapType {
     Custom,
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub enum LayerOperation {
     Difference,
     Union,

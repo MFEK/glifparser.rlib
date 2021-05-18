@@ -8,6 +8,7 @@ use crate::error::GlifParserError;
 use crate::glif::GlifLike;
 use crate::matrix::GlifMatrix;
 
+use serde::{Serialize, Deserialize};
 use integer_or_float::IntegerOrFloat;
 use kurbo::Affine;
 use log::warn;
@@ -76,7 +77,7 @@ impl ImageData {
 }
 
 #[allow(non_snake_case)] // to match UFO spec https://unifiedfontobject.org/versions/ufo3/glyphs/glif/#image
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct GlifImage {
     pub filename: path::PathBuf,
     pub xScale: IntegerOrFloat,
