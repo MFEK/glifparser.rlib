@@ -10,10 +10,12 @@ use integer_or_float::IntegerOrFloat;
 use kurbo::Affine;
 use trees::{Forest, Tree, Node};
 
+use serde::{Serialize, Deserialize};
+
 use std::path::{Path, PathBuf};
 
 #[allow(non_snake_case)] // to match UFO spec https://unifiedfontobject.org/versions/ufo3/glyphs/glif/#component
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct GlifComponent {
     pub base: String,
     pub filename: Option<PathBuf>,
@@ -26,7 +28,7 @@ pub struct GlifComponent {
     pub identifier: Option<String>
 }
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct GlifComponents {
     pub root: String,
     pub vec: Vec<GlifComponent>,
@@ -63,7 +65,7 @@ impl GlifComponent {
     }
 }
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct Component<PD: PointData> {
     pub glif: Glif<PD>,
     pub matrix: Affine
@@ -78,7 +80,7 @@ impl<PD: PointData> Component<PD> {
     }
 }
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct ComponentRect {
     pub minx: f32,
     pub miny: f32,

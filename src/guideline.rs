@@ -1,14 +1,14 @@
 use integer_or_float::IntegerOrFloat;
 
 use crate::color::Color;
-
-#[derive(Debug, Copy, Clone, PartialEq)]
+use serde::{Serialize, Deserialize};
+#[derive(Debug, Copy, Clone, PartialEq, Serialize, Deserialize)]
 pub struct GuidelinePoint {
     pub x: f32,
     pub y: f32
 }
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct Guideline {
     pub at: GuidelinePoint,
     pub angle: IntegerOrFloat,

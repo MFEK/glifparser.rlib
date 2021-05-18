@@ -1,6 +1,6 @@
 use std::fmt::Debug;
-
-#[derive(Clone, Debug, PartialEq)]
+use serde::{Serialize, Deserialize};
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct Anchor {
     pub x: f32,
     pub y: f32,
@@ -8,7 +8,7 @@ pub struct Anchor {
     pub r#type: AnchorType,
 }
 
-#[derive(Debug, Copy, Clone, PartialEq)]
+#[derive(Debug, Copy, Clone, PartialEq, Serialize, Deserialize)]
 pub enum AnchorType {
     Undefined,
     Mark,

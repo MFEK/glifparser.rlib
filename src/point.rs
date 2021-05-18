@@ -1,5 +1,5 @@
 use std::fmt::Debug;
-
+use serde::{Serialize, Deserialize};
 /// A "close to the source" .glif `<point>`
 #[derive(Clone, Debug, PartialEq)]
 pub struct GlifPoint {
@@ -22,7 +22,7 @@ impl GlifPoint {
     }
 }
 
-#[derive(Debug, Copy, Clone, PartialEq)]
+#[derive(Debug, Copy, Clone, PartialEq, Serialize, Deserialize)]
 pub enum PointType {
     Undefined,
     Move,
@@ -34,7 +34,7 @@ pub enum PointType {
 } // Undefined used by new(), shouldn't appear in Point<PointData> structs
 
 /// A handle on a point
-#[derive(Debug, Copy, Clone, PartialEq)]
+#[derive(Debug, Copy, Clone, PartialEq, Serialize, Deserialize)]
 pub enum Handle {
     Colocated,
     At(f32, f32),
@@ -54,10 +54,10 @@ impl From<Option<&GlifPoint>> for Handle {
 /// API consumers may put any clonable type as an associated type to Glif, which will appear along
 /// with each Point. You could use this to implement, e.g., hyperbeziers. The Glif Point's would
 /// still represent a Bézier curve, but you could put hyperbezier info along with the Point.
-pub trait PointData = Clone + Debug;
+pub trait PointData = Clone + Debug + Serialize;
 
 /// A Skia-friendly point
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct Point<PD> {
     pub x: f32,
     pub y: f32,
@@ -69,7 +69,7 @@ pub struct Point<PD> {
 }
 
 /// For use by ``Point::handle_or_colocated``
-#[derive(Debug, Copy, Clone, PartialEq)]
+#[derive(Debug, Copy, Clone, PartialEq, Serialize, Deserialize)]
 pub enum WhichHandle {
     Neither,
     A,
