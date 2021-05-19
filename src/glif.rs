@@ -113,7 +113,7 @@ impl<PD: PointData> Glif<PD> {
     }
 
     pub fn name_to_filename(&self) -> String {
-        name_to_filename(&self.name)
+        name_to_filename(&self.name, true)
     }
 
     pub fn filename_is_sane(&self) -> Result<bool, GlifParserError> {
@@ -146,7 +146,7 @@ impl<PD: PointData> GlifLike for Glif<PD> {
     }
 }
 
-pub fn name_to_filename(name: &str) -> String {
+pub fn name_to_filename(name: &str, append_extension: bool) -> String {
     let mut ret = String::new();
     let chars: Vec<char> = name.chars().collect();
     for c in chars {
@@ -155,6 +155,8 @@ pub fn name_to_filename(name: &str) -> String {
             ret.push('_');
         }
     }
-    ret.push_str(".glif");
+    if append_extension {
+        ret.push_str(".glif");
+    }
     ret
 }
