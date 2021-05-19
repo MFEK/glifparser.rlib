@@ -10,8 +10,16 @@ pub struct Color {
     pub a: IntegerOrFloat
 }
 
+impl Color {
+    pub fn from_rgba(r: IntegerOrFloat, g: IntegerOrFloat, b: IntegerOrFloat, a: IntegerOrFloat) -> Color {
+        Color { r, g, b, a }
+    }
+}
+
 use std::str::FromStr;
 use std::convert::TryFrom;
+
+/// This follows the UFO spec, e.g. `"0,0,1,1"` → blue at 100% opacity
 impl FromStr for Color {
     type Err = GlifParserError;
 
@@ -32,9 +40,21 @@ impl FromStr for Color {
     }
 }
 
-// This follows the UFO spec, not other specs that would say to do e.g. rgba(1,1,1,1)
+/// This follows the UFO spec, not other specs that would say to do e.g. rgba(1,1,1,1)
 impl ToString for Color {
     fn to_string(&self) -> String {
         format!("{},{},{},{}", self.r.to_string(), self.g.to_string(), self.b.to_string(), self.a.to_string())
+    }
+}
+
+impl Into<[f32; 4]> for Color {
+    fn into(self) -> [f32; 4] {
+        [self.r.into(), self.g.into(), self.b.into(), self.a.into()]
+    }
+}
+
+impl From<[f32; 4]> for Color {
+    fn from(c: [f32; 4]) -> Self {
+        Color::from_rgba(c[0].into(), c[1].into(), c[2].into(), c[3].into())
     }
 }

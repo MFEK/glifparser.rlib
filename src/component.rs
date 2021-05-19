@@ -99,7 +99,7 @@ use std::fs;
 impl GlifComponent {
     pub fn set_file_name<F: AsRef<Path>>(&mut self, gliffn: F) {
         let mut retglifname = gliffn.as_ref().to_path_buf();
-        retglifname.set_file_name(glif::name_to_filename(&self.base));
+        retglifname.set_file_name(glif::name_to_filename(&self.base, true));
         self.filename = Some(retglifname);
     }
 

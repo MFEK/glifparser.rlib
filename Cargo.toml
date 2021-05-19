@@ -14,6 +14,7 @@ image = { version = "0.23", features = ["png"], default-features = false }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"# Our submodules
 integer_or_float = { git = "https://github.com/MFEK/integer_or_float.rlib", branch = "main" }
+plist = "1"
 
 [dev-dependencies]
 env_logger = "0.8"

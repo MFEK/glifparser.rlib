@@ -135,6 +135,16 @@ impl GlifImage {
     pub fn matrix(&self) -> GlifMatrix {
         GlifMatrix(self.xScale, self.xyScale, self.yxScale, self.yScale, self.xOffset, self.yOffset)
     }
+
+    pub fn set_matrix(&mut self, matrix: impl Into<Affine>) {
+        let coeffs = matrix.into().as_coeffs();
+        self.xScale = coeffs[0].into();
+        self.xyScale = coeffs[1].into();
+        self.yxScale = coeffs[2].into();
+        self.yScale = coeffs[3].into();
+        self.xOffset = coeffs[4].into();
+        self.yOffset = coeffs[5].into();
+    }
 }
 
 use crate::point::PointData;

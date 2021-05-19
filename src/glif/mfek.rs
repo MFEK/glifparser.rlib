@@ -13,6 +13,10 @@ use crate::{
     Outline,
 };
 
+#[macro_use] pub mod layer;
+pub use layer::Layer;
+pub(crate) use DEFAULT_LAYER_FORMAT_STR;
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct MFEKPointData;
 
@@ -68,7 +72,9 @@ impl From<Glif<MFEKPointData>> for MFEKGlif<MFEKPointData> {
 
             use crate::matrix::skia::ToSkiaMatrix;
             layers.push(Layer {
-                name: "Layer 0".to_string(),
+                // Warning: due to Rust language limitations, the const
+                // `layer::DEFAULT_LAYER_FORMAT_STR` is not usable here. Thus, the macro.
+                name: format!(DEFAULT_LAYER_FORMAT_STR!(), 0),
                 visible: true,
                 color: None,
                 outline: glif.outline.unwrap_or(Vec::new()).iter().map(|contour| contour.into() ).collect(),
@@ -197,16 +203,6 @@ impl<PD: PointData> ToSkiaPaths for MFEKOutline<PD> {
 
         ret
     }
-}
-
-#[derive(Clone, Debug, Serialize, Deserialize)]
-pub struct Layer<PD: PointData> {
-    pub name: String,
-    pub visible: bool,
-    pub color: Option<[f32; 4]>,
-    pub outline: MFEKOutline<PD>,
-    pub operation: Option<LayerOperation>,
-    pub images: Vec<(GlifImage, Affine)>,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
