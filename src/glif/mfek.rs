@@ -41,7 +41,11 @@ pub struct MFEKGlif<PD: PointData> {
 impl From<Glif<MFEKPointData>> for MFEKGlif<MFEKPointData> {
     fn from(glif: Glif<MFEKPointData>) -> Self {
         if let Some(mfek_lib) = glif.private_lib {
-            return serde_json::from_str(mfek_lib.as_str()).unwrap();
+            let mut ret: MFEKGlif<MFEKPointData> = serde_json::from_str(mfek_lib.as_str()).unwrap();
+            ret.filename = glif.filename;
+            ret.flattened = None;
+            ret.component_rects = None;
+            return ret;
         } else {
             let mut layers = Vec::new();
             let history = Vec::new();
