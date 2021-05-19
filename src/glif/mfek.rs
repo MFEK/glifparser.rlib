@@ -109,7 +109,7 @@ impl<PD: PointData> From<MFEKGlif<PD>> for Glif<PD> {
             images: images,
             note: None,
             lib: None,
-            private_lib: Some(serde_json::to_string(&glif).unwrap()),
+            private_lib: Some(serde_json::to_string_pretty(&glif).unwrap()),
             private_lib_root: "MFEK",
         }
     }
