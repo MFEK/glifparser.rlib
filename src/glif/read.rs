@@ -3,9 +3,10 @@ use std::path;
 use std::rc::Rc;
 
 use integer_or_float::IntegerOrFloat;
+use serde_json;
 
 use super::Glif;
-use crate::error::{GlifParserError::{self, GlifInputError}};
+use crate::error::GlifParserError::{self, GlifInputError};
 use crate::component::GlifComponent;
 use crate::guideline::Guideline;
 use crate::outline::{self, get_outline_type, GlifContour, GlifOutline, OutlineType};
@@ -245,10 +246,19 @@ pub fn read_ufo_glif<PD: PointData>(glif: &str) -> Result<Glif<PD>, GlifParserEr
         ret.lib = Some(lib);
     }
 
-    // This will read the first XML comment understandable as itself containing XML.
+    // This will read the first XML comment understandable as containing JSON.
     for child in &glif.children {
         if let xmltree::XMLNode::Comment(c) = child {
-            ret.private_lib = Some(c.clone());
+            // This just checks if it's deserializable at all. serde_json::Value can contain any
+            // JSON structure. The deserialization for real will happen in either mfek.rs or your
+            // own hook into this, and the type being deserialized to will be changed to match.
+            if !c.trim().starts_with(ret.private_lib_root) { log::warn!("Skipped comment not marked {}", ret.private_lib_root); continue }
+            let comment_slice = &(c.trim()[ret.private_lib_root.len()..]);
+            let de: Result<serde_json::Value, _> = serde_json::from_str(comment_slice);
+            match de {
+                Ok(_) => ret.private_lib = Some(comment_slice.to_string()),
+                Err(e) => log::warn!("Skipped comment in input glif ({}) that was invalid JSON due to {:?}", &c, e)
+            }
         }
     }
 

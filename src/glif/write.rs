@@ -197,8 +197,10 @@ pub fn write_ufo_glif<PD: PointData>(glif: &Glif<PD>) -> Result<String, GlifPars
     }
 
     match &glif.private_lib {
-        Some(lib_node) => {
-            glyph.children.push(xmltree::XMLNode::Comment(lib_node.clone()));
+        Some(json) => {
+            let mut mfek_json = glif.private_lib_root.to_string();
+            mfek_json.push_str(&json);
+            glyph.children.push(xmltree::XMLNode::Comment(mfek_json));
         },
         None => {}
     }

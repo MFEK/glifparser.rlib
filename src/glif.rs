@@ -59,6 +59,9 @@ pub struct Glif<PD: PointData> {
     pub lib: Option<xmltree::Element>,
     /// This is a JSON structure that will be written into a comment in the .glif file.
     pub private_lib: Option<String>,
+    /// This string helps prevent us from reading comments not intended for us into our
+    /// private_lib.
+    pub private_lib_root: &'static str,
 }
 
 impl<PD: PointData> Serialize for Glif<PD> {
@@ -106,6 +109,7 @@ impl<PD: PointData> Glif<PD> {
             filename: None,
             lib: None,
             private_lib: None,
+            private_lib_root: "!!MFEK!!",
         }
     }
 

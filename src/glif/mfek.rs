@@ -37,6 +37,8 @@ pub struct MFEKGlif<PD: PointData> {
     pub width: Option<u64>,
     pub unicode: Vec<char>,
     pub name: String,
+    /// This is an arbitrary glyph comment, exactly like the comment field in FontForge SFD.
+    pub note: Option<String>,
     pub format: u8, // we only understand 2
     /// It's up to the API consumer to set this.
     pub filename: Option<path::PathBuf>,
@@ -45,6 +47,7 @@ pub struct MFEKGlif<PD: PointData> {
 impl From<Glif<MFEKPointData>> for MFEKGlif<MFEKPointData> {
     fn from(glif: Glif<MFEKPointData>) -> Self {
         if let Some(mfek_lib) = glif.private_lib {
+            // This unwrap is safe as we check JSON validity in src/glif/read.rs
             let mut ret: MFEKGlif<MFEKPointData> = serde_json::from_str(mfek_lib.as_str()).unwrap();
             ret.filename = glif.filename;
             ret.flattened = None;
@@ -56,7 +59,7 @@ impl From<Glif<MFEKPointData>> for MFEKGlif<MFEKPointData> {
 
             let mut ret = MFEKGlif {
                 layers: vec![],
-                history: history,
+                history,
                 flattened: None,
                 component_rects: None,
                 order: glif.order,
@@ -66,6 +69,7 @@ impl From<Glif<MFEKPointData>> for MFEKGlif<MFEKPointData> {
                 width: glif.width,
                 unicode: glif.unicode,
                 name: glif.name,
+                note: glif.note,
                 format: glif.format,
                 filename: glif.filename,
             };
@@ -112,10 +116,10 @@ impl<PD: PointData> From<MFEKGlif<PD>> for Glif<PD> {
             format: glif.format,
             filename: glif.filename.clone(),
             outline: Some(outline),
-            images: images,
-            note: None,
-            lib: None,
+            images,
+            note: glif.note.clone(),
             private_lib: Some(serde_json::to_string_pretty(&glif).unwrap()),
+            ..Glif::default()
         }
     }
 }
