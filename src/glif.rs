@@ -57,10 +57,8 @@ pub struct Glif<PD: PointData> {
     /// may want to tell xmltree to write it back to a string first; however, it may be possible to
     /// parse plist from xmltree::Element. Might change some day to a ``plist::Dictionary``.
     pub lib: Option<xmltree::Element>,
-    /// This is an XML structure that will be written into a comment in the .glif file.
+    /// This is a JSON structure that will be written into a comment in the .glif file.
     pub private_lib: Option<String>,
-    /// By default <MFEK>. Allows you to choose another root for your private lib.
-    pub private_lib_root: &'static str
 }
 
 impl<PD: PointData> Serialize for Glif<PD> {
@@ -108,7 +106,6 @@ impl<PD: PointData> Glif<PD> {
             filename: None,
             lib: None,
             private_lib: None,
-            private_lib_root: "MFEK"
         }
     }
 

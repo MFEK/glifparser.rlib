@@ -197,8 +197,6 @@ pub fn write_ufo_glif<PD: PointData>(glif: &Glif<PD>) -> Result<String, GlifPars
         None => {}
     }
 
-    let config = xmltree::EmitterConfig::new().perform_indent(false).write_document_declaration(false);
-
     match &glif.private_lib {
         Some(lib_node) => {
             glyph.children.push(xmltree::XMLNode::Comment(lib_node.clone()));

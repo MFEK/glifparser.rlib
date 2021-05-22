@@ -4,8 +4,6 @@ use std::rc::Rc;
 
 use integer_or_float::IntegerOrFloat;
 
-use log::warn;
-
 use super::Glif;
 use crate::error::{GlifParserError::{self, GlifInputError}};
 use crate::component::GlifComponent;

@@ -3,9 +3,9 @@ use serde::Deserialize;
 use kurbo::Affine;
 use plist;
 
-use super::{MFEKOutline, MFEKContour, LayerOperation};
+use super::{MFEKOutline, LayerOperation};
 use crate::color::Color;
-use crate::glif::{Glif, name_to_filename};
+use crate::glif::name_to_filename;
 use crate::image::GlifImage;
 use crate::point::PointData;
 
@@ -90,7 +90,7 @@ impl<PD: PointData> ToLayerContentsPlist for &[Layer<PD>] {
     }
     fn merge_layercontents_plists(&self, other: Self::Output) -> Self::Output {
         let our_lc = self.to_layercontents_plist();
-        let mut inner_ours: Vec<plist::Value> = our_lc.into_array().unwrap(); // Safe. Cf. to_layercontents_plist return type
+        let inner_ours: Vec<plist::Value> = our_lc.into_array().unwrap(); // Safe. Cf. to_layercontents_plist return type
         let mut inner_theirs: Vec<plist::Value> = other.into_array().unwrap();
         for l in inner_ours.iter() {
             if !inner_theirs.contains(&l) {

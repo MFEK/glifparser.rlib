@@ -2,11 +2,11 @@ use std::collections::HashSet;
 use std::path;
 
 use skia_safe as skia;
-use skia::{Matrix as SkMatrix, Path};
+use skia::Path;
 use kurbo::Affine;
 use serde::{Serialize, Deserialize};
 
-use crate::{PointType, outline::skia::{SkiaPaths, SkiaPointTransforms, ToSkiaPath, ToSkiaPaths}, point::Point, image::GlifImage};
+use crate::{PointType, outline::skia::{SkiaPaths, SkiaPointTransforms, ToSkiaPath, ToSkiaPaths}, point::Point};
 
 use crate::{
     outline::OutlineType, point::PointData, Anchor, ComponentRect, Glif, component::GlifComponents, Guideline,
@@ -70,7 +70,7 @@ impl From<Glif<MFEKPointData>> for MFEKGlif<MFEKPointData> {
                 filename: glif.filename,
             };
 
-            use crate::matrix::skia::ToSkiaMatrix;
+
             layers.push(Layer {
                 // Warning: due to Rust language limitations, the const
                 // `layer::DEFAULT_LAYER_FORMAT_STR` is not usable here. Thus, the macro.
@@ -116,7 +116,6 @@ impl<PD: PointData> From<MFEKGlif<PD>> for Glif<PD> {
             note: None,
             lib: None,
             private_lib: Some(serde_json::to_string_pretty(&glif).unwrap()),
-            private_lib_root: "MFEK",
         }
     }
 }
@@ -168,7 +167,7 @@ impl<PD: PointData> From<Vec<Point<PD>>> for MFEKContour<PD> {
 }
 
 
-pub type MFEKOutline<PD: PointData> = Vec<MFEKContour<PD>>;
+pub type MFEKOutline<PD> = Vec<MFEKContour<PD>>;
 
 impl<PD: PointData> ToSkiaPaths for MFEKOutline<PD> {
     fn to_skia_paths(&self, spt: Option<SkiaPointTransforms>) -> SkiaPaths {
