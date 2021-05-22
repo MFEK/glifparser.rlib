@@ -140,6 +140,8 @@ impl<PD: Debug> FromSkiaPath<PD> for Outline<PD> {
 
                 if i != 0 {
                     prev_points = &skc[i-1];
+                } else {
+                    prev_points = &skc[skc_len - 1];
                 }
 
                 let mut point = Point::<PD> {
@@ -156,12 +158,11 @@ impl<PD: Debug> FromSkiaPath<PD> for Outline<PD> {
                 match ptype {
                     PointType::Move => {},
                     PointType::Curve => {
-                        if i != 0 {
-                            point.a = Handle::At(points[1].x, points[1].y);
-                            if prev_points.0 == PointType::Curve {
-                                point.b = Handle::At(prev_points.1[2].x, prev_points.1[2].y);
-                            }
+                        point.a = Handle::At(points[1].x, points[1].y);
+                        if prev_points.0 == PointType::Curve {
+                            point.b = Handle::At(prev_points.1[2].x, prev_points.1[2].y);
                         }
+
                         if i == skc_len-1 {
                             if first_points.0 == PointType::Curve {
                                 contour[0].a = Handle::At(first_points.1[1].x, first_points.1[1].y);

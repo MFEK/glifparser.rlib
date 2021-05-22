@@ -83,14 +83,13 @@ pub fn write_ufo_glif<PD: PointData>(glif: &Glif<PD>) -> Result<String, GlifPars
                 let mut contour_node = xmltree::Element::new("contour");
                 
                 let mut last_point = None;
+                // a is next, b is prev
                 for (i, point) in contour.iter().enumerate() {
                     let mut point = point.clone();
                     if let Some(_lp) = last_point {
                         // if there was a point prior to this one we emit our b handle
                         if let Some(handle_node) = build_ufo_point_from_handle(point.b) {
                             contour_node.children.push(xmltree::XMLNode::Element(handle_node));
-                            // Our point is Curve if we wrote a b (fixup)
-                            point.ptype = PointType::Curve;
                         }
                     }
                     
@@ -98,7 +97,7 @@ pub fn write_ufo_glif<PD: PointData>(glif: &Glif<PD>) -> Result<String, GlifPars
                     // case it already isn't). (fixup)
                     if i == 0 {
                         contour.last().map(|p| {
-                            if p.b != Handle::Colocated {
+                            if p.a != Handle::Colocated {
                                 point.ptype = PointType::Curve;
                             } else {
                                 point.ptype = PointType::Line;
