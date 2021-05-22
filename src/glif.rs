@@ -129,6 +129,12 @@ impl<PD: PointData> Glif<PD> {
 
 }
 
+impl<PD: PointData> Default for Glif<PD> {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 pub trait GlifLike {
     fn name(&self) -> &String;
     fn filename(&self) -> &Option<path::PathBuf>;
