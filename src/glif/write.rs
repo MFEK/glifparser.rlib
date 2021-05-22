@@ -83,29 +83,44 @@ pub fn write_ufo_glif<PD: PointData>(glif: &Glif<PD>) -> Result<String, GlifPars
                 let mut contour_node = xmltree::Element::new("contour");
                 
                 let mut last_point = None;
-                for point in contour {
+                for (i, point) in contour.iter().enumerate() {
+                    let mut point = point.clone();
                     if let Some(_lp) = last_point {
                         // if there was a point prior to this one we emit our b handle
                         if let Some(handle_node) = build_ufo_point_from_handle(point.b) {
                             contour_node.children.push(xmltree::XMLNode::Element(handle_node));
+                            // Our point is Curve if we wrote a b (fixup)
+                            point.ptype = PointType::Curve;
                         }
+                    }
+                    
+                    // If the last point has a handle, the first point should be made a Curve (in
+                    // case it already isn't). (fixup)
+                    if i == 0 {
+                        contour.last().map(|p| {
+                            if p.b != Handle::Colocated {
+                                point.ptype = PointType::Curve;
+                            } else {
+                                point.ptype = PointType::Line;
+                            }
+                        });
                     }
 
                     let mut point_node = xmltree::Element::new("point");
-                        point_node.attributes.insert("x".to_owned(), point.x.to_string());
-                        point_node.attributes.insert("y".to_owned(), point.y.to_string());
+                    point_node.attributes.insert("x".to_owned(), point.x.to_string());
+                    point_node.attributes.insert("y".to_owned(), point.y.to_string());
+            
+                    match point_type_to_string(point.ptype) {
+                        Some(ptype_string) => {point_node.attributes.insert("type".to_owned(), ptype_string);},
+                        None => {}
+                    }
+            
+                    match &point.name {
+                        Some(name) => {point_node.attributes.insert("name".to_owned(), name.to_string());},
+                        None => {}
+                    }
                 
-                        match point_type_to_string(point.ptype) {
-                            Some(ptype_string) => {point_node.attributes.insert("type".to_owned(), ptype_string);},
-                            None => {}
-                        }
-                
-                        match &point.name {
-                            Some(name) => {point_node.attributes.insert("name".to_owned(), name.to_string());},
-                            None => {}
-                        }
-                
-                        // Point>T> does not contain fields for smooth, or identifier.
+                    // Point<T> does not contain fields for smooth, or identifier.
                     contour_node.children.push(xmltree::XMLNode::Element(point_node));
                     match point.ptype {
                         PointType::Line | PointType::Curve | PointType::Move => {
@@ -114,9 +129,9 @@ pub fn write_ufo_glif<PD: PointData>(glif: &Glif<PD>) -> Result<String, GlifPars
                             }                        
                         },
                         PointType::QCurve => {
-                            //QCurve currently unhandled. This needs to be implemented.
+                            unimplemented!()
                         },
-                        _ => { } // I don't think this should be reachable in a well formed Glif object?
+                        _ => { unreachable!() }
                     }    
                     
                     last_point = Some(point);
