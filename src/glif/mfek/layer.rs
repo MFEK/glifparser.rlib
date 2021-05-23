@@ -34,29 +34,27 @@ impl<PD: PointData> Layer<PD> {
 
 /// Create UFO(3) specification layer layerinfo.plist's for our glyph.
 pub trait ToLayerInfoPlist {
-    type Output = plist::Value;
     /// # Safety
     ///
     /// plist::Value guaranteed to be of variant plist::Dictionary
-    fn to_layerinfo_plist(&self) -> Option<Self::Output>;
+    fn to_layerinfo_plist(&self) -> Option<plist::Value>;
 }
 
 /// Create UFO(3) specification layer layercontents.plist's for our glyph.
 pub trait ToLayerContentsPlist {
-    type Output = plist::Value;
     /// # Safety
     ///
     /// plist::Value guaranteed to be of variant plist::Array
-    fn to_layercontents_plist(&self) -> Self::Output;
+    fn to_layercontents_plist(&self) -> plist::Value;
 
     /// # Safety
     ///
     /// plist::Value guaranteed to be of variant plist::Array
-    fn merge_layercontents_plists(&self, other: Self::Output) -> Self::Output;
+    fn merge_layercontents_plists(&self, other: plist::Value) -> plist::Value;
 }
 
 impl<PD: PointData> ToLayerInfoPlist for Layer<PD> {
-    fn to_layerinfo_plist(&self) -> Option<Self::Output> {
+    fn to_layerinfo_plist(&self) -> Option<plist::Value> {
         let color = if let Some(color) = self.color {
             color
         } else {
@@ -72,7 +70,7 @@ impl<PD: PointData> ToLayerInfoPlist for Layer<PD> {
 }
 
 impl<PD: PointData> ToLayerContentsPlist for &[Layer<PD>] {
-    fn to_layercontents_plist(&self) -> Self::Output {
+    fn to_layercontents_plist(&self) -> plist::Value {
         let mut ret: Vec<plist::Value> = Vec::new();
 
         for (i, layer) in self.iter().enumerate() {
@@ -88,7 +86,7 @@ impl<PD: PointData> ToLayerContentsPlist for &[Layer<PD>] {
 
         plist::Value::Array(ret)
     }
-    fn merge_layercontents_plists(&self, other: Self::Output) -> Self::Output {
+    fn merge_layercontents_plists(&self, other: plist::Value) -> plist::Value {
         let our_lc = self.to_layercontents_plist();
         let inner_ours: Vec<plist::Value> = our_lc.into_array().unwrap(); // Safe. Cf. to_layercontents_plist return type
         let mut inner_theirs: Vec<plist::Value> = other.into_array().unwrap();

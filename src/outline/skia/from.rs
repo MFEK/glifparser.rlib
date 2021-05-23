@@ -133,7 +133,7 @@ impl<PD: Debug> FromSkiaPath<PD> for Outline<PD> {
         for skc in final_skoutline.iter_mut() {
             let mut contour: Contour<PD> = Contour::new();
             let first_points: &SkPointTuple = &skc[0];
-            let mut prev_points: &SkPointTuple = &skc[0];
+            let mut prev_points;
             let skc_len = skc.len();
             for (i, skp) in skc.iter().enumerate() {
                 let (ptype, points, _) = skp;
