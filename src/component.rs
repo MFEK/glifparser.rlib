@@ -111,7 +111,7 @@ impl GlifComponent {
         ret.matrix = self.matrix().into();
         ret.glif.name = self.base.clone();
         ret.glif.filename = self.filename.clone();
-        let component_xml = fs::read_to_string(&gliffn).unwrap();
+        let component_xml = fs::read_to_string(&gliffn).or(Err(GlifParserError::GlifFilenameNotSet("Glif filename leads to unreadable file".to_string())))?;
         let mut newglif: Glif<PD> = glif::read(&component_xml)?;
         for component in newglif.components.vec.iter_mut() {
             component.set_file_name(&gliffn);
