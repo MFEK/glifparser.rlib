@@ -128,10 +128,14 @@ impl<PD: PointData> From<MFEKGlif<PD>> for Glif<PD> {
 pub enum HistoryType {
     LayerModified,
     LayerAdded,
-    LayerDeleted,
+    LayerDeleted
+    {
+        layer_operation: Option<LayerOperation>
+    },
     LayerMoved{
         to: usize,
         from: usize,
+        layer_operation: Option<LayerOperation>
     }
 }
 
