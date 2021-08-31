@@ -242,6 +242,12 @@ pub enum PatternHandleDiscontinuity {
     // Cut TODO: implement
 }
 
+#[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq)]
+pub enum PatternStretch {
+    Off, // no stretching
+    On, // stretch the pattern
+    Spacing, // stretch the spacing between the pattern
+}
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct PAPContour {
@@ -249,7 +255,7 @@ pub struct PAPContour {
     pub copies: PatternCopies,
     pub subdivide: PatternSubdivide,
     pub is_vertical: bool, // TODO: Implement this. Might replace it with a general rotation parameter to make it more useful.
-    pub stretch: bool,
+    pub stretch: PatternStretch,
     pub spacing: f64,
     pub simplify: bool,
     pub normal_offset: f64,
