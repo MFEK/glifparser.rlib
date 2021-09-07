@@ -261,7 +261,9 @@ pub struct PAPContour {
     pub normal_offset: f64,
     pub tangent_offset: f64,
     pub pattern_scale: (f64, f64),
-    pub center_pattern: bool
+    pub center_pattern: bool,
+    pub prevent_overdraw: f64,
+    pub two_pass_culling: bool,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
