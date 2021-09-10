@@ -264,6 +264,8 @@ pub struct PAPContour {
     pub center_pattern: bool,
     pub prevent_overdraw: f64,
     pub two_pass_culling: bool,
+    pub reverse_path: bool,
+    pub reverse_culling: bool,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
