@@ -25,7 +25,7 @@ pub struct MFEKPointData;
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct MFEKGlif<PD: PointData> {
     pub layers: Vec<Layer<PD>>,
-    pub history: Vec<HistoryEntry<PD>>,
+    pub history: Vec<HistoryEntry>,
     pub order: OutlineType,
     pub anchors: Vec<Anchor>,
     /// Note that these components are not yet parsed or checked for infinite loops. You need to
@@ -125,29 +125,13 @@ impl<PD: PointData> From<MFEKGlif<PD>> for Glif<PD> {
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
-pub enum HistoryType {
-    LayerModified,
-    LayerAdded,
-    LayerDeleted
-    {
-        layer_operation: Option<LayerOperation>
-    },
-    LayerMoved{
-        to: usize,
-        from: usize,
-        layer_operation: Option<LayerOperation>
-    }
-}
-
-#[derive(Clone, Debug, Serialize, Deserialize)]
-pub struct HistoryEntry<PD: PointData> {
+pub struct HistoryEntry {
     pub description: String,
     pub layer_idx: Option<usize>,
     pub contour_idx: Option<usize>,
     pub point_idx: Option<usize>,
     pub selected: Option<HashSet<(usize, usize)>>,
-    pub layer: Layer<PD>,
-    pub kind: HistoryType,
+    pub glyph: MFEKGlif<MFEKPointData>,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
