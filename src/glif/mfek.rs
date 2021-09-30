@@ -252,7 +252,7 @@ pub struct PAPContour {
     pub reverse_culling: bool,
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
 pub struct VWSContour {
     pub handles: Vec<VWSHandle>,
     pub join_type: JoinType,
@@ -262,13 +262,13 @@ pub struct VWSContour {
     pub remove_external: bool,
 }
 
-#[derive(Clone, Copy, Debug, Serialize, Deserialize)]
+#[derive(Clone, Copy, Debug, Serialize, Deserialize, PartialEq)]
 pub enum InterpolationType {
     Linear,
     Null,
 }
 
-#[derive(Clone, Copy, Debug, Serialize, Deserialize)]
+#[derive(Clone, Copy, Debug, Serialize, Deserialize, PartialEq)]
 pub struct VWSHandle {
     pub left_offset: f64,
     pub right_offset: f64,
