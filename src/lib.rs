@@ -1,4 +1,4 @@
-#![feature(trait_alias, array_map)]
+#![feature(trait_alias)]
 
 pub mod error;
 
@@ -19,7 +19,7 @@ pub use crate::color::Color;
 pub use crate::component::{FlattenedGlif, GlifComponent, Component, ComponentRect};
 pub use crate::glif::{Glif, read, read_from_filename, write, write_to_filename};
 #[cfg(feature = "mfek")]
-pub use crate::glif::mfek::{MFEKGlif, VWSContour, JoinType, CapType};
+pub use crate::glif::mfek::{MFEKGlif, VWSContour, VWSHandle, JoinType, CapType};
 pub use crate::guideline::{Guideline, GuidelinePoint};
 pub use crate::image::{GlifImage, Image, ImageCodec};
 pub use crate::outline::{Contour, Outline, OutlineType};
