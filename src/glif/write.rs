@@ -80,6 +80,7 @@ pub fn write_ufo_glif<PD: PointData>(glif: &Glif<PD>) -> Result<String, GlifPars
             for contour in outline {
                 // if we find a move point at the start of things we set this to false
                 let open_contour = contour.first().unwrap().ptype == PointType::Move;
+                println!("{:?}", open_contour);
                 let mut contour_node = xmltree::Element::new("contour");
                 
                 let mut last_point = None;
@@ -95,7 +96,7 @@ pub fn write_ufo_glif<PD: PointData>(glif: &Glif<PD>) -> Result<String, GlifPars
                     
                     // If the last point has a handle, the first point should be made a Curve (in
                     // case it already isn't). (fixup)
-                    if i == 0 {
+                    if i == 0 && !open_contour {
                         contour.last().map(|p| {
                             if p.a != Handle::Colocated {
                                 point.ptype = PointType::Curve;
