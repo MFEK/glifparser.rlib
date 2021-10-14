@@ -80,7 +80,6 @@ pub fn write_ufo_glif<PD: PointData>(glif: &Glif<PD>) -> Result<String, GlifPars
             for contour in outline {
                 // if we find a move point at the start of things we set this to false
                 let open_contour = contour.first().unwrap().ptype == PointType::Move;
-                println!("{:?}", open_contour);
                 let mut contour_node = xmltree::Element::new("contour");
                 
                 let mut last_point = None;
