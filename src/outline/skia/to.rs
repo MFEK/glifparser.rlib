@@ -24,10 +24,7 @@ impl SkiaPaths {
 
 impl Into<skia::Path> for SkiaPaths {
     fn into(self) -> skia::Path {
-        let mut ret = skia::Path::new();
-        self.open.as_ref().map(|skpath|ret.add_path(&skpath, (0., 0.), skia::path::AddPathMode::Append));
-        self.closed.as_ref().map(|skpath|ret.add_path(&skpath, (0., 0.), skia::path::AddPathMode::Append));
-        ret
+        self.combined()
     }
 }
 
