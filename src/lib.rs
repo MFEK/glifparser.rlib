@@ -1,4 +1,4 @@
-#![feature(trait_alias, array_map)]
+#![feature(trait_alias)]
 
 pub mod error;
 

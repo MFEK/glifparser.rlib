@@ -13,6 +13,15 @@ pub struct SkiaPaths {
     pub closed: Option<skia::Path>,
 }
 
+impl SkiaPaths {
+    pub fn combined(&self) -> skia::Path {
+        let mut combined = skia::Path::new();
+        self.open.as_ref().map(|p|combined.add_path(&p, (0., 0.), skia::path::AddPathMode::Append));
+        self.closed.as_ref().map(|p|combined.add_path(&p, (0., 0.), skia::path::AddPathMode::Append));
+        combined
+    }
+}
+
 impl Into<skia::Path> for SkiaPaths {
     fn into(self) -> skia::Path {
         let mut ret = skia::Path::new();
