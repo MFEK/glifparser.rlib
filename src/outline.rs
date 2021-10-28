@@ -3,6 +3,7 @@ pub mod create;
 pub mod skia;
 
 use log::info;
+#[cfg(feature = "glifserde")]
 use serde::{Serialize, Deserialize};
 
 use crate::point::{GlifPoint, Point, PointType};
@@ -10,7 +11,8 @@ use crate::point::{GlifPoint, Point, PointType};
 pub type Contour<PD> = Vec<Point<PD>>;
 pub type Outline<PD> = Vec<Contour<PD>>;
 
-#[derive(Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
+#[cfg_attr(feature = "glifserde", derive(Serialize, Deserialize))]
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub enum OutlineType {
     Cubic,
     Quadratic,

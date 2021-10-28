@@ -159,6 +159,7 @@ pub fn write_ufo_glif<PD: PointData>(glif: &Glif<PD>) -> Result<String, GlifPars
 
     glyph.children.push(xmltree::XMLNode::Element(outline_node));
 
+    #[cfg(feature = "glifimage")]
     for image in &glif.images {
         let mut image_node = xmltree::Element::new("image");
         image_node.attributes.insert("fileName".to_string(), image.filename.to_str().ok_or(GlifParserError::GlifFilenameInsane("image filename not UTF8!".to_string()))?.to_string());

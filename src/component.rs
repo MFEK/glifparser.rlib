@@ -10,12 +10,14 @@ use integer_or_float::IntegerOrFloat;
 use kurbo::Affine;
 use trees::{Forest, Tree, Node};
 
+#[cfg(feature = "glifserde")]
 use serde::{Serialize, Deserialize};
 
 use std::path::{Path, PathBuf};
 
 #[allow(non_snake_case)] // to match UFO spec https://unifiedfontobject.org/versions/ufo3/glyphs/glif/#component
-#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[cfg_attr(feature = "glifserde", derive(Serialize, Deserialize))]
+#[derive(Clone, Debug, PartialEq)]
 pub struct GlifComponent {
     pub base: String,
     pub filename: Option<PathBuf>,
@@ -28,7 +30,8 @@ pub struct GlifComponent {
     pub identifier: Option<String>
 }
 
-#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[cfg_attr(feature = "glifserde", derive(Serialize, Deserialize))]
+#[derive(Clone, Debug, PartialEq)]
 pub struct GlifComponents {
     pub root: String,
     pub vec: Vec<GlifComponent>,
@@ -65,7 +68,8 @@ impl GlifComponent {
     }
 }
 
-#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[cfg_attr(feature = "glifserde", derive(Serialize, Deserialize))]
+#[derive(Clone, Debug, PartialEq)]
 pub struct Component<PD: PointData> {
     pub glif: Glif<PD>,
     pub matrix: Affine
@@ -80,7 +84,8 @@ impl<PD: PointData> Component<PD> {
     }
 }
 
-#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[cfg_attr(feature = "glifserde", derive(Serialize, Deserialize))]
+#[derive(Clone, Debug, PartialEq)]
 pub struct ComponentRect {
     pub minx: f32,
     pub miny: f32,

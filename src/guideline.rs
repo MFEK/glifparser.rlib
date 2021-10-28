@@ -1,14 +1,17 @@
 use integer_or_float::IntegerOrFloat;
 
 use crate::color::Color;
+#[cfg(feature = "glifserde")]
 use serde::{Serialize, Deserialize};
-#[derive(Debug, Copy, Clone, PartialEq, Serialize, Deserialize)]
+#[cfg_attr(feature = "glifserde", derive(Serialize, Deserialize))]
+#[derive(Debug, Copy, Clone, PartialEq)]
 pub struct GuidelinePoint {
     pub x: f32,
     pub y: f32
 }
 
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[cfg_attr(feature = "glifserde", derive(Serialize, Deserialize))]
+#[derive(Debug, Clone, PartialEq)]
 pub struct Guideline {
     pub at: GuidelinePoint,
     pub angle: IntegerOrFloat,

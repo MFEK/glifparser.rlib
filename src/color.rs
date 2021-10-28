@@ -1,8 +1,10 @@
 use integer_or_float::IntegerOrFloat;
 
 use crate::error::GlifParserError;
+#[cfg(feature = "glifserde")]
 use serde::{Serialize, Deserialize};
-#[derive(Debug, Copy, Clone, PartialEq, Serialize, Deserialize)]
+#[cfg_attr(feature = "glifserde", derive(Serialize, Deserialize))]
+#[derive(Debug, Copy, Clone, PartialEq)]
 pub struct Color {
     pub r: IntegerOrFloat,
     pub g: IntegerOrFloat,

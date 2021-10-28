@@ -1,26 +1,30 @@
 [package]
 name = "glifparser"
-version = "1.0.0"
+version = "1.1.0"
 authors = ["Fredrick Brennan <copypaste@kittens.ph>"]
 edition = "2018"
 
 [dependencies]
 xmltree = "0.10.3"
 log = "0.4"
-kurbo = {version = "0.8", features = ["serde"]}
+kurbo = { version = "0.8", default-features = false }
 trees = "0.4"
-skia-safe = {version = "0", optional = true}
-image = { version = "0.23", features = ["png"], default-features = false }
-serde = { version = "1.0", features = ["derive"] }
-serde_json = "1.0"
-plist = "1"
+skia-safe = { version = "0", optional = true }
+image = { version = "0.23", features = ["png"], default-features = false, optional = true }
+serde = { version = "1.0", features = ["derive"], optional = true }
+serde_json = { version = "1.0", optional = true }
+plist = { version = "1", optional = true }
 
 # Our submodules
-integer_or_float = { git = "https://github.com/MFEK/integer_or_float.rlib", branch = "main" }
+# The default feature is serde, dep:serde syntax still (Oct '21) not stabilized
+integer_or_float = { git = "https://github.com/MFEK/integer_or_float.rlib", branch = "main", default-features = false }
 
 [dev-dependencies]
 env_logger = "0.8"
 
 [features]
-skia = ["skia-safe"]
-mfek = ["skia"]
+glifimage = ["image"]
+glifserde = ["serde", "serde_json", "kurbo/serde", "integer_or_float/default"]
+default = ["glifimage", "glifserde"]
+skia = ["default", "skia-safe"]
+mfek = ["default", "skia", "plist"]

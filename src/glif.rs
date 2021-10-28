@@ -5,6 +5,7 @@ use crate::anchor::Anchor;
 use crate::component::GlifComponents;
 use crate::error::GlifParserError;
 use crate::guideline::Guideline;
+#[cfg(feature = "glifimage")]
 use crate::image::GlifImage;
 use crate::point::PointData;
 use crate::outline::{Outline, OutlineType};
@@ -19,9 +20,8 @@ pub use read::read_ufo_glif_from_filename as read_from_filename;
 pub use write::write_ufo_glif as write;
 pub use write::write_ufo_glif_to_filename as write_to_filename;
 
-use serde::{Deserialize, Deserializer, Serialize, Serializer, ser::SerializeStruct};
-use serde::ser::Error as SerdeError;
-use serde::de::Error as SerdeDeError;
+#[cfg(feature = "glifserde")]
+use serde::{Deserialize, Deserializer, Serialize, Serializer, ser::SerializeStruct, ser::Error as SerdeError, de::Error as SerdeDeError};
 
 #[cfg(feature = "mfek")]
 pub use mfek::*;
@@ -43,6 +43,7 @@ pub struct Glif<PD: PointData> {
     /// glifparser does support reading the data of images and guessing their format, but in order
     /// to allow you to handle possibly erroneous files we don't do so by default. You need to call
     /// ``GlifImage::to_image_of`` to get an ``Image`` with data.
+    #[cfg(feature = "glifimage")]
     pub images: Vec<GlifImage>,
     pub width: Option<u64>,
     pub unicode: Vec<char>,
@@ -64,6 +65,7 @@ pub struct Glif<PD: PointData> {
     pub private_lib_root: &'static str,
 }
 
+#[cfg(feature = "glifserde")]
 impl<PD: PointData> Serialize for Glif<PD> {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -78,7 +80,7 @@ impl<PD: PointData> Serialize for Glif<PD> {
     }
 }
 
-
+#[cfg(feature = "glifserde")]
 impl<'de, PD: PointData> Deserialize<'de> for Glif<PD> {
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
     where
@@ -100,6 +102,7 @@ impl<PD: PointData> Glif<PD> {
             anchors: vec![],
             components: GlifComponents::new(),
             guidelines: vec![],
+            #[cfg(feature = "glifimage")]
             images: vec![],
             width: None,
             unicode: vec![],

@@ -1,6 +1,8 @@
 use std::fmt::Debug;
+#[cfg(feature = "glifserde")]
 use serde::{Serialize, Deserialize};
-#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[cfg_attr(feature = "glifserde", derive(Serialize, Deserialize))]
+#[derive(Clone, Debug, PartialEq)]
 pub struct Anchor {
     pub x: f32,
     pub y: f32,
@@ -8,7 +10,8 @@ pub struct Anchor {
     pub r#type: AnchorType,
 }
 
-#[derive(Debug, Copy, Clone, PartialEq, Serialize, Deserialize)]
+#[cfg_attr(feature = "glifserde", derive(Serialize, Deserialize))]
+#[derive(Debug, Copy, Clone, PartialEq)]
 pub enum AnchorType {
     Undefined,
     Mark,

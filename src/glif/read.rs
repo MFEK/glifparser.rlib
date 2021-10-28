@@ -3,6 +3,7 @@ use std::path;
 use std::rc::Rc;
 
 use integer_or_float::IntegerOrFloat;
+#[cfg(feature = "glifserde")]
 use serde_json;
 
 use super::Glif;
@@ -12,6 +13,7 @@ use crate::guideline::Guideline;
 use crate::outline::{self, get_outline_type, GlifContour, GlifOutline, OutlineType};
 use crate::point::{GlifPoint, PointData, parse_point_type};
 use crate::anchor::Anchor;
+#[cfg(feature = "glifimage")]
 use crate::image::GlifImage;
 
 macro_rules! input_error {
@@ -36,11 +38,10 @@ macro_rules! load_matrix_and_identifier {
 }
 
 use std::fs;
-use std::path::Path;
 /// If you have a known filename, it is always preferable to call this function, as it sets the
 /// filename on the Glif<PD> as well as on its GlifComponent's, easing their transition into
 /// Component's.
-pub fn read_ufo_glif_from_filename<F: AsRef<Path> + Clone, PD: PointData>(filename: F) -> Result<Glif<PD>, GlifParserError> {
+pub fn read_ufo_glif_from_filename<F: AsRef<path::Path> + Clone, PD: PointData>(filename: F) -> Result<Glif<PD>, GlifParserError> {
     let glifxml = match fs::read_to_string(&filename) {
         Ok(s) => s,
         Err(ioe) => Err(GlifParserError::GlifFileIoError(Some(Rc::new(ioe))))?
@@ -133,6 +134,7 @@ pub fn read_ufo_glif<PD: PointData>(glif: &str) -> Result<Glif<PD>, GlifParserEr
 
     ret.anchors = anchors;
 
+    #[cfg(feature = "glifimage")] {
     let mut images: Vec<GlifImage> = Vec::new();
 
     while let Some(image_el) = glif.take_child("image") {
@@ -153,6 +155,7 @@ pub fn read_ufo_glif<PD: PointData>(glif: &str) -> Result<Glif<PD>, GlifParserEr
     }
 
     ret.images = images;
+    }
 
     let mut guidelines: Vec<Guideline> = Vec::new();
 
@@ -247,6 +250,7 @@ pub fn read_ufo_glif<PD: PointData>(glif: &str) -> Result<Glif<PD>, GlifParserEr
     }
 
     // This will read the first XML comment understandable as containing JSON.
+    #[cfg(feature = "glifserde")]
     for child in &glif.children {
         if let xmltree::XMLNode::Comment(c) = child {
             // This just checks if it's deserializable at all. serde_json::Value can contain any
