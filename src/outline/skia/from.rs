@@ -184,10 +184,16 @@ impl<PD: PointData> FromSkiaPath<PD> for Outline<PD> {
             match (contour.first(), contour.last()) {
                 (Some(first), Some(last)) => {
                     if first.ptype == PointType::Move && last.ptype == PointType::Curve {
+                        debug_assert_eq!(skc[skc_len-1].1.len(), 4);
                         let p = skc[skc_len-1].1[3];
-                        let glifl: Point<PD> = Point::from_x_y_type((p.x, p.y), PointType::Curve);
+                        let mut glifl: Point<PD> = Point::from_x_y_type((p.x, p.y), PointType::Curve);
+                        let h_prev = skc[skc_len-1].1[2];
+                        if p != h_prev {
+                            glifl.b = Handle::At(h_prev.x, h_prev.y);
+                        }
                         contour.push(glifl);
                     } else if first.ptype == PointType::Move && last.ptype == PointType::Line {
+                        debug_assert_eq!(skc[skc_len-1].1.len(), 2);
                         let p = skc[skc_len-1].1[1];
                         let glifl: Point<PD> = Point::from_x_y_type((p.x, p.y), PointType::Line);
                         contour.push(glifl);
@@ -201,6 +207,8 @@ impl<PD: PointData> FromSkiaPath<PD> for Outline<PD> {
                 (Some(first), 2..) => {
                     if first.ptype == PointType::Move {
                         if contour[1].x == first.x && contour[1].y == first.y {
+                            contour[0].a = contour[1].a;
+                            contour[0].b = contour[1].b;
                             contour.remove(1);
                         }
                     }
