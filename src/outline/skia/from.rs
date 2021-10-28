@@ -17,10 +17,10 @@ type SkPointTuple = (PointType, Vec<SkPoint>, Option<f32>);
 type SkContour = Vec<SkPointTuple>;
 type SkOutline = Vec<SkContour>;
 
-/// Stability note: This is quite a new feature, and has only been tested on Skia shapes and shapes
-/// with SkCornerPathEffect applied. I documented it as best I could, and left around old debug
-/// eprintln's in case you find a broken case. It's quite complicated and takes multiple passes
-/// because Skia path's can contain conics and quads, both of which we want to upconvert to cubics.
+/// Stability note: This is a complex conversion. I documented it as best I could, and left around
+/// old debug eprintln's in case you find a broken case. It's quite complicated and takes multiple
+/// passes because Skia path's can contain conics and quads, both of which we want to upconvert to
+/// cubics.
 impl<PD: PointData> FromSkiaPath<PD> for Outline<PD> {
     fn from_skia_path(skp: &skia::Path) -> Outline<PD> {
         // These are iterators over (Verb, Vec<skia_safe::Point>)
@@ -180,15 +180,32 @@ impl<PD: PointData> FromSkiaPath<PD> for Outline<PD> {
                 contour.push(point);
             }
 
+            // Skia doesn't put a last point like we expect for open contours
             match (contour.first(), contour.last()) {
                 (Some(first), Some(last)) => {
                     if first.ptype == PointType::Move && last.ptype == PointType::Curve {
                         let p = skc[skc_len-1].1[3];
                         let glifl: Point<PD> = Point::from_x_y_type((p.x, p.y), PointType::Curve);
                         contour.push(glifl);
+                    } else if first.ptype == PointType::Move && last.ptype == PointType::Line {
+                        let p = skc[skc_len-1].1[1];
+                        let glifl: Point<PD> = Point::from_x_y_type((p.x, p.y), PointType::Line);
+                        contour.push(glifl);
                     }
                 },
                 _ => {}
+            }
+
+            // Skia adds Move followed by Line at same spot, .glif format only needs the Move
+            match (contour.first(), contour.len()) {
+                (Some(first), 2..) => {
+                    if first.ptype == PointType::Move {
+                        if contour[1].x == first.x && contour[1].y == first.y {
+                            contour.remove(1);
+                        }
+                    }
+                },
+                _ => ()
             }
 
             ret.push(contour);
