@@ -5,6 +5,9 @@ use crate::error::GlifParserError;
 use crate::point::{Handle, PointData, PointType, point_type_to_string};
 use crate::codepoint::Codepoint;
 
+use std::fs;
+use std::path::Path;
+
 fn build_ufo_point_from_handle(handle: Handle) -> Option<xmltree::Element>
 {
     match handle {
@@ -36,8 +39,6 @@ macro_rules! write_matrix_and_identifier {
     }
 }
 
-use std::fs;
-use std::path::Path;
 pub fn write_ufo_glif_to_filename<F: AsRef<Path> + Clone, PD: PointData>(glif: &Glif<PD>, filename: F) -> Result<(), GlifParserError> {
     let glifxml: String = write_ufo_glif(glif)?;
     fs::write(filename, glifxml).or( Err(GlifParserError::XmlWriteError( "Failed to write to filename".to_string() )) )

@@ -183,19 +183,28 @@ impl<PD: PointData> FromSkiaPath<PD> for Outline<PD> {
             // Skia doesn't put a last point like we expect for open contours
             match (contour.first(), contour.last()) {
                 (Some(first), Some(last)) => {
-                    if first.ptype == PointType::Move && last.ptype == PointType::Curve {
-                        debug_assert_eq!(skc[skc_len-1].1.len(), 4);
-                        let p = skc[skc_len-1].1[3];
-                        let mut glifl: Point<PD> = Point::from_x_y_type((p.x, p.y), PointType::Curve);
-                        let h_prev = skc[skc_len-1].1[2];
-                        if p != h_prev {
-                            glifl.b = Handle::At(h_prev.x, h_prev.y);
+                    if first.ptype == PointType::Move && (last.ptype == PointType::Curve || last.ptype == PointType::Line) {
+                        let ptype = match skc[skc_len-1].1.len() {
+                            2 => PointType::Line,
+                            4 => PointType::Curve,
+                            _ => {unreachable!()}
+                        };
+                        let p = match ptype {
+                            PointType::Line => {
+                                skc[skc_len-1].1[1]
+                            },
+                            PointType::Curve => {
+                                skc[skc_len-1].1[3]
+                            },
+                            _ => {unreachable!()}
+                        };
+                        let mut glifl: Point<PD> = Point::from_x_y_type((p.x, p.y), ptype);
+                        if ptype == PointType::Curve {
+                            let h_prev = skc[skc_len-1].1[2];
+                            if p != h_prev {
+                                glifl.b = Handle::At(h_prev.x, h_prev.y);
+                            }
                         }
-                        contour.push(glifl);
-                    } else if first.ptype == PointType::Move && last.ptype == PointType::Line {
-                        debug_assert_eq!(skc[skc_len-1].1.len(), 2);
-                        let p = skc[skc_len-1].1[1];
-                        let glifl: Point<PD> = Point::from_x_y_type((p.x, p.y), PointType::Line);
                         contour.push(glifl);
                     }
                 },
