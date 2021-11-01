@@ -41,6 +41,8 @@ pub enum GlifParserError {
 
     /// Color (for guidelines, images, etc) not RGBA
     ColorNotRGBA,
+    /// Error for use by parse() trait (FromStr)
+    TypeConversionError(&'static str, String),
 }
 
 impl Display for GlifParserError {
@@ -87,6 +89,10 @@ impl Display for GlifParserError {
 
             Self::ColorNotRGBA => {
                 format!("Color not RGBA")
+            },
+
+            Self::TypeConversionError(t, s) => {
+                format!("Type conversion error: {} not in {}", s, t)
             }
         })
     }

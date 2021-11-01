@@ -1,17 +1,19 @@
 use std::collections::HashSet;
-use std::path;
+use std::path as stdpath;
+use std::{fmt::Display, str::FromStr};
 
-use skia_safe as skia;
-use skia::Path;
+use skia_safe::{self as skia, Path};
 use kurbo::Affine;
 use serde::{Serialize, Deserialize};
 
-use crate::{PointType, outline::skia::{SkiaPaths, SkiaPointTransforms, ToSkiaPath, ToSkiaPaths}, point::Point};
-
-use crate::{
-    outline::OutlineType, point::PointData, Anchor, ComponentRect, Glif, component::GlifComponents, Guideline,
-    Outline,
-};
+use crate::anchor::Anchor;
+use crate::component::{ComponentRect, GlifComponents};
+use crate::error::GlifParserError;
+use crate::glif::Glif;
+use crate::guideline::Guideline;
+use crate::outline::{Outline, OutlineType};
+use crate::outline::skia::{SkiaPaths, SkiaPointTransforms, ToSkiaPath, ToSkiaPaths};
+use crate::point::{Point, PointData, PointType};
 
 #[macro_use] pub mod layer;
 pub use layer::Layer;
@@ -41,7 +43,7 @@ pub struct MFEKGlif<PD: PointData> {
     pub note: Option<String>,
     pub format: u8, // we only understand 2
     /// It's up to the API consumer to set this.
-    pub filename: Option<path::PathBuf>,
+    pub filename: Option<stdpath::PathBuf>,
 }
 
 impl From<Glif<MFEKPointData>> for MFEKGlif<MFEKPointData> {
@@ -73,7 +75,6 @@ impl From<Glif<MFEKPointData>> for MFEKGlif<MFEKPointData> {
                 format: glif.format,
                 filename: glif.filename,
             };
-
 
             layers.push(Layer {
                 // Warning: due to Rust language limitations, the const
@@ -209,28 +210,33 @@ pub enum PatternCopies {
     Fixed(usize) // TODO: Implement
 }
 
-// pff - no splitting
-// simple - split each curve at it's midpoint
-// angle - split the input pattern each x degrees in change in direction on the path
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub enum PatternSubdivide {
+    /// no splitting
     Off,
+    /// split each curve at its midpoint
     Simple(usize), // The value here is how many times we'll subdivide simply
+    // split the input pattern each x degrees in change in direction on the path
     //Angle(f64) TODO: Implement.
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub enum PatternHandleDiscontinuity {
-    Off, // no handling
+    /// no handling
+    Off,
+    /// handle by splitting
     Split(f64) 
     // Cut TODO: implement
 }
 
 #[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq)]
 pub enum PatternStretch {
-    Off, // no stretching
-    On, // stretch the pattern
-    Spacing, // stretch the spacing between the pattern
+    /// no stretching
+    Off,
+    /// stretch the pattern
+    On,
+    /// stretch the spacing between the pattern
+    Spacing,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -264,8 +270,28 @@ pub struct VWSContour {
 
 #[derive(Clone, Copy, Debug, Serialize, Deserialize, PartialEq)]
 pub enum InterpolationType {
-    Linear,
     Null,
+    Linear,
+}
+
+impl Display for InterpolationType {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> Result<(), std::fmt::Error> {
+        write!(f, "{}", match self {
+            InterpolationType::Null => "none",
+            InterpolationType::Linear => "linear",
+        })
+    }
+}
+
+impl FromStr for InterpolationType {
+    type Err = GlifParserError/*::TypeConversionError(type, s)*/;
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s {
+            "none" => Ok(InterpolationType::Null),
+            "linear" => Ok(InterpolationType::Linear),
+            _ => Err(GlifParserError::TypeConversionError("InterpolationType", s.to_owned())),
+        }
+    }
 }
 
 #[derive(Clone, Copy, Debug, Serialize, Deserialize, PartialEq)]
@@ -284,12 +310,60 @@ pub enum JoinType {
     Round,
 }
 
+impl Display for JoinType {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> Result<(), std::fmt::Error> {
+        write!(f, "{}", match self {
+            JoinType::Bevel => "bevel",
+            JoinType::Miter => "miter",
+            JoinType::Circle => "circle",
+            JoinType::Round => "round",
+        })
+    }
+}
+
+impl FromStr for JoinType {
+    type Err = GlifParserError/*::TypeConversionError(type, s)*/;
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s {
+            "bevel" => Ok(JoinType::Bevel),
+            "miter" => Ok(JoinType::Miter),
+            "circle" => Ok(JoinType::Circle),
+            "round" => Ok(JoinType::Round),
+            _ => Err(GlifParserError::TypeConversionError("JoinType", s.to_owned())),
+        }
+    }
+}
+
 #[derive(Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
 pub enum CapType {
-    Round,
+    Custom,
     Square,
     Circle,
-    Custom,
+    Round,
+}
+
+impl Display for CapType {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> Result<(), std::fmt::Error> {
+        write!(f, "{}", match self {
+            CapType::Custom => "custom",
+            CapType::Square => "square",
+            CapType::Circle => "circle",
+            CapType::Round => "round",
+        })
+    }
+}
+
+impl FromStr for CapType {
+    type Err = GlifParserError/*::TypeConversionError(type, s)*/;
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s {
+            "custom" => Ok(CapType::Custom),
+            "square" => Ok(CapType::Square),
+            "circle" => Ok(CapType::Circle),
+            "round" => Ok(CapType::Round),
+            _ => Err(GlifParserError::TypeConversionError("CapType", s.to_owned())),
+        }
+    }
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -303,10 +377,15 @@ pub enum LayerOperation {
 use super::GlifLike;
 
 impl<PD: PointData> GlifLike for MFEKGlif<PD> {
-    fn filename(&self) -> &Option<path::PathBuf> {
+    fn filename(&self) -> &Option<stdpath::PathBuf> {
         &self.filename
     }
     fn name(&self) -> &String {
         &self.name
     }
+}
+
+#[test]
+fn test_tostring() {
+  assert!(format!("{}", CapType::Circle) == CapType::Circle.to_string() && CapType::Circle.to_string() == String::from("circle"));
 }
