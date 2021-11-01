@@ -1,5 +1,6 @@
+use plist;
+
 use std::path;
-use xmltree;
 
 use crate::anchor::Anchor;
 use crate::component::GlifComponents;
@@ -53,11 +54,8 @@ pub struct Glif<PD: PointData> {
     pub format: u8, // we only understand 2
     /// It's up to the API consumer to set this.
     pub filename: Option<path::PathBuf>,
-    /// We give you the <lib> as an XML Element. Note, however, that in the UFO spec it is a plist
-    /// dictionary. You're going to need to parse this with a plist parser, such as plist.rs. You
-    /// may want to tell xmltree to write it back to a string first; however, it may be possible to
-    /// parse plist from xmltree::Element. Might change some day to a ``plist::Dictionary``.
-    pub lib: Option<xmltree::Element>,
+    /// glif private library
+    pub lib: Option<plist::Dictionary>,
     /// This is a JSON structure that will be written into a comment in the .glif file.
     pub private_lib: Option<String>,
     /// This string helps prevent us from reading comments not intended for us into our
@@ -156,6 +154,7 @@ impl<PD: PointData> GlifLike for Glif<PD> {
     }
 }
 
+#[inline]
 pub fn name_to_filename(name: &str, append_extension: bool) -> String {
     let mut ret = String::new();
     let chars: Vec<char> = name.chars().collect();

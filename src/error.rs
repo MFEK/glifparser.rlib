@@ -5,6 +5,7 @@ use std::rc::Rc;
 use std::string;
 
 use xmltree::{ParseError, Error as XMLTreeError};
+use plist::Error as PlistError;
 
 #[derive(Debug, Clone)]
 pub enum GlifParserError {
@@ -17,6 +18,8 @@ pub enum GlifParserError {
     GlifFilenameInsane(String),
     /// Components of the glyph form a loop
     GlifComponentsCyclical(String),
+    /// .glif has invalid <lib>
+    GlifLibError,
 
     /// Glif isn't UTF8
     GlifNotUtf8,
@@ -58,6 +61,9 @@ impl Display for GlifParserError {
             Self::GlifComponentsCyclical(s) => {
                 format!("Glyph components are cyclical: {}", &s)
             },
+            Self::GlifLibError => {
+                format!("Glif <lib> invalid")
+            },
 
             Self::XmlParseError(s) | Self::XmlWriteError(s) => {
                 format!("XML error: {}", &s)
@@ -71,7 +77,7 @@ impl Display for GlifParserError {
             },
             Self::ImageNotPNG => {
                 format!("Image not formatted as PNG. The glif file format only supports PNG. If you want to support other types, you have to work on the data yourself.")
-            }
+            },
             Self::ImageNotDecodable => {
                 format!("Image not decodable")
             },
@@ -97,6 +103,11 @@ impl From<ParseError> for GlifParserError {
 impl From<XMLTreeError> for GlifParserError {
     fn from(e: XMLTreeError) -> Self {
         Self::XmlWriteError(format!("{}", e))
+    }
+}
+impl From<PlistError> for GlifParserError {
+    fn from(_e: PlistError) -> Self {
+        GlifParserError::GlifLibError
     }
 }
 

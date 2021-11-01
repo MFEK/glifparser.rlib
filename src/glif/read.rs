@@ -246,7 +246,9 @@ pub fn read_ufo_glif<PD: PointData>(glif: &str) -> Result<Glif<PD>, GlifParserEr
     }
 
     if let Some(lib) = glif.take_child("lib") {
-        ret.lib = Some(lib);
+        let mut plist_temp: Vec<u8> = vec![];
+        lib.write(&mut plist_temp)?;
+        ret.lib = plist::from_bytes(&plist_temp).ok();
     }
 
     // This will read the first XML comment understandable as containing JSON.

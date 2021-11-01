@@ -193,7 +193,10 @@ pub fn write_ufo_glif<PD: PointData>(glif: &Glif<PD>) -> Result<String, GlifPars
 
     match &glif.lib {
         Some(lib_node) => {
-            glyph.children.push(xmltree::XMLNode::Element(lib_node.clone()));
+            let mut plist_buf: Vec<u8> = vec![];
+            plist::to_writer_xml(&mut plist_buf, lib_node)?;
+            let lib = xmltree::Element::parse(plist_buf.as_slice())?;
+            glyph.children.push(xmltree::XMLNode::Element(lib));
         }
         None => {}
     }
