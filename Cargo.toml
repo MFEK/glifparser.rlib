@@ -20,7 +20,7 @@ plist = { git = "https://github.com/ebarnard/rust-plist", default-features = fal
 integer_or_float = { git = "https://github.com/MFEK/integer_or_float.rlib", branch = "main", default-features = false }
 
 [dev-dependencies]
-env_logger = "0.8"
+env_logger = "0.9"
 
 [features]
 glifimage = ["image"]
