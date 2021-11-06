@@ -4,7 +4,7 @@ use crate::error::GlifParserError;
 #[cfg(feature = "glifserde")]
 use serde::{Serialize, Deserialize};
 #[cfg_attr(feature = "glifserde", derive(Serialize, Deserialize))]
-#[derive(Debug, Copy, Clone, PartialEq)]
+#[derive(Debug, Default, Copy, Clone, PartialEq)]
 pub struct Color {
     pub r: IntegerOrFloat,
     pub g: IntegerOrFloat,

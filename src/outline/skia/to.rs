@@ -7,7 +7,7 @@ use crate::{Contour, Outline, OutlineType};
 /// liekly that you are going to want to draw open paths in a different way than you draw closed
 /// ones. `Option`'s are used because it's possible, and most likely, that the Outline will only
 /// contain paths of one type.
-#[derive(Clone, PartialEq)]
+#[derive(Clone, Default, PartialEq)]
 pub struct SkiaPaths {
     pub open: Option<skia::Path>,
     pub closed: Option<skia::Path>,
@@ -34,12 +34,18 @@ pub struct SkiaPointTransforms {
     pub calc_y: fn(f32) -> f32,
 }
 
-impl SkiaPointTransforms {
-    pub fn new() -> Self {
+impl Default for SkiaPointTransforms {
+    fn default() -> Self {
         Self {
             calc_x: |f|f,
             calc_y: |f|f
         }
+    }
+}
+
+impl SkiaPointTransforms {
+    pub fn new() -> Self {
+        Self::default()
     }
 }
 

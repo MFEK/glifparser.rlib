@@ -21,6 +21,12 @@ pub enum OutlineType {
     Spiro,
 }
 
+impl Default for OutlineType {
+    fn default() -> OutlineType {
+        OutlineType::Cubic
+    }
+}
+
 pub type GlifContour = Vec<GlifPoint>;
 pub type GlifOutline = Vec<GlifContour>;
 

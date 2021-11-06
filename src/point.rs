@@ -5,7 +5,7 @@ use std::str::FromStr;
 #[cfg(feature = "glifserde")]
 use serde::{Serialize, Deserialize};
 /// A "close to the source" .glif `<point>`
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Default, PartialEq)]
 pub struct GlifPoint {
     pub x: f32,
     pub y: f32,
@@ -16,13 +16,7 @@ pub struct GlifPoint {
 
 impl GlifPoint {
     pub fn new() -> GlifPoint {
-        GlifPoint {
-            x: 0.,
-            y: 0.,
-            ptype: PointType::Undefined,
-            smooth: false,
-            name: None,
-        }
+        Self::default()
     }
 }
 
@@ -95,7 +89,7 @@ pub enum WhichHandle {
 
 impl<PD: PointData> Point<PD> {
     pub fn new() -> Point<PD> {
-        Point { ..Default::default() }
+        Self::default()
     }
 
     /// Make a point from its x and y position and type

@@ -24,7 +24,7 @@ pub struct MFEKPointData;
 
 /// This is an intermediary form used in MFEKglif and other tools. You can .into() a glif into this
 /// make changes to MFEK data and then turn it back into a standard UFO glif before saving.
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Default, Serialize, Deserialize)]
 pub struct MFEKGlif<PD: PointData> {
     pub layers: Vec<Layer<PD>>,
     pub history: Vec<HistoryEntry>,

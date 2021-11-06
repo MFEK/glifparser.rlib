@@ -5,7 +5,7 @@ pub use skia::ToSkiaMatrix;
 
 use integer_or_float::IntegerOrFloat;
 
-#[derive(Clone, Copy, Debug, PartialEq)]
+#[derive(Clone, Copy, Debug, Default, PartialEq)]
 pub struct GlifMatrix(pub IntegerOrFloat, pub IntegerOrFloat, pub IntegerOrFloat, pub IntegerOrFloat, pub IntegerOrFloat, pub IntegerOrFloat);
 
 pub use kurbo::Affine;

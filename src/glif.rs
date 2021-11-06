@@ -28,7 +28,7 @@ use serde::{Deserialize, Deserializer, Serialize, Serializer, ser::SerializeStru
 #[cfg(feature = "mfek")]
 pub use mfek::*;
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Default, PartialEq)]
 pub struct Glif<PD: PointData> {
     pub outline: Option<Outline<PD>>,
     pub order: OutlineType,
@@ -90,22 +90,7 @@ impl<'de, PD: PointData> Deserialize<'de> for Glif<PD> {
 
 impl<PD: PointData> Glif<PD> {
     pub fn new() -> Self {
-        Glif {
-            outline: None,
-            order: OutlineType::Cubic, // default when only corners
-            anchors: vec![],
-            components: GlifComponents::new(),
-            guidelines: vec![],
-            #[cfg(feature = "glifimage")]
-            images: vec![],
-            width: None,
-            unicode: vec![],
-            name: String::new(),
-            note: None,
-            format: 2,
-            filename: None,
-            lib: None,
-        }
+        Self::default()
     }
 
     pub fn name_to_filename(&self) -> String {
@@ -126,12 +111,6 @@ impl<PD: PointData> Glif<PD> {
         }
     }
 
-}
-
-impl<PD: PointData> Default for Glif<PD> {
-    fn default() -> Self {
-        Self::new()
-    }
 }
 
 pub trait GlifLike {
