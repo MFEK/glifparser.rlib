@@ -22,8 +22,8 @@ pub(crate) use DEFAULT_LAYER_FORMAT_STR;
 #[derive(Debug, Default, Clone, Serialize, Deserialize)]
 pub struct MFEKPointData;
 
-// This is an intermediary form used in MFEKglif and other tools. You can .into() a glif into this
-// make changes to MFEK data and then turn it back into a standard UFO glif before saving.
+/// This is an intermediary form used in MFEKglif and other tools. You can .into() a glif into this
+/// make changes to MFEK data and then turn it back into a standard UFO glif before saving.
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct MFEKGlif<PD: PointData> {
     pub layers: Vec<Layer<PD>>,
@@ -48,51 +48,42 @@ pub struct MFEKGlif<PD: PointData> {
 
 impl From<Glif<MFEKPointData>> for MFEKGlif<MFEKPointData> {
     fn from(glif: Glif<MFEKPointData>) -> Self {
-        if let Some(mfek_lib) = glif.private_lib {
-            // This unwrap is safe as we check JSON validity in src/glif/read.rs
-            let mut ret: MFEKGlif<MFEKPointData> = serde_json::from_str(mfek_lib.as_str()).unwrap();
-            ret.filename = glif.filename;
-            ret.flattened = None;
-            ret.component_rects = None;
-            return ret;
-        } else {
-            let mut layers = Vec::new();
-            let history = Vec::new();
+        let mut layers = Vec::new();
+        let history = Vec::new();
 
-            let mut ret = MFEKGlif {
-                layers: vec![],
-                history,
-                flattened: None,
-                component_rects: None,
-                order: glif.order,
-                anchors: glif.anchors,
-                components: glif.components,
-                guidelines: glif.guidelines,
-                width: glif.width,
-                unicode: glif.unicode,
-                name: glif.name,
-                note: glif.note,
-                format: glif.format,
-                filename: glif.filename,
-            };
+        let mut ret = MFEKGlif {
+            layers: vec![],
+            history,
+            flattened: None,
+            component_rects: None,
+            order: glif.order,
+            anchors: glif.anchors,
+            components: glif.components,
+            guidelines: glif.guidelines,
+            width: glif.width,
+            unicode: glif.unicode,
+            name: glif.name,
+            note: glif.note,
+            format: glif.format,
+            filename: glif.filename,
+        };
 
-            layers.push(Layer {
-                // Warning: due to Rust language limitations, the const
-                // `layer::DEFAULT_LAYER_FORMAT_STR` is not usable here. Thus, the macro.
-                name: format!(DEFAULT_LAYER_FORMAT_STR!(), 0),
-                visible: true,
-                color: None,
-                outline: glif.outline.unwrap_or(Vec::new()).iter().map(|contour| contour.into() ).collect(),
-                operation: None,
-                images: glif.images.iter().map(|im| {
-                    let temp_affine: Affine = im.matrix().into();
-                    (im.clone(), temp_affine)
-                }).collect(),
-            });
-            ret.layers = layers;
+        layers.push(Layer {
+            // Warning: due to Rust language limitations, the const
+            // `layer::DEFAULT_LAYER_FORMAT_STR` is not usable here. Thus, the macro.
+            name: format!(DEFAULT_LAYER_FORMAT_STR!(), 0),
+            visible: true,
+            color: None,
+            outline: glif.outline.unwrap_or(Vec::new()).iter().map(|contour| contour.into() ).collect(),
+            operation: None,
+            images: glif.images.iter().map(|im| {
+                let temp_affine: Affine = im.matrix().into();
+                (im.clone(), temp_affine)
+            }).collect(),
+        });
+        ret.layers = layers;
 
-            ret
-        }
+        ret
     }
 }
 
@@ -119,7 +110,6 @@ impl<PD: PointData> From<MFEKGlif<PD>> for Glif<PD> {
             outline: Some(outline),
             images,
             note: glif.note.clone(),
-            private_lib: Some(serde_json::to_string_pretty(&glif).unwrap()),
             ..Glif::default()
         }
     }

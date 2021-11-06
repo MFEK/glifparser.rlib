@@ -210,15 +210,6 @@ pub fn write_ufo_glif_data<PD: PointData>(glif: &Glif<PD>) -> Result<Vec<u8>, Gl
         None => {}
     }
 
-    match &glif.private_lib {
-        Some(json) => {
-            let mut mfek_json = glif.private_lib_root.to_string();
-            mfek_json.push_str(&json);
-            glyph.children.push(xmltree::XMLNode::Comment(mfek_json));
-        },
-        None => {}
-    }
-
     let config = xmltree::EmitterConfig::new().perform_indent(true);
 
     let mut ret_string: Vec<u8> = Vec::new();
