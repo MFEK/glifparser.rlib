@@ -72,9 +72,8 @@ pub trait PointData = Clone + Default + Debug + Serialize;
 pub trait PointData = Clone + Default + Debug;
 
 /// A Skia-friendly point
-#[non_exhaustive]
 #[cfg_attr(feature = "glifserde", derive(Serialize, Deserialize))]
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Default, Clone, PartialEq)]
 pub struct Point<PD: PointData> {
     pub x: f32,
     pub y: f32,
@@ -101,18 +100,17 @@ impl<PD: PointData> Point<PD> {
 
     /// Make a point from its x and y position and type
     pub fn from_x_y_type((x, y): (f32, f32), ptype: PointType) -> Point<PD> {
-        Point {
-            x, y, ptype,
-            ..Default::default()
-        }
+        Point { x, y, ptype, ..Default::default() }
     }
 
     /// Make a point from its x and y position, handles and type
     pub fn from_x_y_a_b_type((x, y): (f32, f32), (a, b): (Handle, Handle), ptype: PointType) -> Point<PD> {
-        Point {
-            x, y, a, b, ptype,
-            ..Default::default()
-        }
+        Point { x, y, a, b, ptype, ..Default::default() }
+    }
+
+    /// Make a point from its x and y position, handles and type
+    pub fn from_fields((x, y): (f32, f32), (a, b): (Handle, Handle), ptype: PointType, name: Option<String>, data: Option<PD>) -> Point<PD> {
+        Point { x, y, a, b, ptype, name, data }
     }
 
     /// Return an x, y position for a point, or one of its handles. If called with
@@ -137,10 +135,6 @@ impl<PD: PointData> Point<PD> {
 
 impl Default for Handle {
     fn default() -> Self { Handle::Colocated }
-}
-
-impl<PD: PointData> Default for Point<PD> {
-    fn default() -> Point<PD> { Point::new() }
 }
 
 impl Default for PointType {
