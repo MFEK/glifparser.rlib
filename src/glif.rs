@@ -52,7 +52,6 @@ pub struct Glif<PD: PointData> {
     pub name: String,
     /// This is an arbitrary glyph comment, exactly like the comment field in FontForge SFD.
     pub note: Option<String>,
-    pub format: u8, // we only understand 2
     /// It's up to the API consumer to set this.
     pub filename: Option<path::PathBuf>,
     /// glif private library

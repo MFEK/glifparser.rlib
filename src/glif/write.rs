@@ -57,7 +57,7 @@ pub fn write_ufo_glif_data<PD: PointData>(glif: &Glif<PD>) -> Result<Vec<u8>, Gl
 {
     let mut glyph = xmltree::Element::new("glyph");
         glyph.attributes.insert("name".to_owned(), glif.name.to_string());
-        glyph.attributes.insert("format".to_owned(), glif.format.to_string());
+        glyph.attributes.insert("format".to_owned(), "2".to_string());
 
     match glif.width {
         Some(w) => {

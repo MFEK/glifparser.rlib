@@ -41,7 +41,6 @@ pub struct MFEKGlif<PD: PointData> {
     pub name: String,
     /// This is an arbitrary glyph comment, exactly like the comment field in FontForge SFD.
     pub note: Option<String>,
-    pub format: u8, // we only understand 2
     /// It's up to the API consumer to set this.
     pub filename: Option<stdpath::PathBuf>,
 }
@@ -64,7 +63,6 @@ impl From<Glif<MFEKPointData>> for MFEKGlif<MFEKPointData> {
             unicode: glif.unicode,
             name: glif.name,
             note: glif.note,
-            format: glif.format,
             filename: glif.filename,
         };
 
@@ -105,7 +103,6 @@ impl<PD: PointData> From<MFEKGlif<PD>> for Glif<PD> {
             width: glif.width,
             unicode: glif.unicode.clone(),
             name: glif.name.clone(),
-            format: glif.format,
             filename: glif.filename.clone(),
             outline: Some(outline),
             images,
