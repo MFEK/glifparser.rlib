@@ -227,7 +227,7 @@ pub fn read_ufo_glif<PD: PointData>(glif: &str) -> Result<Glif<PD>, GlifParserEr
                     None => {}
                 }
 
-                gpoint.ptype = point_el.attributes.get("type").as_ref().map(|s| s.as_str()).ok_or(input_error!("Couldn't read <point> type"))?.into();
+                gpoint.ptype = point_el.attributes.get("type").as_ref().map(|s| s.as_str()).unwrap_or("offcurve").into();
 
                 if gpoint.ptype.should_write_to_ufo() {
                     gcontour.push(gpoint);
