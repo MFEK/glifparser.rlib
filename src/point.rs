@@ -100,11 +100,17 @@ impl<PD: PointData> Point<PD> {
     }
 
     /// Make a point from its x and y position and type
-    pub fn from_x_y_type(at: (f32, f32), ptype: PointType) -> Point<PD> {
+    pub fn from_x_y_type((x, y): (f32, f32), ptype: PointType) -> Point<PD> {
         Point {
-            x: at.0,
-            y: at.1,
-            ptype: ptype,
+            x, y, ptype,
+            ..Default::default()
+        }
+    }
+
+    /// Make a point from its x and y position, handles and type
+    pub fn from_x_y_a_b_type((x, y): (f32, f32), (a, b): (Handle, Handle), ptype: PointType) -> Point<PD> {
+        Point {
+            x, y, a, b, ptype,
             ..Default::default()
         }
     }
