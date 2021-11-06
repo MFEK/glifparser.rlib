@@ -11,6 +11,7 @@ use crate::image::GlifImage;
 use crate::point::PointData;
 use crate::outline::{Outline, OutlineType};
 
+mod conv;
 mod read;
 mod write;
 #[cfg(feature = "mfek")]

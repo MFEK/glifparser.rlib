@@ -11,7 +11,7 @@ use crate::error::GlifParserError::{self, GlifInputError};
 use crate::component::GlifComponent;
 use crate::guideline::Guideline;
 use crate::outline::{self, get_outline_type, GlifContour, GlifOutline, OutlineType};
-use crate::point::{GlifPoint, PointData, parse_point_type};
+use crate::point::{GlifPoint, PointData};
 use crate::anchor::Anchor;
 #[cfg(feature = "glifimage")]
 use crate::image::GlifImage;
@@ -227,10 +227,13 @@ pub fn read_ufo_glif<PD: PointData>(glif: &str) -> Result<Glif<PD>, GlifParserEr
                     None => {}
                 }
 
-                gpoint.ptype =
-                    parse_point_type(point_el.attributes.get("type").as_ref().map(|s| s.as_str()));
+                gpoint.ptype = point_el.attributes.get("type").as_ref().map(|s| s.as_str()).ok_or(input_error!("Couldn't read <point> type"))?.into();
 
-                gcontour.push(gpoint);
+                if gpoint.ptype.should_write_to_ufo() {
+                    gcontour.push(gpoint);
+                } else {
+                    Err(GlifInputError(format!("Shouldn't write <point type={}> to UFO .glif!", gpoint.ptype)))?;
+                }
             }
             if gcontour.len() > 0 {
                 goutline.push(gcontour);

@@ -1,4 +1,7 @@
-use std::fmt::Debug;
+pub mod conv;
+
+use std::fmt::{Display, Debug};
+use std::str::FromStr;
 #[cfg(feature = "glifserde")]
 use serde::{Serialize, Deserialize};
 /// A "close to the source" .glif `<point>`
@@ -27,11 +30,17 @@ impl GlifPoint {
 #[derive(Debug, Copy, Clone, PartialEq)]
 pub enum PointType {
     Undefined,
+    /// .glif "move", can act as any point type!
     Move,
+    /// .glif "curve" (cubic Bézier point to be followed by two off-curve points)
     Curve,
+    /// .glif "qcurve" (quadratic Bézier point to be followed by one…*ish* [see spec] off-curve points)
     QCurve,
+    /// TODO: Remove. DEPRECATED
     QClose,
+    /// .glif "line"
     Line,
+    /// .glif "offcurve" or ""
     OffCurve,
 } // Undefined used by new(), shouldn't appear in Point<PointData> structs
 
@@ -58,14 +67,15 @@ impl From<Option<&GlifPoint>> for Handle {
 /// with each Point. You could use this to implement, e.g., hyperbeziers. The Glif Point's would
 /// still represent a Bézier curve, but you could put hyperbezier info along with the Point.
 #[cfg(feature = "glifserde")]
-pub trait PointData = Clone + Debug + Serialize;
+pub trait PointData = Clone + Default + Debug + Serialize;
 #[cfg(not(feature = "glifserde"))]
-pub trait PointData = Clone + Debug;
+pub trait PointData = Clone + Default + Debug;
 
 /// A Skia-friendly point
+#[non_exhaustive]
 #[cfg_attr(feature = "glifserde", derive(Serialize, Deserialize))]
 #[derive(Debug, Clone, PartialEq)]
-pub struct Point<PD> {
+pub struct Point<PD: PointData> {
     pub x: f32,
     pub y: f32,
     pub a: Handle,
@@ -86,15 +96,7 @@ pub enum WhichHandle {
 
 impl<PD: PointData> Point<PD> {
     pub fn new() -> Point<PD> {
-        Point {
-            x: 0.,
-            y: 0.,
-            a: Handle::Colocated,
-            b: Handle::Colocated,
-            ptype: PointType::Undefined,
-            name: None,
-            data: None,
-        }
+        Point { ..Default::default() }
     }
 
     /// Make a point from its x and y position and type
@@ -102,11 +104,8 @@ impl<PD: PointData> Point<PD> {
         Point {
             x: at.0,
             y: at.1,
-            a: Handle::Colocated,
-            b: Handle::Colocated,
             ptype: ptype,
-            name: None,
-            data: None,
+            ..Default::default()
         }
     }
 
@@ -130,25 +129,78 @@ impl<PD: PointData> Point<PD> {
     }
 }
 
-pub fn parse_point_type(pt: Option<&str>) -> PointType {
-    match pt {
-        Some("move") => PointType::Move,
-        Some("line") => PointType::Line,
-        Some("qcurve") => PointType::QCurve,
-        Some("curve") => PointType::Curve,
-        _ => PointType::OffCurve,
+impl Default for Handle {
+    fn default() -> Self { Handle::Colocated }
+}
+
+impl<PD: PointData> Default for Point<PD> {
+    fn default() -> Point<PD> { Point::new() }
+}
+
+impl Default for PointType {
+    fn default() -> PointType { PointType::Undefined }
+}
+
+impl Default for WhichHandle {
+    fn default() -> Self { WhichHandle::Neither }
+}
+
+
+impl FromStr for PointType {
+    type Err = ();
+    fn from_str(s: &str) -> Result<PointType, ()> {
+        Ok(match s {
+            "move" => PointType::Move,
+            "line" => PointType::Line,
+            "qcurve" => PointType::QCurve,
+            "curve" => PointType::Curve,
+            _ => PointType::OffCurve,
+        })
     }
 }
 
-pub fn point_type_to_string(ptype: PointType) -> Option<String>
-{
-    return match ptype{
-        PointType::Undefined => None,
-        PointType::OffCurve => None,
-        PointType::QClose => None, // should probably be removed from PointType
-        PointType::Move => Some(String::from("move")),
-        PointType::Curve => Some(String::from("curve")),
-        PointType::QCurve => Some(String::from("qcurve")),
-        PointType::Line => Some(String::from("line")),
+impl FromStr for WhichHandle {
+    type Err = ();
+    fn from_str(s: &str) -> Result<WhichHandle, ()> {
+        Ok(match s.trim() {
+            "A" | "a" => WhichHandle::A,
+            "B" | "b" => WhichHandle::B,
+            _ => WhichHandle::Neither,
+        })
+    }
+}
+
+impl From<&str> for PointType {
+    fn from(s: &str) -> Self {
+        PointType::from_str(s).unwrap()
+    }
+}
+
+impl From<&str> for WhichHandle {
+    fn from(s: &str) -> Self {
+        WhichHandle::from_str(s).unwrap()
+    }
+}
+
+impl Display for PointType {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> Result<(), std::fmt::Error> {
+        write!(f, "{}", match self {
+            PointType::Undefined => "undefined",
+            PointType::OffCurve => "offcurve",
+            PointType::QClose => "qclose",
+            PointType::Move => "move",
+            PointType::Curve => "curve",
+            PointType::QCurve => "qcurve",
+            PointType::Line => "line",
+        })
+    }
+}
+
+impl PointType {
+    pub fn should_write_to_ufo(&self) -> bool {
+        match self {
+            PointType::Undefined | PointType::QClose => false,
+            _ => true,
+        }
     }
 }

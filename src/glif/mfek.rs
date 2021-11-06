@@ -19,7 +19,7 @@ use crate::point::{Point, PointData, PointType};
 pub use layer::Layer;
 pub(crate) use DEFAULT_LAYER_FORMAT_STR;
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Default, Clone, Serialize, Deserialize)]
 pub struct MFEKPointData;
 
 // This is an intermediary form used in MFEKglif and other tools. You can .into() a glif into this

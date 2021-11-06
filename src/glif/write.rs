@@ -2,7 +2,7 @@ use xmltree;
 
 use super::Glif;
 use crate::error::GlifParserError;
-use crate::point::{Handle, PointData, PointType, point_type_to_string};
+use crate::point::{Handle, PointData, PointType};
 use crate::codepoint::Codepoint;
 
 use std::fs;
@@ -39,13 +39,21 @@ macro_rules! write_matrix_and_identifier {
     }
 }
 
-pub fn write_ufo_glif_to_filename<F: AsRef<Path> + Clone, PD: PointData>(glif: &Glif<PD>, filename: F) -> Result<(), GlifParserError> {
+pub fn write_ufo_glif_to_filename<F, PD>(glif: &Glif<PD>, filename: F) -> Result<(), GlifParserError>
+where F: AsRef<Path> + Clone, PD: PointData
+{
     let glifxml: String = write_ufo_glif(glif)?;
     fs::write(filename, glifxml).or( Err(GlifParserError::XmlWriteError( "Failed to write to filename".to_string() )) )
 }
 
-/// Write Glif struct to UFO .glif XML 
 pub fn write_ufo_glif<PD: PointData>(glif: &Glif<PD>) -> Result<String, GlifParserError>
+{
+    let ret = write_ufo_glif_data(glif)?;
+    Ok(String::from_utf8(ret)?)
+}
+
+/// Write Glif struct to UFO .glif XML 
+pub fn write_ufo_glif_data<PD: PointData>(glif: &Glif<PD>) -> Result<Vec<u8>, GlifParserError>
 {
     let mut glyph = xmltree::Element::new("glyph");
         glyph.attributes.insert("name".to_owned(), glif.name.to_string());
@@ -109,10 +117,11 @@ pub fn write_ufo_glif<PD: PointData>(glif: &Glif<PD>) -> Result<String, GlifPars
                     let mut point_node = xmltree::Element::new("point");
                     point_node.attributes.insert("x".to_owned(), point.x.to_string());
                     point_node.attributes.insert("y".to_owned(), point.y.to_string());
-            
-                    match point_type_to_string(point.ptype) {
-                        Some(ptype_string) => {point_node.attributes.insert("type".to_owned(), ptype_string);},
-                        None => {}
+
+                    let ptype_string = point.ptype.to_string();
+                    match ptype_string.as_ref() {
+                        "offcurve" => {} // while this name is OK, most often not written
+                        _ => {point_node.attributes.insert("type".to_owned(), ptype_string);},
                     }
             
                     match &point.name {
@@ -137,7 +146,7 @@ pub fn write_ufo_glif<PD: PointData>(glif: &Glif<PD>) -> Result<String, GlifPars
                     last_point = Some(point);
                 }
 
-                // if a move wasn't our first point then we gotta close the shape by emitting the first point's b handle
+                // if a move wasn't our first point then we gotta close the shape by emitting the first point's b (prev) handle
                 if !open_contour {
                     if let Some(handle_node) = build_ufo_point_from_handle(contour.first().unwrap().b) {
                         contour_node.children.push(xmltree::XMLNode::Element(handle_node));
@@ -215,5 +224,5 @@ pub fn write_ufo_glif<PD: PointData>(glif: &Glif<PD>) -> Result<String, GlifPars
     let mut ret_string: Vec<u8> = Vec::new();
     glyph.write_with_config(&mut ret_string, config)?;
 
-    return Ok(String::from_utf8(ret_string)?);
+    Ok(ret_string)
 }

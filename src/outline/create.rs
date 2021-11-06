@@ -67,7 +67,7 @@ pub fn quadratic_outline<PD: PointData>(goutline: &GlifOutline) -> Outline<PD> {
                 temp_contour.push_back(GlifPoint {
                     x: tx,
                     y: ty,
-                    ptype: PointType::QClose,
+                    ptype: PointType::QClose, // TODO: Change to QCurve & vigorously test quadratic, often ignored
                     smooth: true,
                     name: None,
                 });

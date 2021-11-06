@@ -8,7 +8,7 @@ use crate::{Contour, Outline};
 use super::QuadsToCubics;
 
 /// Get an outline from a Skia path. Outline is guaranteed to contain only Curve's, no QCurve's.
-pub trait FromSkiaPath<PD> {
+pub trait FromSkiaPath<PD: PointData> {
     fn from_skia_path(skp: &skia::Path) -> Outline<PD>;
 }
 
