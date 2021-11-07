@@ -201,11 +201,16 @@ pub fn write_ufo_glif_data<PD: PointData>(glif: &Glif<PD>) -> Result<Vec<u8>, Gl
     }
 
     match &glif.lib {
+        #[cfg(feature = "glifserde")]
         Some(lib_node) => {
             let mut plist_buf: Vec<u8> = vec![];
             plist::to_writer_xml(&mut plist_buf, lib_node)?;
             let lib = xmltree::Element::parse(plist_buf.as_slice())?;
             glyph.children.push(xmltree::XMLNode::Element(lib));
+        }
+        #[cfg(not(feature = "glifserde"))]
+        Some(_) => {
+            panic!("Tried to get XML from plist lib when not compiled with glifserde feature! Crashing to prevent data loss.")
         }
         None => {}
     }

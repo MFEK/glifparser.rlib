@@ -246,10 +246,15 @@ pub fn read_ufo_glif<PD: PointData>(glif: &str) -> Result<Glif<PD>, GlifParserEr
         }
     }
 
+    #[cfg(feature = "glifserde")]
     if let Some(lib) = glif.take_child("lib") {
         let mut plist_temp: Vec<u8> = vec![];
         lib.write(&mut plist_temp)?;
         ret.lib = plist::from_bytes(&plist_temp).ok();
+    }
+    #[cfg(not(feature = "glifserde"))]
+    if let Some(_) = glif.take_child("lib") {
+        log::warn!("Without glifserde, cannot decode plist!")
     }
 
     ret.order = get_outline_type(&goutline);

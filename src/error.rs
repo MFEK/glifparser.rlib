@@ -5,6 +5,7 @@ use std::rc::Rc;
 use std::string;
 
 use xmltree::{ParseError, Error as XMLTreeError};
+#[cfg(feature = "glifserde")]
 use plist::Error as PlistError;
 
 #[derive(Debug, Clone)]
@@ -111,6 +112,7 @@ impl From<XMLTreeError> for GlifParserError {
         Self::XmlWriteError(format!("{}", e))
     }
 }
+#[cfg(feature = "glifserde")]
 impl From<PlistError> for GlifParserError {
     fn from(_e: PlistError) -> Self {
         GlifParserError::GlifLibError
