@@ -61,9 +61,10 @@ impl From<Option<&GlifPoint>> for Handle {
 /// with each Point. You could use this to implement, e.g., hyperbeziers. The Glif Point's would
 /// still represent a Bézier curve, but you could put hyperbezier info along with the Point.
 #[cfg(feature = "glifserde")]
-pub trait PointData = Clone + Default + Debug + Serialize;
+pub trait PointData where Self: Clone + Default + Debug + Serialize {}
 #[cfg(not(feature = "glifserde"))]
-pub trait PointData = Clone + Default + Debug;
+pub trait PointData where Self: Clone + Default + Debug {}
+impl PointData for () {}
 
 /// A Skia-friendly point
 #[cfg_attr(feature = "glifserde", derive(Serialize, Deserialize))]

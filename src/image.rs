@@ -147,7 +147,6 @@ impl GlifImage {
     }
 }
 
-use crate::point::PointData;
 impl GlifImage {
     pub fn to_image_of(&self, glif: &dyn GlifLike) -> Result<Image, GlifParserError> {
         let mut ret = Image::new();

@@ -21,6 +21,7 @@ pub(crate) use DEFAULT_LAYER_FORMAT_STR;
 
 #[derive(Debug, Default, Clone, Serialize, Deserialize)]
 pub struct MFEKPointData;
+impl PointData for MFEKPointData {}
 
 /// This is an intermediary form used in MFEKglif and other tools. You can .into() a glif into this
 /// make changes to MFEK data and then turn it back into a standard UFO glif before saving.
