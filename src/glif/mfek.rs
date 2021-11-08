@@ -350,7 +350,16 @@ impl FromStr for CapType {
             "square" => Ok(CapType::Square),
             "circle" => Ok(CapType::Circle),
             "round" => Ok(CapType::Round),
-            _ => Err(GlifParserError::TypeConversionError("CapType", s.to_owned())),
+            _ => {
+                if s.ends_with(".glif") {
+                    Ok(CapType::Custom)
+                } else {
+                    Err(GlifParserError::TypeConversionError(
+                        "CapType",
+                        s.to_owned(),
+                    ))
+                }
+            }
         }
     }
 }
