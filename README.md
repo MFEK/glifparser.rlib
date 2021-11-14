@@ -12,9 +12,6 @@ Another difference is that it supports glyph components more fully, and allows
 you to flatten the components to another Glif representing the outlines of all
 the components, plus the outlines in the original glyph.
 
-Yet a third difference is the support for private libraries, stored in
-comments. This is for support of the `<MFEK>` comment.
-
 Since this library considers .glif files as detached from .ufo files, its
 approach is much different from Norad's as well. This is because MFEKglif, the
 first software this was written for, is both a _detached_ and an _attached_ UFO 
