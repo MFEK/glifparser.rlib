@@ -1,3 +1,5 @@
+#![cfg(feature = "skia")]
+
 use skia_safe::{Path, Rect, RRect, Point as SkPoint};
 use glifparser::outline::skia::FromSkiaPath;
 use glifparser::Outline;
