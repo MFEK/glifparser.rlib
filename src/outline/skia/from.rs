@@ -8,8 +8,8 @@ use crate::{Contour, Outline};
 use super::QuadsToCubics;
 
 /// Get an outline from a Skia path. Outline is guaranteed to contain only Curve's, no QCurve's.
-pub trait FromSkiaPath<PD: PointData> {
-    fn from_skia_path(skp: &skia::Path) -> Outline<PD>;
+pub trait FromSkiaPath {
+    fn from_skia_path(skp: &skia::Path) -> Self;
 }
 
 // These types should never be used outside this file and are only shorthand for FromSkiaPath
@@ -21,7 +21,7 @@ type SkOutline = Vec<SkContour>;
 /// old debug eprintln's in case you find a broken case. It's quite complicated and takes multiple
 /// passes because Skia path's can contain conics and quads, both of which we want to upconvert to
 /// cubics.
-impl<PD: PointData> FromSkiaPath<PD> for Outline<PD> {
+impl<PD: PointData> FromSkiaPath for Outline<PD> {
     fn from_skia_path(skp: &skia::Path) -> Outline<PD> {
         // These are iterators over (Verb, Vec<skia_safe::Point>)
         // We need two of them because the for loop consumes `iter`, meaning we can't get the conic
@@ -47,7 +47,8 @@ impl<PD: PointData> FromSkiaPath<PD> for Outline<PD> {
                 SkVerb::Conic => {holding_conic = true; PointType::QCurve},
                 // We call these "off curve" simply because it's a free PointType, to test against
                 // later. Bit of a hack.
-                SkVerb::Close | SkVerb::Done => PointType::OffCurve,
+                SkVerb::Close => PointType::OffCurve,
+                SkVerb::Done => { break }
             };
             if ptype == PointType::Move {
                 if skcontour.len() > 0 {
