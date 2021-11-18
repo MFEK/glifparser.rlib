@@ -186,10 +186,15 @@ impl<PD: PointData> ToSkiaPaths for MFEKOutline<PD> {
     }
 }
 
+// The reason that all this is here and not in MFEK/math.rlib is because this data needs to be
+// serialized and deserialized in glif files. So, MFEK/math.rlib gets its structs from here.
+
 #[derive(Clone, Debug, Serialize, Deserialize)]
+#[non_exhaustive]
 pub enum ContourOperations {
     VariableWidthStroke { data: VWSContour },
-    PatternAlongPath { data: PAPContour }
+    PatternAlongPath { data: PAPContour },
+    DashAlongPath { data: DashContour },
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -255,6 +260,22 @@ pub struct VWSContour {
     pub cap_end_type: CapType,
     pub remove_internal: bool,
     pub remove_external: bool,
+}
+
+#[derive(Copy, Clone, Debug, Serialize, Deserialize, PartialEq)]
+pub struct DashCull {
+    pub width: f32,
+    pub area_cutoff: f32,
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
+pub struct DashContour {
+    pub stroke_width: f32,
+    pub cull: Option<DashCull>,
+    pub dash_desc: Vec<f32>,
+    pub include_last_path: bool,
+    pub paint_join: u8, // skia::PaintJoin,
+    pub paint_cap: u8, // skia::PaintCap,
 }
 
 #[derive(Clone, Copy, Debug, Serialize, Deserialize, PartialEq)]
