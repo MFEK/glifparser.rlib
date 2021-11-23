@@ -38,4 +38,10 @@ impl Guideline {
         ret.angle = angle;
         ret
     }
+
+    pub fn from_name_x_y_angle(name: String, x: f32, y: f32, angle: IntegerOrFloat) -> Self {
+        let mut ret = Self::from_x_y_angle(x, y, angle);
+        ret.name = Some(name);
+        ret
+    }
 }
