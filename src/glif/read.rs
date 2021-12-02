@@ -105,7 +105,7 @@ pub fn read_ufo_glif<PD: PointData>(glif: &str) -> Result<Glif<PD>, GlifParserEr
 
     ret.unicode = unicodes;
 
-    let mut anchors: Vec<Anchor> = Vec::new();
+    let mut anchors: Vec<Anchor<PD>> = Vec::new();
 
     while let Some(anchor_el) = glif.take_child("anchor") {
         let mut anchor = Anchor::new();
@@ -155,7 +155,7 @@ pub fn read_ufo_glif<PD: PointData>(glif: &str) -> Result<Glif<PD>, GlifParserEr
     ret.images = images;
     }
 
-    let mut guidelines: Vec<Guideline> = Vec::new();
+    let mut guidelines: Vec<Guideline<PD>> = Vec::new();
 
     while let Some(guideline_el) = glif.take_child("guideline") {
         let gx = guideline_el

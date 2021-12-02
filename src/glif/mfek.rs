@@ -23,21 +23,31 @@ pub(crate) use DEFAULT_LAYER_FORMAT_STR;
 pub struct MFEKPointData;
 impl PointData for MFEKPointData {}
 impl PointData for Option<MFEKPointData> {}
+impl From<()> for MFEKPointData {
+    fn from(_: ()) -> Self {
+        Self::default()
+    }
+}
+impl Into<()> for MFEKPointData {
+    fn into(self) -> () {
+        ()
+    }
+}
 
 /// This is an intermediary form used in MFEKglif and other tools. You can .into() a glif into this
 /// make changes to MFEK data and then turn it back into a standard UFO glif before saving.
 #[derive(Clone, Debug, Default, Serialize, Deserialize)]
 pub struct MFEKGlif<PD: PointData> {
     pub layers: Vec<Layer<PD>>,
-    pub history: Vec<HistoryEntry>,
+    pub history: Vec<HistoryEntry<PD>>,
     pub order: OutlineType,
-    pub anchors: Vec<Anchor>,
+    pub anchors: Vec<Anchor<PD>>,
     /// Note that these components are not yet parsed or checked for infinite loops. You need to
     /// call either ``GlifComponent::to_component_of`` on each of these, or ``Glif::flatten``.
     pub components: GlifComponents,
     pub flattened: Option<Outline<PD>>, // holds cached flattened glif (components to points)
     pub component_rects: Option<Vec<ComponentRect>>, // holds cached flattened component rects
-    pub guidelines: Vec<Guideline>,
+    pub guidelines: Vec<Guideline<PD>>,
     pub width: Option<u64>,
     pub unicode: Vec<char>,
     pub name: String,
@@ -47,8 +57,8 @@ pub struct MFEKGlif<PD: PointData> {
     pub filename: Option<stdpath::PathBuf>,
 }
 
-impl From<Glif<MFEKPointData>> for MFEKGlif<MFEKPointData> {
-    fn from(glif: Glif<MFEKPointData>) -> Self {
+impl<PD: PointData> From<Glif<PD>> for MFEKGlif<PD> {
+    fn from(glif: Glif<PD>) -> Self {
         let mut layers = Vec::new();
         let history = Vec::new();
 
@@ -115,19 +125,20 @@ impl<PD: PointData> From<MFEKGlif<PD>> for Glif<PD> {
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
-pub struct HistoryEntry {
+pub struct HistoryEntry<PD: PointData> {
     pub description: String,
     pub layer_idx: Option<usize>,
     pub contour_idx: Option<usize>,
     pub point_idx: Option<usize>,
+    pub guidelines: Vec<Guideline<PD>>, // UFO-level, not glyph-level which'd be in HistoryEntry::glyph
     pub selected: Option<HashSet<(usize, usize)>>,
-    pub glyph: MFEKGlif<MFEKPointData>,
+    pub glyph: MFEKGlif<PD>,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct MFEKContour<PD: PointData> {
     pub inner: Vec<Point<PD>>,
-    pub operation: Option<ContourOperations>,
+    pub operation: Option<ContourOperations<PD>>,
 }
 
 impl<PD: PointData> From<&Vec<Point<PD>>> for MFEKContour<PD> {
@@ -191,9 +202,9 @@ impl<PD: PointData> ToSkiaPaths for MFEKOutline<PD> {
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[non_exhaustive]
-pub enum ContourOperations {
+pub enum ContourOperations<PD: PointData> {
     VariableWidthStroke { data: VWSContour },
-    PatternAlongPath { data: PAPContour },
+    PatternAlongPath { data: PAPContour<PD> },
     DashAlongPath { data: DashContour },
 }
 
@@ -234,8 +245,8 @@ pub enum PatternStretch {
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
-pub struct PAPContour {
-    pub pattern: MFEKOutline<MFEKPointData>,
+pub struct PAPContour<PD: PointData> {
+    pub pattern: MFEKOutline<PD>,
     pub copies: PatternCopies,
     pub subdivide: PatternSubdivide,
     pub is_vertical: bool, // TODO: Implement this. Might replace it with a general rotation parameter to make it more useful.

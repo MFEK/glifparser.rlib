@@ -28,11 +28,15 @@ use serde::{Deserialize, Deserializer, Serialize, Serializer, ser::SerializeStru
 #[cfg(feature = "mfek")]
 pub use mfek::*;
 
+/// A UFO .glif
+///
+/// TODO: use different generic types on Anchor and Guideline, making this declaration
+/// `Glif<PD,GD,AD>`
 #[derive(Clone, Debug, Default, PartialEq)]
 pub struct Glif<PD: PointData> {
     pub outline: Option<Outline<PD>>,
     pub order: OutlineType,
-    pub anchors: Vec<Anchor>,
+    pub anchors: Vec<Anchor<PD>>,
     /// Note that these components are not yet parsed or checked for infinite loops. You need to
     /// call either ``GlifComponent::to_component_of`` on each of these, or ``Glif::flatten``.
     pub components: GlifComponents,
@@ -41,7 +45,7 @@ pub struct Glif<PD: PointData> {
     /// the parent UFO and telling it not to read glif's (via UfoDataRequest) since you're using
     /// this for that.
     // Command line MFEK programs can also get it from MFEKmetadata.
-    pub guidelines: Vec<Guideline>,
+    pub guidelines: Vec<Guideline<PD>>,
     /// glifparser does support reading the data of images and guessing their format, but in order
     /// to allow you to handle possibly erroneous files we don't do so by default. You need to call
     /// ``GlifImage::to_image_of`` to get an ``Image`` with data.
