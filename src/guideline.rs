@@ -33,6 +33,22 @@ pub struct Guideline<GD: PointData> {
 }
 
 impl<GD: PointData> Guideline<GD> {
+    pub fn as_plist_dict(&self) -> plist::Dictionary {
+        let mut dict = plist::Dictionary::new();
+        dict.insert("x".to_string(), plist::Value::Real(self.at.x.into()));
+        dict.insert("y".to_string(), plist::Value::Real(self.at.y.into()));
+        dict.insert("angle".to_string(), plist::Value::Real(self.angle.into()));
+        if let Some(ref name) = self.name {
+            dict.insert("name".to_string(), plist::Value::String(name.to_string()));
+        }
+        if let Some(ref color) = self.color {
+            dict.insert("color".to_string(), color.as_plist_value());
+        }
+        dict
+    }
+}
+
+impl<GD: PointData> Guideline<GD> {
     fn new() -> Self {
         Self::default()
     }

@@ -16,6 +16,10 @@ impl Color {
     pub fn from_rgba(r: IntegerOrFloat, g: IntegerOrFloat, b: IntegerOrFloat, a: IntegerOrFloat) -> Color {
         Color { r, g, b, a }
     }
+
+    pub fn as_plist_value(&self) -> plist::Value {
+        plist::Value::Array(vec![plist::Value::Real(self.r.into()), plist::Value::Real(self.g.into()), plist::Value::Real(self.b.into()), plist::Value::Real(self.a.into())])
+    }
 }
 
 use std::str::FromStr;
