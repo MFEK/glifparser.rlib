@@ -14,6 +14,88 @@ inclusion tree includes any parent glyph). `glifparser` supports images
 completely, including colored images, and can generate the colored to-spec UFO
 bitmaps for you.
 
+## Main type: `Glif`
+`glifparser`'s main type is `Glif<PD: PointData>`. You can get this type by
+calling `glifparser::read_from_filename`.
+
+```rust
+/// A UFO .glif
+///
+/// TODO: use different generic types on Anchor and Guideline, making this declaration
+/// `Glif<PD,GD,AD>`
+#[derive(Clone, Debug, Default, PartialEq)]
+pub struct Glif<PD: PointData> {
+    pub outline: Option<Outline<PD>>,
+    pub order: OutlineType,
+    pub anchors: Vec<Anchor<PD>>,
+    /// Note that these components are not yet parsed or checked for infinite loops. You need to
+    /// call either ``GlifComponent::to_component_of`` on each of these, or ``Glif::flatten``.
+    pub components: GlifComponents,
+    /// .glif guidelines. Note: glif may have more guidelines, not listed here. It will also have
+    /// an asecender and a descender, not listed here. You can get this info from `norad`, reading
+    /// the parent UFO and telling it not to read glif's (via UfoDataRequest) since you're using
+    /// this for that.
+    // Command line MFEK programs can also get it from MFEKmetadata.
+    pub guidelines: Vec<Guideline<PD>>,
+    /// glifparser does support reading the data of images and guessing their format, but in order
+    /// to allow you to handle possibly erroneous files we don't do so by default. You need to call
+    /// ``GlifImage::to_image_of`` to get an ``Image`` with data.
+    #[cfg(feature = "glifimage")]
+    pub images: Vec<GlifImage>,
+    pub width: Option<u64>,
+    pub unicode: Vec<char>,
+    pub name: String,
+    /// This is an arbitrary glyph comment, exactly like the comment field in FontForge SFD.
+    pub note: Option<String>,
+    /// It's up to the API consumer to set this.
+    pub filename: Option<path::PathBuf>,
+    /// glif private library
+    pub lib: Option<plist::Dictionary>,
+}
+```
+
+If you do not need to associate data with points, it behooves you to stub out
+the generic type with `()` as early as you can…
+
+```rust
+fn main() {
+    let mut input_glif: glifparser::Glif<()> =
+        glifparser::read_from_filename(&path).expect("Failed to read .glif file!"))
+            .expect("glifparser couldn't parse input path glif. Invalid glif?");
+}
+```
+### `PointData`
+
+API consumers may put any clonable type as an associated type to Glif, which
+will appear along with each Point. You could use this to implement, e.g.,
+hyperbeziers. The Glif Point's would still represent a Bézier curve, but you
+could put hyperbezier info along with the Point.
+
+Note that anchors and guidelines receive *the same type*. So, if you wanted to
+put *different* data along with each, you would need to make an enum like:
+
+```rust
+use glifparser::{Point, PointData};
+
+#[derive(Debug, Copy, Clone, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
+pub enum MyPointData {
+    Point(bool),
+    Guideline(u8),
+    Anchor { good: bool },
+}
+impl Default for MyPointData {
+    fn default() -> Self {
+        Self::Point(false)
+    }
+}
+impl PointData for MyPointData {}
+
+fn testing() {
+    let mut point = Point::default();
+    point.data = Some(MyPointData::Point(true));
+}
+```
+
 ## Comparison with Norad
 
 First and foremost, `glifparser` has different goals than Norad. `glifparser`
@@ -64,34 +146,3 @@ well as Cartesian coordinates (in polar mode, the point is the origin).
 You can also find in MFEK/math.rlib piecewise spline types that can be
 converted to and from glifparser's `Glif<PD>` and `Outline<PD>` types.
 
-## `PointData`
-
-API consumers may put any clonable type as an associated type to Glif, which
-will appear along with each Point. You could use this to implement, e.g.,
-hyperbeziers. The Glif Point's would still represent a Bézier curve, but you
-could put hyperbezier info along with the Point.
-
-Note that anchors and guidelines receive *the same type*. So, if you wanted to
-put *different* data along with each, you would need to make an enum like:
-
-```rust
-use glifparser::{Point, PointData};
-
-#[derive(Debug, Copy, Clone, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
-pub enum MyPointData {
-    Point(bool),
-    Guideline(u8),
-    Anchor { good: bool },
-}
-impl Default for MyPointData {
-    fn default() -> Self {
-        Self::Point(false)
-    }
-}
-impl PointData for MyPointData {}
-
-fn testing() {
-    let mut point = Point::default();
-    point.data = Some(MyPointData::Point(true));
-}
-```
