@@ -105,9 +105,11 @@ pub struct Point<PD: PointData> {
 }
 
 /// For use by ``Point::handle_or_colocated``
+/// TODO: Replace with Option<WhichHandle>
 #[cfg_attr(feature = "glifserde", derive(Serialize, Deserialize))]
 #[derive(Debug, Copy, Clone, PartialEq, Hash)]
 pub enum WhichHandle {
+    /// TODO: Deprecate Neither.
     Neither,
     A,
     B,
@@ -229,6 +231,10 @@ impl WhichHandle {
                 Self::Neither
             }
         }
+    }
+
+    pub fn is_valid(&self) -> bool {
+        *self == Self::A || *self == Self::B
     }
 }
 
