@@ -115,6 +115,7 @@ pub fn write_ufo_glif_data<PD: PointData>(glif: &Glif<PD>) -> Result<Vec<u8>, Gl
                     }
 
                     let mut point_node = xmltree::Element::new("point");
+                    debug_assert!(point.is_valid(None));
                     point_node.attributes.insert("x".to_owned(), point.x.to_string());
                     point_node.attributes.insert("y".to_owned(), point.y.to_string());
 
