@@ -10,4 +10,8 @@ fn test_handles() {
     let mut point = point;
     point.set_handle(WhichHandle::A, Handle::Colocated);
     assert_eq!(point.handle(WhichHandle::A), Handle::Colocated);
+
+    let wh = WhichHandle::A;
+    assert_eq!(wh.opposite(), WhichHandle::B);
+    assert_eq!(wh.opposite().opposite(), WhichHandle::A);
 }

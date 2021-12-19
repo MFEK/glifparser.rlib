@@ -219,6 +219,19 @@ impl From<&str> for WhichHandle {
     }
 }
 
+impl WhichHandle {
+    pub fn opposite(self) -> Self {
+        match self {
+            Self::A => Self::B,
+            Self::B => Self::A,
+            Self::Neither => {
+                log::error!("Tried to get opposite handle of Neither, returned Neither. This should not be valid!");
+                Self::Neither
+            }
+        }
+    }
+}
+
 impl Display for PointType {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> Result<(), std::fmt::Error> {
         write!(f, "{}", match self {
