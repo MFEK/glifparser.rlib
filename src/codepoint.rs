@@ -4,6 +4,6 @@ pub trait Codepoint {
 
 impl Codepoint for char {
     fn display(&self) -> String {
-        format!("{:x}", *self as u32)
+        format!("{:X}", *self as u32)
     }
 }
