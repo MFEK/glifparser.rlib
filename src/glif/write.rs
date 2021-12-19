@@ -215,7 +215,10 @@ pub fn write_ufo_glif_data<PD: PointData>(glif: &Glif<PD>) -> Result<Vec<u8>, Gl
         None => {}
     }
 
-    let config = xmltree::EmitterConfig::new().perform_indent(true);
+    let config = xmltree::EmitterConfig::new()
+        .perform_indent(true)
+        .pad_self_closing(false)
+        .autopad_comments(false);
 
     let mut ret_string: Vec<u8> = Vec::new();
     glyph.write_with_config(&mut ret_string, config)?;
