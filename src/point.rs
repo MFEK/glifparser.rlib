@@ -133,6 +133,17 @@ impl<PD: PointData> Point<PD> {
         Point { x, y, a, b, ptype, name, data }
     }
 
+    pub fn handle(&self, which: WhichHandle) -> Handle {
+        match which {
+            WhichHandle::A => self.a,
+            WhichHandle::B => self.b,
+            WhichHandle::Neither => {
+                log::error!("Used Point::handle(which) to get Neither handle…that shouldn't be valid!");
+                Handle::Colocated
+            },
+        }
+    }
+
     /// Return an x, y position for a point, or one of its handles. If called with
     /// WhichHandle::Neither, return position for point.
     pub fn handle_or_colocated(
@@ -141,14 +152,20 @@ impl<PD: PointData> Point<PD> {
         transform_x: fn(f32) -> f32,
         transform_y: fn(f32) -> f32,
     ) -> (f32, f32) {
-        let handle = match which {
-            WhichHandle::A => self.a,
-            WhichHandle::B => self.b,
-            WhichHandle::Neither => Handle::Colocated,
-        };
+        let handle = self.handle(which);
         match handle {
             Handle::At(x, y) => (transform_x(x), transform_y(y)),
             Handle::Colocated => (transform_x(self.x), transform_y(self.y)),
+        }
+    }
+
+    /// This function is intended for use by generic functions that can work on either handle, to
+    /// decrease the use of macros like `move_mirror!(a, b)`.
+    pub fn set_handle(&mut self, which: WhichHandle, handle: Handle) {
+        match which {
+            WhichHandle::A => self.a = handle,
+            WhichHandle::B => self.b = handle,
+            WhichHandle::Neither => log::error!("Tried to Point::set_handle a WhichHandle::Neither, refusing to set point's x, y"),
         }
     }
 }
