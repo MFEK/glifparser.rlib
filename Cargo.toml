@@ -5,7 +5,7 @@ authors = ["Fredrick Brennan <copypaste@kittens.ph>"]
 edition = "2018"
 
 [dependencies]
-xmltree = "0.10.3"
+xmltree = { version = "0.10", features = ["attribute-order"] }
 log = "0.4"
 kurbo = { version = "0.8", default-features = false }
 trees = "0.4"
