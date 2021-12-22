@@ -1,7 +1,7 @@
 pub mod create;
 pub mod skia;
 
-use log::info;
+use log;
 #[cfg(feature = "glifserde")]
 use serde::{Serialize, Deserialize};
 
@@ -39,6 +39,6 @@ pub fn get_outline_type(goutline: &GlifOutline) -> OutlineType {
             }
         }
     }
-    info!("Defaulting outline with only lines or unrecognized points to cubic");
+    log::debug!("Defaulting outline with only lines or unrecognized points to cubic");
     OutlineType::Cubic // path has no off-curve point, only lines
 }
