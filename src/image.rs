@@ -64,6 +64,8 @@ impl ImageData {
             Some(&[0xFF, 0xD8, _, _, _, _, _, _, _, _, _, _]) => ImageCodec::JPEG,
             Some(&[0x89, 0x50, 0x4E, 0x47, _, _, _, _, _, _, _, _]) => ImageCodec::PNG,
             Some(&[0x47, 0x49, 0x46, 0x38, _, _, _, _, _, _, _, _]) => ImageCodec::GIF,
+            Some(&[0x49, 0x49, 0x2A, 0x00, _, _, _, _, _, _, _, _]) => ImageCodec::TIFF,
+            Some(&[0x4D, 0x4D, 0x00, 0x2A, _, _, _, _, _, _, _, _]) => ImageCodec::TIFF,
             Some(&[0x52, 0x49, 0x46, 0x46, _, _, _, _, 0x57, 0x45, 0x42, 0x50]) => ImageCodec::WebP,
             _ => ImageCodec::Unknown
         };
@@ -104,6 +106,7 @@ pub enum ImageCodec {
     Unknown,
     PNG,
     JPEG,
+    TIFF,
     GIF,
     WebP,
     BMP,
