@@ -27,3 +27,4 @@ glifserde = ["serde", "kurbo/serde", "integer_or_float/default", "plist/default"
 default = ["glifimage", "glifserde"]
 skia = ["default", "skia-safe"]
 mfek = ["default", "skia"]
+more-image-formats = ["image/gif", "image/jpeg", "image/webp", "image/bmp", "image/tiff"]

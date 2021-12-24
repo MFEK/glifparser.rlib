@@ -12,7 +12,7 @@ use serde::{Serialize, Deserialize};
 use integer_or_float::IntegerOrFloat;
 use kurbo::Affine;
 use log::warn;
-use image::{DynamicImage, ImageFormat, io::Reader};
+use image::{self, DynamicImage, io::Reader};
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum DataLoadState {
@@ -210,7 +210,8 @@ impl Image {
             DataOrBitmap::Bitmap { .. } => Err(GlifParserError::ImageIoError(None))?
         };
         let reader = Reader::new(io::Cursor::new(raw_data)).with_guessed_format().or_else(|e|Err(GlifParserError::ImageIoError(Some(Rc::new(e)))))?;
-        if !(reader.format() == Some(ImageFormat::Png)) {
+        #[cfg(not(feature = "more-image-formats"))]
+        if !(reader.format() == Some(image::ImageFormat::Png)) {
             self.data.state = DataLoadState::LoadedDecodeFailed;
             Err(GlifParserError::ImageNotPNG)?
         }
