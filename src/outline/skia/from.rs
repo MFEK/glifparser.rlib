@@ -191,6 +191,7 @@ impl<PD: PointData> FromSkOutline for Outline<PD> {
                     data: None,
                     x: points[0].x,
                     y: points[0].y,
+                    smooth: false,
                     // These will be fixed below, if needed
                     a: Handle::Colocated,
                     b: Handle::Colocated,

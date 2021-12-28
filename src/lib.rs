@@ -22,7 +22,7 @@ pub use crate::glif::mfek::{MFEKGlif, VWSContour, JoinType, CapType};
 pub use crate::guideline::{Guideline, GuidelinePoint};
 #[cfg(feature = "glifimage")]
 pub use crate::image::{GlifImage, Image, ImageCodec};
-pub use crate::outline::{Contour, Outline, OutlineType};
+pub use crate::outline::{contour, Contour, Outline, OutlineType};
 pub use crate::point::{Point, PointType, Handle, WhichHandle, PointData};
 pub use integer_or_float::IntegerOrFloat;
 

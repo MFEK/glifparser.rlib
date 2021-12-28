@@ -43,7 +43,17 @@ pub enum GlifParserError {
     /// Color (for guidelines, images, etc) not RGBA
     ColorNotRGBA,
     /// Error for use by parse() trait (FromStr)
-    TypeConversionError(&'static str, String),
+    TypeConversionError{req_type: &'static str, req_variant: String},
+
+    /// A requested point index is out of bounds
+    ContourLenOneUnexpected,
+    ContourLenZeroUnexpected,
+    PointIdxOutOfBounds{idx: usize, len: usize},
+    /// No previous on an open contour.
+    // usize value = contour length for these 2
+    ContourNoPrevious(usize),
+    /// No next on an open contour
+    ContourNoNext(usize),
 }
 
 impl Display for GlifParserError {
@@ -92,8 +102,26 @@ impl Display for GlifParserError {
                 format!("Color not RGBA")
             },
 
-            Self::TypeConversionError(t, s) => {
-                format!("Type conversion error: {} not in {}", s, t)
+            Self::TypeConversionError { req_type, req_variant } => {
+                format!("Type conversion error: {} not in {}", req_variant, req_type)
+            }
+
+            Self::PointIdxOutOfBounds { idx, len } => {
+                format!("The point index {} is out of bounds as self.len() == {}", idx, len)
+            }
+            Self::ContourLenOneUnexpected => {
+                format!("On a contour of length one, there's no previous/next point")
+            }
+            Self::ContourLenZeroUnexpected => {
+                format!("On an empty invalid contour (len == 0), there's no previous/next point")
+            }
+
+            Self::ContourNoPrevious(len) => {
+                format!("Asked for previous index of 0 on an open contour (len {})", len)
+            }
+
+            Self::ContourNoNext(len) => {
+                format!("Asked for next index of last point, {}, on an open contour", len)
             }
         })
     }

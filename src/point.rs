@@ -101,6 +101,7 @@ pub struct Point<PD: PointData> {
     pub b: Handle,
     pub name: Option<String>,
     pub ptype: PointType,
+    pub smooth: bool,
     pub data: Option<PD>,
 }
 
@@ -161,8 +162,8 @@ impl<PD: PointData> Point<PD> {
     }
 
     /// Make a point from its x and y position, handles and type
-    pub fn from_fields((x, y): (f32, f32), (a, b): (Handle, Handle), ptype: PointType, name: Option<String>, data: Option<PD>) -> Point<PD> {
-        Point { x, y, a, b, ptype, name, data }
+    pub fn from_fields((x, y): (f32, f32), (a, b): (Handle, Handle), smooth: bool, ptype: PointType, name: Option<String>, data: Option<PD>) -> Point<PD> {
+        Point { x, y, a, b, smooth, ptype, name, data }
     }
 
     pub fn handle(&self, which: WhichHandle) -> Handle {

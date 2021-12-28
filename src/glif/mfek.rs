@@ -310,7 +310,7 @@ impl FromStr for InterpolationType {
         match s {
             "none" => Ok(InterpolationType::Null),
             "linear" => Ok(InterpolationType::Linear),
-            _ => Err(GlifParserError::TypeConversionError("InterpolationType", s.to_owned())),
+            _ => Err(GlifParserError::TypeConversionError{req_type: "InterpolationType", req_variant: s.to_owned()}),
         }
     }
 }
@@ -350,7 +350,7 @@ impl FromStr for JoinType {
             "miter" => Ok(JoinType::Miter),
             "circle" => Ok(JoinType::Circle),
             "round" => Ok(JoinType::Round),
-            _ => Err(GlifParserError::TypeConversionError("JoinType", s.to_owned())),
+            _ => Err(GlifParserError::TypeConversionError{req_type: "JoinType", req_variant: s.to_owned()}),
         }
     }
 }
@@ -386,10 +386,7 @@ impl FromStr for CapType {
                 if s.ends_with(".glif") {
                     Ok(CapType::Custom)
                 } else {
-                    Err(GlifParserError::TypeConversionError(
-                        "CapType",
-                        s.to_owned(),
-                    ))
+                    Err(GlifParserError::TypeConversionError{req_type: "CapType", req_variant: s.to_owned()})
                 }
             }
         }

@@ -1,3 +1,4 @@
+pub mod contour;
 pub mod create;
 pub mod skia;
 

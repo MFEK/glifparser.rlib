@@ -9,7 +9,7 @@ use crate::error::GlifParserError::{self, GlifInputError};
 use crate::component::GlifComponent;
 use crate::guideline::Guideline;
 use crate::outline::{self, get_outline_type, GlifContour, GlifOutline, OutlineType};
-use crate::point::{GlifPoint, PointData};
+use crate::point::{GlifPoint, PointData, PointType};
 use crate::anchor::Anchor;
 #[cfg(feature = "glifimage")]
 use crate::image::GlifImage;
@@ -221,11 +221,22 @@ pub fn read_ufo_glif<PD: PointData>(glif: &str) -> Result<Glif<PD>, GlifParserEr
                     .or(Err(input_error!("<point> y not float")))?;
 
                 match point_el.attributes.get("name") {
-                    Some(p) => gpoint.name = Some(p.clone()),
+                    Some(n) => gpoint.name = Some(n.clone()),
                     None => {}
                 }
 
                 gpoint.ptype = point_el.attributes.get("type").as_ref().map(|s| s.as_str()).unwrap_or("offcurve").into();
+
+                match point_el.attributes.get("smooth") {
+                    Some(s) => if s == "yes" {
+                        if gpoint.ptype != PointType::OffCurve {
+                            gpoint.smooth = true;
+                        } else {
+                            log::error!("Ignoring illogical `smooth=yes` on offcurve point");
+                        }
+                    },
+                    _ => {}
+                }
 
                 if gpoint.ptype.should_write_to_ufo() {
                     gcontour.push(gpoint);

@@ -129,8 +129,12 @@ pub fn write_ufo_glif_data<PD: PointData>(glif: &Glif<PD>) -> Result<Vec<u8>, Gl
                         Some(name) => {point_node.attributes.insert("name".to_owned(), name.to_string());},
                         None => {}
                     }
+
+                    if point.smooth {
+                        point_node.attributes.insert("smooth".to_owned(), "yes".to_owned());
+                    }
                 
-                    // Point<T> does not contain fields for smooth, or identifier.
+                    // Point<T> does not contain field for identifier.
                     contour_node.children.push(xmltree::XMLNode::Element(point_node));
                     match point.ptype {
                         PointType::Line | PointType::Curve | PointType::Move => {
