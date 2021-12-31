@@ -11,13 +11,15 @@ use crate::component::{ComponentRect, GlifComponents};
 use crate::error::GlifParserError;
 use crate::glif::Glif;
 use crate::guideline::Guideline;
-use crate::outline::{Outline, OutlineType};
+use crate::outline::{Outline, Contour, OutlineType};
 use crate::outline::skia::{SkiaPaths, SkiaPointTransforms, ToSkiaPath, ToSkiaPaths};
 use crate::point::{Point, PointData, PointType};
 
 #[macro_use] pub mod layer;
 pub use layer::Layer;
 pub(crate) use DEFAULT_LAYER_FORMAT_STR;
+pub mod traits;
+use traits::*;
 
 #[derive(Debug, Default, Clone, Serialize, Deserialize)]
 pub struct MFEKPointData;
@@ -153,14 +155,43 @@ impl<PD: PointData> From<&Vec<Point<PD>>> for MFEKContour<PD> {
 impl<PD: PointData> From<Vec<Point<PD>>> for MFEKContour<PD> {
     fn from(contour: Vec<Point<PD>>) -> Self {
         Self {
-            inner: contour.clone(),
+            inner: contour,
             operation: None,
         }
     }
 }
 
+impl<PD: PointData> Into<Contour<PD>> for MFEKContour<PD> {
+    fn into(self) -> Contour<PD> {
+        self.inner
+    }
+}
 
 pub type MFEKOutline<PD> = Vec<MFEKContour<PD>>;
+
+impl<PD: PointData> DowngradeOutline<PD> for MFEKOutline<PD> {
+    fn cleanly_downgradable(&self) -> bool {
+        self.iter().all(|c|c.operation.is_none())
+    }
+
+    fn downgrade(self) -> Outline<PD> {
+        let mut ret = Outline::new();
+        for contour in self {
+            ret.push(contour.inner);
+        }
+        ret
+    }
+}
+
+impl<PD: PointData> UpgradeOutline<PD> for Outline<PD> {
+    fn upgrade(self) -> MFEKOutline<PD> {
+        let mut ret = MFEKOutline::new();
+        for contour in self {
+            ret.push(contour.into());
+        }
+        ret
+    }
+}
 
 impl<PD: PointData> ToSkiaPaths for MFEKOutline<PD> {
     fn to_skia_paths(&self, spt: Option<SkiaPointTransforms>) -> SkiaPaths {

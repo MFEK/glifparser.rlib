@@ -97,11 +97,16 @@ impl PointData for () {}
 pub struct Point<PD: PointData> {
     pub x: f32,
     pub y: f32,
+    #[cfg_attr(feature = "glifserde", serde(default))]
     pub a: Handle,
+    #[cfg_attr(feature = "glifserde", serde(default))]
     pub b: Handle,
+    #[cfg_attr(feature = "glifserde", serde(default))]
     pub name: Option<String>,
     pub ptype: PointType,
+    #[cfg_attr(feature = "glifserde", serde(default))]
     pub smooth: bool,
+    #[cfg_attr(feature = "glifserde", serde(default))]
     pub data: Option<PD>,
 }
 
