@@ -12,7 +12,7 @@ use crate::point::PointData;
 macro_rules! DEFAULT_LAYER_FORMAT_STR {() => {"Layer {}"}}
 pub const DEFAULT_LAYER_FORMAT_STR: &str = DEFAULT_LAYER_FORMAT_STR!();
 
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct Layer<PD: PointData> {
     pub name: String,
     pub visible: bool,

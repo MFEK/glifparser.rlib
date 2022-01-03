@@ -8,7 +8,7 @@ use serde::{Serialize, Deserialize};
 
 use crate::anchor::Anchor;
 use crate::component::{ComponentRect, GlifComponents};
-use crate::error::GlifParserError;
+use crate::error::{mfek::*, GlifParserError};
 use crate::glif::Glif;
 use crate::guideline::Guideline;
 use crate::outline::{Outline, Contour, OutlineType};
@@ -19,7 +19,6 @@ use crate::point::{Point, PointData, PointType};
 pub use layer::Layer;
 pub(crate) use DEFAULT_LAYER_FORMAT_STR;
 pub mod traits;
-use traits::*;
 
 #[derive(Debug, Default, Clone, Serialize, Deserialize)]
 pub struct MFEKPointData;
@@ -38,7 +37,7 @@ impl Into<()> for MFEKPointData {
 
 /// This is an intermediary form used in MFEKglif and other tools. You can .into() a glif into this
 /// make changes to MFEK data and then turn it back into a standard UFO glif before saving.
-#[derive(Clone, Debug, Default, Serialize, Deserialize)]
+#[derive(Clone, Debug, Default, PartialEq, Serialize, Deserialize)]
 pub struct MFEKGlif<PD: PointData> {
     pub layers: Vec<Layer<PD>>,
     pub history: Vec<HistoryEntry<PD>>,
@@ -126,7 +125,7 @@ impl<PD: PointData> From<MFEKGlif<PD>> for Glif<PD> {
     }
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct HistoryEntry<PD: PointData> {
     pub description: String,
     pub layer_idx: Option<usize>,
@@ -137,7 +136,7 @@ pub struct HistoryEntry<PD: PointData> {
     pub glyph: MFEKGlif<PD>,
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct MFEKContour<PD: PointData> {
     pub inner: Vec<Point<PD>>,
     pub operation: Option<ContourOperations<PD>>,
@@ -168,30 +167,6 @@ impl<PD: PointData> Into<Contour<PD>> for MFEKContour<PD> {
 }
 
 pub type MFEKOutline<PD> = Vec<MFEKContour<PD>>;
-
-impl<PD: PointData> DowngradeOutline<PD> for MFEKOutline<PD> {
-    fn cleanly_downgradable(&self) -> bool {
-        self.iter().all(|c|c.operation.is_none())
-    }
-
-    fn downgrade(self) -> Outline<PD> {
-        let mut ret = Outline::new();
-        for contour in self {
-            ret.push(contour.inner);
-        }
-        ret
-    }
-}
-
-impl<PD: PointData> UpgradeOutline<PD> for Outline<PD> {
-    fn upgrade(self) -> MFEKOutline<PD> {
-        let mut ret = MFEKOutline::new();
-        for contour in self {
-            ret.push(contour.into());
-        }
-        ret
-    }
-}
 
 impl<PD: PointData> ToSkiaPaths for MFEKOutline<PD> {
     fn to_skia_paths(&self, spt: Option<SkiaPointTransforms>) -> SkiaPaths {
@@ -231,7 +206,7 @@ impl<PD: PointData> ToSkiaPaths for MFEKOutline<PD> {
 // The reason that all this is here and not in MFEK/math.rlib is because this data needs to be
 // serialized and deserialized in glif files. So, MFEK/math.rlib gets its structs from here.
 
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[non_exhaustive]
 pub enum ContourOperations<PD: PointData> {
     VariableWidthStroke { data: VWSContour },
@@ -239,14 +214,14 @@ pub enum ContourOperations<PD: PointData> {
     DashAlongPath { data: DashContour },
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub enum PatternCopies {
     Single,
     Repeated,
     Fixed(usize) // TODO: Implement
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub enum PatternSubdivide {
     /// no splitting
     Off,
@@ -256,7 +231,7 @@ pub enum PatternSubdivide {
     //Angle(f64) TODO: Implement.
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub enum PatternHandleDiscontinuity {
     /// no handling
     Off,
@@ -265,7 +240,7 @@ pub enum PatternHandleDiscontinuity {
     // Cut TODO: implement
 }
 
-#[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
 pub enum PatternStretch {
     /// no stretching
     Off,
@@ -275,7 +250,7 @@ pub enum PatternStretch {
     Spacing,
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct PAPContour<PD: PointData> {
     pub pattern: MFEKOutline<PD>,
     pub copies: PatternCopies,
@@ -424,7 +399,7 @@ impl FromStr for CapType {
     }
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub enum LayerOperation {
     Difference,
     Union,

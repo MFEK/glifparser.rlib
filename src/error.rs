@@ -1,3 +1,6 @@
+#[cfg(feature = "mfek")]
+pub mod mfek;
+
 use std::error::Error;
 use std::fmt::{Formatter, Display};
 use std::io;
