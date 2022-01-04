@@ -51,6 +51,7 @@ pub trait PrevNext {
     /// Return the previous and next index, given an index. As opposed to ``GenericPrevNext``, this always
     /// considers a contour's open/closed state (`assert!(self[0].ptype == PointType::Move)`).
     fn contour_prev_next(&self, idx: usize) -> Result<(Option<usize>, Option<usize>), GlifParserError>;
+    fn contour_prev_next_handles(&self, idx: usize) -> Result<((Handle, Handle), (Handle, Handle)), GlifParserError>;
 }
 
 impl<T> GenericPrevNext for Vec<T> {
@@ -127,6 +128,12 @@ impl<PD: PointData> PrevNext for Contour<PD> {
         } else {
             Ok((Some(self.prev(idx)?), Some(self.next(idx)?)))
         }
+    }
+    fn contour_prev_next_handles(&self, idx: usize) -> Result<((Handle, Handle), (Handle, Handle)), GlifParserError> {
+        let (prev, next) = self.contour_prev_next(idx)?;
+        let prev = prev.map(|idx| (self[idx].a, self[idx].b)).unwrap_or((Handle::Colocated, Handle::Colocated));
+        let next = next.map(|idx| (self[idx].a, self[idx].b)).unwrap_or((Handle::Colocated, Handle::Colocated));
+        Ok((prev, next))
     }
 }
 

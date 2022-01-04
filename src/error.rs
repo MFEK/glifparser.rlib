@@ -1,6 +1,8 @@
 #[cfg(feature = "mfek")]
 pub mod mfek;
 
+use crate::point::PointType;
+
 use std::error::Error;
 use std::fmt::{Formatter, Display};
 use std::io;
@@ -15,6 +17,8 @@ use plist::Error as PlistError;
 pub enum GlifParserError {
     /// OS error when reading glif
     GlifFileIoError(Option<Rc<io::Error>>),
+    /// Self-built Outline error
+    GlifOutlineHasBadPointType{idx: usize, ptype: PointType},
 
     /// Glif filename not set
     GlifFilenameNotSet(String),
@@ -64,6 +68,9 @@ impl Display for GlifParserError {
         write!(f, "glifparser error: {}", match self {
             Self::GlifFileIoError(ioe) => {
                 format!("System error when loading glif file: {:?}", ioe)
+            },
+            Self::GlifOutlineHasBadPointType{idx, ptype} => {
+                format!("Bad point type {:?} in contour (index @{})", ptype, idx)
             },
             Self::GlifFilenameNotSet(s) => {
                 format!("Glyph filename not set: {}", &s)

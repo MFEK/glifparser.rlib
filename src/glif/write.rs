@@ -2,25 +2,23 @@ use xmltree;
 
 use super::Glif;
 use crate::error::GlifParserError;
-use crate::point::{Handle, PointData, PointType};
+use crate::point::{Handle, Point, PointData, PointType, WhichHandle};
 use crate::codepoint::Codepoint;
+use crate::outline::contour::State as _;
+use crate::outline::RefigurePointTypes;
 
 use std::fs;
 use std::path::Path;
 
-fn build_ufo_point_from_handle(handle: Handle) -> Option<xmltree::Element>
-{
-    match handle {
-        Handle::At(x, y) => {
-            let mut glyph = xmltree::Element::new("point");
-            glyph.attributes.insert("x".to_owned(), x.to_string());
-            glyph.attributes.insert("y".to_owned(), y.to_string());
-            return Some(glyph);
-        },
-        _ => {}
-    }
-
-    None
+fn build_ufo_point_from_handle<PD: PointData>(point: &Point<PD>, wh: WhichHandle) -> xmltree::Element {
+    let (x, y) = match point.handle(wh) {
+        Handle::At(x, y) => (x, y),
+        Handle::Colocated => (point.x, point.y),
+    };
+    let mut glyph = xmltree::Element::new("point");
+    glyph.attributes.insert("x".to_owned(), x.to_string());
+    glyph.attributes.insert("y".to_owned(), y.to_string());
+    glyph
 }
 
 // Both components and images have the same matrix/identifier values. This is DRY.
@@ -87,33 +85,22 @@ pub fn write_ufo_glif_data<PD: PointData>(glif: &Glif<PD>) -> Result<Vec<u8>, Gl
     {
         Some(outline) => {
             for contour in outline {
+                let mut contour = contour.clone();
+                contour.refigure_point_types();
                 // if we find a move point at the start of things we set this to false
-                let open_contour = contour.first().unwrap().ptype == PointType::Move;
+                let open_contour = contour.is_open();
                 let mut contour_node = xmltree::Element::new("contour");
-                
+
                 let mut last_point = None;
                 // a is next, b is prev
-                for (i, point) in contour.iter().enumerate() {
-                    let mut point = point.clone();
-                    if let Some(_lp) = last_point {
+                let mut iter = contour.iter_mut().enumerate().peekable();
+                while let Some((i, point)) = iter.next() {
+                    if last_point.map(|lp: &mut Point<_>|lp.handle(WhichHandle::A) != Handle::Colocated).unwrap_or(false) || point.b != Handle::Colocated {
                         // if there was a point prior to this one we emit our b handle
-                        if let Some(handle_node) = build_ufo_point_from_handle(point.b) {
-                            contour_node.children.push(xmltree::XMLNode::Element(handle_node));
-                        }
+                        let handle_node = build_ufo_point_from_handle(&point, WhichHandle::B);
+                        contour_node.children.push(xmltree::XMLNode::Element(handle_node));
                     }
                     
-                    // If the last point has a handle, the first point should be made a Curve (in
-                    // case it already isn't). (fixup)
-                    if i == 0 && !open_contour {
-                        contour.last().map(|p| {
-                            if p.a != Handle::Colocated {
-                                point.ptype = PointType::Curve;
-                            } else {
-                                point.ptype = PointType::Line;
-                            }
-                        });
-                    }
-
                     let mut point_node = xmltree::Element::new("point");
                     debug_assert!(point.is_valid(None));
                     point_node.attributes.insert("x".to_owned(), point.x.to_string());
@@ -133,29 +120,32 @@ pub fn write_ufo_glif_data<PD: PointData>(glif: &Glif<PD>) -> Result<Vec<u8>, Gl
                     if point.smooth {
                         point_node.attributes.insert("smooth".to_owned(), "yes".to_owned());
                     }
+
+                    let next_point = iter.peek();
+                    let next_has_prev = next_point.map(|(_, np)|np.b != Handle::Colocated).unwrap_or(false);
                 
                     // Point<T> does not contain field for identifier.
                     contour_node.children.push(xmltree::XMLNode::Element(point_node));
                     match point.ptype {
                         PointType::Line | PointType::Curve | PointType::Move => {
-                            if let Some(handle_node) = build_ufo_point_from_handle(point.a) {
+                            if point.a != Handle::Colocated || next_has_prev {
+                                let handle_node = build_ufo_point_from_handle(&point, WhichHandle::A);
                                 contour_node.children.push(xmltree::XMLNode::Element(handle_node));
-                            }                        
+                            }
                         },
                         PointType::QCurve => {
-                            unimplemented!()
+                            unimplemented!("Quadratic curves not writable yet")
                         },
-                        _ => { unreachable!() }
+                        _ => { return Err(GlifParserError::GlifOutlineHasBadPointType{idx: i, ptype: point.ptype}); }
                     }    
                     
                     last_point = Some(point);
                 }
 
                 // if a move wasn't our first point then we gotta close the shape by emitting the first point's b (prev) handle
-                if !open_contour {
-                    if let Some(handle_node) = build_ufo_point_from_handle(contour.first().unwrap().b) {
-                        contour_node.children.push(xmltree::XMLNode::Element(handle_node));
-                    }     
+                if !open_contour && contour.first().map(|fp|fp.ptype != PointType::Move && contour.last().unwrap().a != Handle::Colocated).unwrap_or(false) {
+                    let handle_node = build_ufo_point_from_handle(&(contour.first().unwrap()), WhichHandle::B);
+                    contour_node.children.push(xmltree::XMLNode::Element(handle_node));
                 }
 
                 outline_node.children.push(xmltree::XMLNode::Element(contour_node));
