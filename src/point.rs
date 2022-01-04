@@ -42,8 +42,8 @@ pub enum PointType {
 #[cfg_attr(feature = "glifserde", derive(Serialize, Deserialize))]
 #[derive(Debug, Copy, Clone, PartialEq)]
 pub enum Handle {
-    Colocated,
     At(f32, f32),
+    Colocated,
 }
 
 impl From<Option<&GlifPoint>> for Handle {
@@ -52,6 +52,27 @@ impl From<Option<&GlifPoint>> for Handle {
             Some(p) => Handle::At(p.x, p.y),
             None => Handle::Colocated,
         }
+    }
+}
+
+impl From<Option<(f32, f32)>> for Handle {
+    fn from(o: Option<(f32, f32)>) -> Self {
+        match o {
+            Some((x, y)) => Handle::At(x, y),
+            None => Handle::Colocated
+        }
+    }
+}
+
+impl From<(f32, f32)> for Handle {
+    fn from((x, y): (f32, f32)) -> Self {
+        Handle::At(x, y)
+    }
+}
+
+impl From<()> for Handle {
+    fn from(_: ()) -> Self {
+        Handle::Colocated
     }
 }
 
@@ -144,9 +165,10 @@ impl<PD: PointData> Point<PD> {
 /// TODO: Replace with Option<WhichHandle>
 #[cfg_attr(feature = "glifserde", derive(Serialize, Deserialize))]
 #[derive(Debug, Copy, Clone, PartialEq, Hash)]
+#[repr(i8)]
 pub enum WhichHandle {
     /// TODO: Deprecate Neither.
-    Neither,
+    Neither = -1,
     A,
     B,
 }
@@ -209,7 +231,7 @@ impl<PD: PointData> Point<PD> {
 }
 
 impl Default for Handle {
-    fn default() -> Self { Handle::Colocated }
+    fn default() -> Handle { Handle::Colocated }
 }
 
 impl Default for PointType {
@@ -245,6 +267,15 @@ impl FromStr for WhichHandle {
     }
 }
 
+impl From<Handle> for PointType {
+    fn from(h: Handle) -> Self {
+        match h {
+            Handle::At(..) => Self::Curve,
+            Handle::Colocated => Self::Line,
+        }
+    }
+}
+
 impl From<&str> for PointType {
     fn from(s: &str) -> Self {
         PointType::from_str(s).unwrap()
@@ -271,6 +302,16 @@ impl WhichHandle {
 
     pub fn is_valid(&self) -> bool {
         *self == Self::A || *self == Self::B
+    }
+}
+
+impl Into<char> for WhichHandle {
+    fn into(self) -> char {
+        match self {
+            Self::A => 'A',
+            Self::B => 'B',
+            Self::Neither => 0 as char,
+        }
     }
 }
 
