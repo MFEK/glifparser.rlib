@@ -1,11 +1,18 @@
-use super::Contour;
+use super::{Contour, Outline};
 
 use crate::contour::{PrevNext as ContourPrevNext, State as ContourState};
 use crate::point::{Handle, PointData, PointType};
 
-pub trait RefigurePointTypes<PD: PointData>: ContourPrevNext + ContourState {
+pub trait RefigurePointTypes<PD: PointData> {
     fn refigure_point_types(&mut self);
-    fn point_type_for_idx(&self, idx: usize) -> PointType;
+}
+
+impl<PD: PointData> RefigurePointTypes<PD> for Outline<PD> {
+    fn refigure_point_types(&mut self) {
+        for contour in self {
+            contour.refigure_point_types();
+        }
+    }
 }
 
 impl<PD: PointData> RefigurePointTypes<PD> for Contour<PD> {
@@ -25,6 +32,13 @@ impl<PD: PointData> RefigurePointTypes<PD> for Contour<PD> {
             self[i].ptype = self.point_type_for_idx(i);
         }
     }
+}
+
+trait PointTypeForIdx: ContourPrevNext + ContourState {
+    fn point_type_for_idx(&self, idx: usize) -> PointType;
+}
+
+impl<PD: PointData> PointTypeForIdx for Contour<PD> {
     fn point_type_for_idx(&self, idx: usize) -> PointType {
         let open_contour = self.is_open();
         let point = &self[idx];
