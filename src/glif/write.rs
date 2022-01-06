@@ -87,6 +87,7 @@ pub fn write_ufo_glif_data<PD: PointData>(glif: &Glif<PD>) -> Result<Vec<u8>, Gl
     {
         Some(outline) => {
             for (ci, contour) in outline.into_iter().enumerate() {
+                let contour_len = contour.len();
                 // if we find a move point at the start of things we set this to false
                 let open_contour = contour.first().unwrap().ptype == PointType::Move;
                 let mut contour_node = xmltree::Element::new("contour");
@@ -140,7 +141,9 @@ pub fn write_ufo_glif_data<PD: PointData>(glif: &Glif<PD>) -> Result<Vec<u8>, Gl
                     match ptype {
                         PointType::Line | PointType::Curve | PointType::Move => {
                             if let Some(handle_node) = build_ufo_point_from_handle(point.a) {
-                                contour_node.children.push(xmltree::XMLNode::Element(handle_node));
+                                if !(open_contour && pi == contour_len - 1) {
+                                    contour_node.children.push(xmltree::XMLNode::Element(handle_node));
+                                }
                             }
                         },
                         PointType::QCurve => {

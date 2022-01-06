@@ -1,4 +1,4 @@
-use crate::point::{Point, PointData, Handle, GlifPoint};
+use crate::point::{GlifPoint, Handle, Point, PointData};
 
 impl<PD: PointData> From<&Point<PD>> for Handle {
     fn from(p: &Point<PD>) -> Handle {
