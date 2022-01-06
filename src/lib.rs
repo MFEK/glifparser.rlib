@@ -10,7 +10,7 @@ mod guideline;
 #[cfg(feature = "glifimage")]
 pub mod image;
 pub mod outline;
-mod point;
+pub mod point;
 
 pub use crate::anchor::Anchor;
 pub use crate::codepoint::Codepoint;
@@ -24,6 +24,6 @@ pub use crate::guideline::{Guideline, GuidelinePoint};
 pub use crate::image::{GlifImage, Image, ImageCodec};
 pub use crate::outline::{contour, Contour, Outline, OutlineType};
 pub use crate::point::{Point, PointType, Handle, WhichHandle, PointData};
-pub use integer_or_float::IntegerOrFloat;
 
+pub use integer_or_float::IntegerOrFloat;
 pub use trees::{Forest, Tree};
