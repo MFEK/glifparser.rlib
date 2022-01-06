@@ -3,12 +3,15 @@ use crate::{outline, point};
 
 use std::collections::VecDeque;
 
-type MFEKOutlineContourOperations<PD> = VecDeque<Option<ContourOperations<PD>>>;
+pub type MFEKOutlineContourOperations<PD> = VecDeque<Option<ContourOperations<PD>>>;
 /// Vec (layers) → Vec (contours) → which may or may not have any operations
-/// ```rust
-/// Vec<Vec<Option<ContourOperations<PD>>>>
 /// ```
-type MFEKGlifContourOperations<PD> = VecDeque<VecDeque<Option<ContourOperations<PD>>>>;
+/// # use glifparser::glif::mfek::ContourOperations;
+/// # fn doctest<PD: glifparser::PointData>() ->
+/// Vec<Vec<Option<ContourOperations<PD>>>>
+/// # { vec![] }
+/// ```
+pub type MFEKGlifContourOperations<PD> = VecDeque<MFEKOutlineContourOperations<PD>>;
 impl<PD: PointData> PointData for MFEKOutlineContourOperations<PD> {}
 impl<PD: PointData> PointData for MFEKGlifContourOperations<PD> {}
 
