@@ -20,6 +20,7 @@ integer_or_float = { git = "https://github.com/MFEK/integer_or_float.rlib", bran
 
 [dev-dependencies]
 env_logger = "0.9"
+test-log = "0.2"
 
 [features]
 glifimage = ["image"]

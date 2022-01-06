@@ -3,17 +3,12 @@ use std::path;
 use integer_or_float::IntegerOrFloat;
 use glifparser;
 use glifparser::{Image, Color, image::DataOrBitmap};
+use log;
 
-use env_logger;
-
-fn init() {
-    let _ = env_logger::builder().init();
-}
+use test_log::test;
 
 #[test]
 fn test_load_image() {
-    init();
-
     let gliffn = "test_data/TT2020Base.ufo/glyphs/N_U_L_L_.glif";
     let glif_outxml;
     // Read
@@ -42,7 +37,7 @@ fn test_image_png() {
     image.decode().unwrap();
     match image.data.data {
         //DataOrBitmap::Bitmap { pixels, width, height } => eprintln!("{:?} {}x{}", pixels, width, height),
-        DataOrBitmap::Bitmap { width, height, .. } => eprintln!("{}x{}", width, height),
+        DataOrBitmap::Bitmap { width, height, .. } => log::info!("{}x{}", width, height),
         _ => panic!("Decode failed")
     }
 }
