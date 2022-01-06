@@ -219,6 +219,22 @@ impl<PD: PointData> Point<PD> {
         }
     }
 
+    pub fn handle_as_point(
+        &self,
+        which: WhichHandle,
+    ) -> kurbo::Point {
+        let handle = self.handle(which);
+        let (x, y) = match handle {
+            Handle::At(x, y) => (x, y),
+            Handle::Colocated => (self.x, self.y),
+        };
+        kurbo::Point::new(x as f64, y as f64)
+    }
+
+    pub fn as_kpoint(&self) -> kurbo::Point {
+        kurbo::Point::new(self.x as f64, self.y as f64)
+    }
+
     /// This function is intended for use by generic functions that can work on either handle, to
     /// decrease the use of macros like `move_mirror!(a, b)`.
     pub fn set_handle(&mut self, which: WhichHandle, handle: Handle) {

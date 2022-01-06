@@ -3,7 +3,6 @@
 use skia_safe::{Path, Rect, RRect, Point as SkPoint};
 use glifparser::outline::skia::FromSkiaPath;
 use glifparser::Outline;
-use glifparser::glif::MFEKPointData;
 
 #[test]
 fn test_from_skp() {
@@ -25,7 +24,7 @@ fn test_from_skp() {
     path.move_to((50., 0.));
     path.cubic_to((50., 50.), (50., -50.), (50., 100.));
     path.cubic_to((50., 150.), (50., -150.), (50., 200.));
-    let o: Outline<MFEKPointData> = Outline::from_skia_path(&path);
+    let o: Outline<()> = Outline::from_skia_path(&path);
     assert_eq!(o.len(), 7);
     assert_eq!(o[0][0].x, 50.);
 }

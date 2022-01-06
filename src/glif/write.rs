@@ -86,14 +86,15 @@ pub fn write_ufo_glif_data<PD: PointData>(glif: &Glif<PD>) -> Result<Vec<u8>, Gl
     match &glif.outline
     {
         Some(outline) => {
-            for contour in outline {
+            for (ci, contour) in outline.into_iter().enumerate() {
                 // if we find a move point at the start of things we set this to false
                 let open_contour = contour.first().unwrap().ptype == PointType::Move;
                 let mut contour_node = xmltree::Element::new("contour");
                 
                 let mut last_point = None;
                 // a is next, b is prev
-                for (i, point) in contour.iter().enumerate() {
+                for (pi, point) in contour.iter().enumerate() {
+                    let ptype = point.ptype;
                     let mut point = point.clone();
                     if let Some(_lp) = last_point {
                         // if there was a point prior to this one we emit our b handle
@@ -104,7 +105,7 @@ pub fn write_ufo_glif_data<PD: PointData>(glif: &Glif<PD>) -> Result<Vec<u8>, Gl
                     
                     // If the last point has a handle, the first point should be made a Curve (in
                     // case it already isn't). (fixup)
-                    if i == 0 && !open_contour {
+                    if pi == 0 && !open_contour {
                         contour.last().map(|p| {
                             if p.a != Handle::Colocated {
                                 point.ptype = PointType::Curve;
@@ -119,7 +120,7 @@ pub fn write_ufo_glif_data<PD: PointData>(glif: &Glif<PD>) -> Result<Vec<u8>, Gl
                     point_node.attributes.insert("x".to_owned(), point.x.to_string());
                     point_node.attributes.insert("y".to_owned(), point.y.to_string());
 
-                    let ptype_string = point.ptype.to_string();
+                    let ptype_string = ptype.to_string();
                     match ptype_string.as_ref() {
                         "offcurve" => {} // while this name is OK, most often not written
                         _ => {point_node.attributes.insert("type".to_owned(), ptype_string);},
@@ -136,7 +137,7 @@ pub fn write_ufo_glif_data<PD: PointData>(glif: &Glif<PD>) -> Result<Vec<u8>, Gl
                 
                     // Point<T> does not contain field for identifier.
                     contour_node.children.push(xmltree::XMLNode::Element(point_node));
-                    match point.ptype {
+                    match ptype {
                         PointType::Line | PointType::Curve | PointType::Move => {
                             if let Some(handle_node) = build_ufo_point_from_handle(point.a) {
                                 contour_node.children.push(xmltree::XMLNode::Element(handle_node));
@@ -145,7 +146,7 @@ pub fn write_ufo_glif_data<PD: PointData>(glif: &Glif<PD>) -> Result<Vec<u8>, Gl
                         PointType::QCurve => {
                             unimplemented!("Quadratic curves not writable yet")
                         },
-                        _ => { return Err(GlifParserError::GlifOutlineHasBadPointType{idx: i, ptype: point.ptype}); }
+                        _ => { return Err(GlifParserError::GlifOutlineHasBadPointType{ci, pi, ptype}); }
                     }    
                     
                     last_point = Some(point);

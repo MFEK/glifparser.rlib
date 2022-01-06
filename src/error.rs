@@ -17,8 +17,9 @@ use plist::Error as PlistError;
 pub enum GlifParserError {
     /// OS error when reading glif
     GlifFileIoError(Option<Rc<io::Error>>),
-    /// Self-built Outline error
-    GlifOutlineHasBadPointType{idx: usize, ptype: PointType},
+    /// Self-built Outline/Contour error.
+    GlifOutlineHasBadPointType{ci: usize, pi: usize, ptype: PointType},
+    GlifContourHasBadPointType{pi: usize, ptype: PointType},
 
     /// Glif filename not set
     GlifFilenameNotSet(String),
@@ -69,8 +70,11 @@ impl Display for GlifParserError {
             Self::GlifFileIoError(ioe) => {
                 format!("System error when loading glif file: {:?}", ioe)
             },
-            Self::GlifOutlineHasBadPointType{idx, ptype} => {
-                format!("Bad point type {:?} in contour (index @{})", ptype, idx)
+            Self::GlifOutlineHasBadPointType{ci, pi, ptype} => {
+                format!("Bad point type {:?} in outline @({}, {}))", ptype, ci, pi)
+            },
+            Self::GlifContourHasBadPointType{pi, ptype} => {
+                format!("Bad point type {:?} in contour @{})", ptype, pi)
             },
             Self::GlifFilenameNotSet(s) => {
                 format!("Glyph filename not set: {}", &s)
