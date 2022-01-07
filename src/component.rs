@@ -7,6 +7,7 @@ use crate::point::{Handle, PointData, WhichHandle};
 use crate::outline::Outline;
 
 use integer_or_float::IntegerOrFloat;
+use IntegerOrFloat::Float;
 use kurbo::Affine;
 use trees::{Forest, Tree, Node};
 
@@ -48,7 +49,11 @@ impl GlifComponents {
 
 impl GlifComponent {
     pub fn new() -> Self {
-        Self::default()
+        Self {
+            xScale: Float(1.0),
+            yScale: Float(1.0),
+            ..Default::default()
+        }
     }
 }
 
