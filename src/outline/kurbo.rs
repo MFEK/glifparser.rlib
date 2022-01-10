@@ -1,16 +1,55 @@
+use itertools::Itertools as _;
 use kurbo::{BezPath, PathEl, Shape as _};
 
-use std::collections::VecDeque;
+use std::collections::{HashSet, VecDeque};
 
 use crate::error::GlifParserError;
-use crate::point::{Handle, Point, PointType, PointData, WhichHandle};
+use crate::outline;
+use crate::outline::GlifOutline;
+use crate::point::{GlifPoint, Handle, Point, PointType, PointData, WhichHandle};
 use super::{Contour, Outline};
 
 use crate::outline::contour::{PrevNext as _, State as _};
 use super::RefigurePointTypes as _;
 
-pub trait FromKurbo<PD: PointData>: Sized {
-    fn from_kurbo(kpath: &BezPath) -> Outline<PD>;
+use PathEl::*;
+use PointType::*;
+
+pub trait FromKurbo: Sized {
+    type Output;
+    fn from_kurbo(kpath: &BezPath) -> Self::Output;
+}
+
+impl GlifPoint {
+    fn from_kurbo(kp: kurbo::Point, pt: PointType) -> Self {
+        Self::from_x_y_type((kp.x as f32, kp.y as f32), pt)
+    }
+
+    fn from_kurbo_offcurve(kp: kurbo::Point) -> Self {
+        Self::from_kurbo(kp, PointType::OffCurve)
+    }
+}
+
+impl From<PathEl> for PointType {
+    fn from(el: PathEl) -> Self {
+        match el {
+            MoveTo(..) => Move,
+            LineTo(..) => Line,
+            QuadTo(..) => QCurve,
+            CurveTo(..) => Curve,
+            ClosePath => QClose
+        }
+    }
+}
+impl From<&PathEl> for PointType {
+    fn from(el: &PathEl) -> Self {
+        (*el).into()
+    }
+}
+impl From<&mut PathEl> for PointType {
+    fn from(el: &mut PathEl) -> Self {
+        (*el).into()
+    }
 }
 
 pub trait IntoKurbo: Sized {
@@ -56,75 +95,45 @@ impl<PD: PointData> IntoKurbo for Contour<PD> {
     }
 }
 
-impl<PD: PointData> FromKurbo<PD> for Outline<PD> {
-    fn from_kurbo(kpath: &BezPath) -> Outline<PD> {
-        let ptvec: Vec<_> = kpath.path_elements(f64::NAN).map(|el| { // accuracy not used for BezPath's
-            match el {
-                PathEl::MoveTo(kp) => (PointType::Move, kp.x as f32, kp.y as f32, Handle::Colocated, Handle::Colocated),
-                PathEl::LineTo(kp) => (PointType::Line, kp.x as f32, kp.y as f32, Handle::Colocated, Handle::Colocated),
-                PathEl::QuadTo(kpa, kp) => (PointType::QCurve, kp.x as f32, kp.y as f32, Handle::At(kpa.x as f32, kpa.y as f32), Handle::Colocated),
-                PathEl::CurveTo(kpa, kpb, kp) => (PointType::Curve, kp.x as f32, kp.y as f32, Handle::At(kpa.x as f32, kpa.y as f32), Handle::At(kpb.x as f32, kpb.y as f32)),
-                PathEl::ClosePath => (PointType::Undefined, f32::NAN, f32::NAN, Handle::Colocated, Handle::Colocated)
-            }
-        }).chain(vec![(PointType::Undefined, 0., 0., Handle::Colocated, Handle::Colocated)]).collect();
+impl<PD: PointData> FromKurbo for Outline<PD> {
+    type Output = Self;
+    fn from_kurbo(kpath: &BezPath) -> Self {
+        let (mut ptypes, mut glifpoints): (VecDeque<PointType>, Vec<GlifPoint>) = (VecDeque::new(), vec![]);
 
-        let mut ret = vec![];
-        let mut now_vec: Vec<Point<PD>> = vec![];
-        let mut open_closed = vec![];
-        let mut a_handles = VecDeque::with_capacity(ptvec.len());
-        let mut b_handles = VecDeque::with_capacity(ptvec.len());
+        let mut prev = None;
+        for el in kpath.path_elements(1.0) {
+            if prev.map(|elo|elo==ClosePath).unwrap_or(false) && el == ClosePath {
+                prev = Some(el);
+                continue
+            }
+            ptypes.push_back(PointType::from(&el));
+            let pvec = match el {
+                MoveTo(kp) | LineTo(kp) => vec![kp],
+                QuadTo(kpb, kp) => vec![kpb, kp],
+                CurveTo(kpa, kpb, kp) => vec![kpa, kpb, kp],
+                ClosePath => vec![kurbo::Point::new(f64::NAN, f64::NAN)],
+            };
 
-        for (ptype, x, y, a, b) in ptvec {
-            if ptype != PointType::Undefined {
-                a_handles.push_back(a);
+            for (i, p) in pvec.iter().enumerate() {
+                let to_push = if pvec.len() - 1 == i { GlifPoint::from_kurbo(*p, el.into()) } else { GlifPoint::from_kurbo_offcurve(*p) };
+                glifpoints.push(to_push);
             }
-            if ptype != PointType::Undefined {
-                b_handles.push_back(b);
-            }
-            match (ptype, now_vec.is_empty()) {
-                (PointType::Undefined, false) | (PointType::Move, false) => {
-                    if ptype == PointType::Undefined && now_vec[0].ptype == PointType::Move {
-                        let last_a = a_handles.pop_front().unwrap_or(Handle::Colocated);
-                        let last_b = b_handles.pop_back().unwrap_or(Handle::Colocated);
-                        let first = now_vec.remove(0);
-                        let first_a = first.a;
-                        let first_b = first.b;
-                        now_vec.last_mut().map(|lp|lp.a = first_a);
-                        now_vec.last_mut().map(|lp|lp.b = last_b);
-                    }
-                    let closed = now_vec[0].ptype != PointType::Move;
-                    let now_len = now_vec.len();
-                    for (idx, point) in now_vec.iter_mut().enumerate() {
-                        if idx != 0 || closed {
-                            point.ptype = PointType::Curve;
-                        }
-                        if idx == 0 && closed {
-                            point.a = a_handles.pop_back().unwrap_or(Handle::Colocated);
-                            point.b = b_handles.pop_back().unwrap_or(Handle::Colocated);
-                        } else {
-                            point.a = a_handles.pop_front().unwrap_or(Handle::Colocated);
-                            point.b = b_handles.pop_front().unwrap_or(Handle::Colocated);
-                        }
-                    }
-                    if !closed {
-                        now_vec[now_len - 2].a = now_vec[now_len - 1].a;
-                    }
-                    #[cfg(debug_assertions)]
-                    if !b_handles.is_empty() {
-                        log::error!("B handles vec contained {} handles! {:?}", b_handles.len(), &b_handles);
-                    }
-                    b_handles.clear();
-                    ret.push(now_vec);
-                    now_vec = vec![];
-                    open_closed.push(closed);
-                }
-                _ => ()
-            }
-            if ptype != PointType::Undefined {
-                now_vec.push(Point::from_x_y_type((x, y), ptype));
-            }
+            prev = Some(el);
         }
+        let gllen = glifpoints.len();
 
-        ret
+        let mut positions: Vec<_> = glifpoints.iter().positions(|gp|gp.ptype==PointType::QClose).collect();
+        let mut glifoutline: GlifOutline = vec![];
+        let mut last_pos = 0;
+        for pos in positions.iter().chain([&gllen]).peekable() {
+            let mut glifcontour = glifpoints[last_pos .. *pos].to_vec();
+            if let Some(closest_move) = glifcontour.iter().rposition(|gp|gp.ptype==PointType::Move) {
+                glifcontour[closest_move].ptype = PointType::Curve;
+            }
+            glifoutline.push(glifcontour);
+            last_pos = *pos;
+        }
+        //eprintln!("{:?} {:?} {:?} {:?}", &positions, &glifoutline, &glifpoints, last_pos);
+        outline::create::cubic_outline(&glifoutline)
     }
 }
