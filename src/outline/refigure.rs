@@ -42,14 +42,21 @@ impl<PD: PointData> PointTypeForIdx for Contour<PD> {
     fn point_type_for_idx(&self, idx: usize) -> PointType {
         let open_contour = self.is_open();
         let point = &self[idx];
-        let prev_a =
-            if let Ok(((prev_a, _prev_b), (_next_a, _next_b))) = self.contour_prev_next_handles(idx) {
-                prev_a
+        let (prev_a, next_b) =
+            if let Ok(((prev_a, _prev_b), (_next_a, next_b))) = self.contour_prev_next_handles(idx) {
+                (prev_a, next_b)
             } else {
                 return PointType::default();
             };
         if !open_contour || idx != 0 {
             match (prev_a, point.b) {
+                (Handle::At(..), Handle::Colocated)
+                | (Handle::Colocated, Handle::At(..))
+                | (Handle::At(..), Handle::At(..)) => PointType::Curve,
+                (Handle::Colocated, Handle::Colocated) => PointType::Line,
+            }
+        } else if !open_contour && idx == 0 {
+            match (point.a, next_b) {
                 (Handle::At(..), Handle::Colocated)
                 | (Handle::Colocated, Handle::At(..))
                 | (Handle::At(..), Handle::At(..)) => PointType::Curve,

@@ -1,10 +1,13 @@
+mod xml;
+pub use self::xml::FromXML;
+
 use std::convert::TryInto;
 use std::path;
 use std::rc::Rc;
 
 use integer_or_float::IntegerOrFloat;
 
-use super::Glif;
+use super::{Glif, Lib};
 use crate::error::GlifParserError::{self, GlifInputError};
 use crate::component::GlifComponent;
 use crate::guideline::Guideline;
@@ -260,8 +263,16 @@ pub fn read_ufo_glif<PD: PointData>(glif: &str) -> Result<Glif<PD>, GlifParserEr
     #[cfg(feature = "glifserde")]
     if let Some(lib) = glif.take_child("lib") {
         let mut plist_temp: Vec<u8> = vec![];
-        lib.write(&mut plist_temp)?;
-        ret.lib = plist::from_bytes(&plist_temp).ok();
+        match lib.write(&mut plist_temp).map(|()|plist::from_bytes(&plist_temp)) {
+            Ok(Ok(lib_p)) => ret.lib = Lib::Plist(lib_p),
+            Err(e) => {
+                log::error!("Failed to serialize .glif lib as XML? Error: {:?}", e);
+                ret.lib = Lib::Xml(lib)
+            },
+            Ok(Err(e)) => {
+                log::error!("Failed to deserialize .glif lib XML as plist? Error: {:?}", e);
+            }
+        }
     }
     #[cfg(not(feature = "glifserde"))]
     if let Some(_) = glif.take_child("lib") {

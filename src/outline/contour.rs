@@ -1,10 +1,12 @@
+mod xml;
+
 use kurbo;
 use kurbo::ParamCurveNearest as _;
 
 use crate::error::GlifParserError;
 use crate::point::{Handle, PointData, PointType};
 
-use super::Contour;
+use super::{Contour, GlifContour};
 
 #[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
 pub enum End {

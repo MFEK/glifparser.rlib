@@ -1,3 +1,5 @@
+mod xml;
+
 use crate::error::GlifParserError;
 use crate::glif::{self, Glif};
 #[cfg(feature = "mfek")]

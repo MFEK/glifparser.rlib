@@ -1,5 +1,3 @@
-use plist;
-
 use std::path;
 
 use crate::anchor::Anchor;
@@ -12,15 +10,18 @@ use crate::point::PointData;
 use crate::outline::{Outline, OutlineType};
 
 mod conv;
+mod lib;
+pub use lib::Lib;
 mod read;
+pub use self::read::read_ufo_glif as read;
+pub use self::read::read_ufo_glif_from_filename as read_from_filename;
 mod write;
+pub use self::write::write_ufo_glif as write;
+pub use self::write::write_ufo_glif_to_filename as write_to_filename;
 #[cfg(feature = "mfek")]
 pub mod mfek;
-
-pub use read::read_ufo_glif as read;
-pub use read::read_ufo_glif_from_filename as read_from_filename;
-pub use write::write_ufo_glif as write;
-pub use write::write_ufo_glif_to_filename as write_to_filename;
+pub mod xml;
+pub use self::{read::FromXML, write::IntoXML, xml::XMLConversion};
 
 #[cfg(feature = "glifserde")]
 use serde::{Deserialize, Deserializer, Serialize, Serializer, ser::SerializeStruct, ser::Error as SerdeError, de::Error as SerdeDeError};
@@ -59,7 +60,7 @@ pub struct Glif<PD: PointData> {
     /// It's up to the API consumer to set this.
     pub filename: Option<path::PathBuf>,
     /// glif private library
-    pub lib: Option<plist::Dictionary>,
+    pub lib: Lib,
 }
 
 #[cfg(feature = "glifserde")]

@@ -1,3 +1,5 @@
+mod xml;
+
 use std::fmt::Debug;
 #[cfg(feature = "glifserde")]
 use serde::{Serialize, Deserialize};
@@ -14,6 +16,7 @@ pub struct Anchor<PD: PointData> {
     pub data: PD,
 }
 
+/// Only Undefined is used, for now.
 #[cfg_attr(feature = "glifserde", derive(Serialize, Deserialize))]
 #[derive(Debug, Copy, Clone, PartialEq)]
 pub enum AnchorType {
@@ -22,7 +25,7 @@ pub enum AnchorType {
     Base,
     MarkMark,
     MarkBase,
-} // Undefined used everywhere for now as getting type requires parsing OpenType features, which we will be using nom to do since I have experience w/it.
+}
 
 impl<PD: PointData> Anchor<PD> {
     pub fn new() -> Self {

@@ -1,3 +1,5 @@
+mod xml;
+
 use std::io;
 use std::fs;
 use std::path;

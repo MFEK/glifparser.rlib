@@ -13,6 +13,8 @@ use xmltree::{ParseError, Error as XMLTreeError};
 #[cfg(feature = "glifserde")]
 use plist::Error as PlistError;
 
+pub type GlifParserResult<T> = Result<T, GlifParserError>;
+
 #[derive(Debug, Clone)]
 pub enum GlifParserError {
     /// OS error when reading glif

@@ -71,20 +71,38 @@ impl<PD: PointData> FromKurbo<PD> for Outline<PD> {
         let mut ret = vec![];
         let mut now_vec: Vec<Point<PD>> = vec![];
         let mut open_closed = vec![];
+        let mut a_handles = VecDeque::with_capacity(ptvec.len());
         let mut b_handles = VecDeque::with_capacity(ptvec.len());
 
-        for (ptype, x, y, a, next_b) in ptvec {
+        for (ptype, x, y, a, b) in ptvec {
             if ptype != PointType::Undefined {
-                b_handles.push_back(next_b);
+                a_handles.push_back(a);
+            }
+            if ptype != PointType::Undefined {
+                b_handles.push_back(b);
             }
             match (ptype, now_vec.is_empty()) {
-                (PointType::Undefined, _) | (PointType::Move, false) => {
+                (PointType::Undefined, false) | (PointType::Move, false) => {
+                    if ptype == PointType::Undefined && now_vec[0].ptype == PointType::Move {
+                        let last_a = a_handles.pop_front().unwrap_or(Handle::Colocated);
+                        let last_b = b_handles.pop_back().unwrap_or(Handle::Colocated);
+                        let first = now_vec.remove(0);
+                        let first_a = first.a;
+                        let first_b = first.b;
+                        now_vec.last_mut().map(|lp|lp.a = first_a);
+                        now_vec.last_mut().map(|lp|lp.b = last_b);
+                    }
                     let closed = now_vec[0].ptype != PointType::Move;
                     let now_len = now_vec.len();
                     for (idx, point) in now_vec.iter_mut().enumerate() {
+                        if idx != 0 || closed {
+                            point.ptype = PointType::Curve;
+                        }
                         if idx == 0 && closed {
+                            point.a = a_handles.pop_back().unwrap_or(Handle::Colocated);
                             point.b = b_handles.pop_back().unwrap_or(Handle::Colocated);
                         } else {
+                            point.a = a_handles.pop_front().unwrap_or(Handle::Colocated);
                             point.b = b_handles.pop_front().unwrap_or(Handle::Colocated);
                         }
                     }
@@ -103,7 +121,7 @@ impl<PD: PointData> FromKurbo<PD> for Outline<PD> {
                 _ => ()
             }
             if ptype != PointType::Undefined {
-                now_vec.push(Point::from_x_y_a_b_type((x, y), (a, Handle::Colocated), ptype));
+                now_vec.push(Point::from_x_y_type((x, y), ptype));
             }
         }
 

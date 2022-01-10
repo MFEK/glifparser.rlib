@@ -1,10 +1,13 @@
 pub mod contour;
+mod conv;
+pub use conv::IntoGlifPoints;
 pub mod create;
 mod kurbo;
 pub use self::kurbo::*;
 mod refigure;
 pub use refigure::*;
 pub mod skia;
+mod xml;
 
 use log;
 #[cfg(feature = "glifserde")]

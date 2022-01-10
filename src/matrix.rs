@@ -3,6 +3,9 @@ pub mod skia;
 #[cfg(feature = "skia")]
 pub use skia::ToSkiaMatrix;
 
+mod write;
+pub(crate) use self::write::write_matrix as write;
+
 use integer_or_float::IntegerOrFloat;
 
 #[derive(Clone, Copy, Debug, Default, PartialEq)]

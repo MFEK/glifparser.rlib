@@ -1,4 +1,5 @@
 pub mod conv;
+mod xml;
 
 use std::fmt::{Display, Debug};
 use std::str::FromStr;
@@ -12,6 +13,13 @@ pub struct GlifPoint {
     pub smooth: bool,
     pub name: Option<String>,
     pub ptype: PointType,
+}
+
+impl GlifPoint {
+    /// Make a point from its x and y position and type
+    pub fn from_x_y_type((x, y): (f32, f32), ptype: PointType) -> GlifPoint {
+        GlifPoint { x, y, ptype, ..Default::default() }
+    }
 }
 
 impl GlifPoint {

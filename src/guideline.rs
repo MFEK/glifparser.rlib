@@ -1,3 +1,5 @@
+mod xml;
+
 use integer_or_float::IntegerOrFloat;
 
 use crate::color::Color;
