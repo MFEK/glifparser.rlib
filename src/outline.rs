@@ -8,6 +8,7 @@ pub use self::kurbo::*;
 mod quad_to_cubic;
 pub use quad_to_cubic::QuadToCubic;
 mod refigure;
+mod reverse;
 pub use refigure::*;
 pub mod skia;
 mod xml;

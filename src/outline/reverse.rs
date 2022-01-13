@@ -1,5 +1,6 @@
 use super::contour::Reverse;
 use super::Outline;
+use crate::point::PointData;
 
 impl<PD: PointData> Reverse for Outline<PD> {
     fn reverse(self) -> Outline<PD> {
