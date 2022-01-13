@@ -1,36 +1,17 @@
 /// Kurbo module — warning: only guaranteed to round trip closed contours!
 
-use float_cmp::{ApproxEq, F32Margin};
-use itertools::Itertools as _;
-use kurbo::{BezPath, PathEl, Shape as _};
-
-use std::collections::VecDeque;
+use float_cmp::ApproxEq as _;
+use kurbo::{BezPath, PathEl};
 
 use super::{Contour, Outline};
 use crate::error::GlifParserError;
-use crate::outline::GlifOutline;
-use crate::point::{GlifPoint, PointData, PointType, WhichHandle};
+use crate::point::{Handle, Point, PointData, PointType, WhichHandle};
 
 use super::RefigurePointTypes as _;
 use crate::outline::contour::{PrevNext as _, State as _};
 
 use PathEl::*;
 use PointType::*;
-
-pub trait FromKurbo: Sized {
-    type Output;
-    fn from_kurbo(kpath: &BezPath) -> Self::Output;
-}
-
-impl GlifPoint {
-    fn from_kurbo(kp: kurbo::Point, pt: PointType) -> Self {
-        Self::from_x_y_type((kp.x as f32, kp.y as f32), pt)
-    }
-
-    fn from_kurbo_offcurve(kp: kurbo::Point) -> Self {
-        Self::from_kurbo(kp, PointType::OffCurve)
-    }
-}
 
 impl From<PathEl> for PointType {
     fn from(el: PathEl) -> Self {
@@ -125,134 +106,125 @@ impl<PD: PointData> IntoKurbo for Contour<PD> {
     }
 }
 
-impl<PD: PointData> FromKurbo for Outline<PD> {
-    type Output = Outline<PD>;
-    fn from_kurbo(kpath: &BezPath) -> Outline<PD> {
-        let mut on_points = VecDeque::new();
-        let mut a_handles = VecDeque::new(); // "next"
-        let mut b_handles = VecDeque::new(); // "prev"
-        let mut breakers = VecDeque::new();
-        let mut ptypes = VecDeque::new();
+pub trait FromKurbo {
+    fn from_kurbo(kpath: &BezPath) -> Self;
+}
 
-        for (kpi, el) in kpath.path_elements(1.0).enumerate() {
-            let (a, b, on) = match el {
-                MoveTo(kp) => {
-                    (None, None, Some(kp))
-                }
-                LineTo(kp) => {
-                    (None, None, Some(kp))
-                }
-                QuadTo(kpb, kp) => {
-                    (None, Some(kpb), Some(kp))
-                }
-                CurveTo(kpa, kpb, kp) => {
-                    (Some(kpa), Some(kpb), Some(kp))
-                }
-                ClosePath => {
-                    (None, None, None)
-                }
-            };
+trait SplitKurboPath {
+    fn split_kurbo_path(&self) -> Vec<Vec<(PointType, Vec<kurbo::Point>)>>;
+}
 
-            match el {
-                ClosePath | MoveTo(..) => {
-                    breakers.push_back(Some(PointType::from(el)));
-                }
-                _ => {
-                    breakers.push_back(None);
-                }
-            }
+trait IntoKurboPointsVec {
+    fn into_kpoint_vec(&self) -> Vec<kurbo::Point>;
+}
 
-            on_points.push_back((kpi, PointType::from(el), on));
-            a_handles.push_back((kpi, PointType::from(el), a));
-            b_handles.push_back((kpi, PointType::from(el), b));
-            ptypes.push_back(PointType::from(el));
+impl IntoKurboPointsVec for PathEl {
+    fn into_kpoint_vec(&self) -> Vec<kurbo::Point> {
+        match self {
+            MoveTo(kp) => vec![*kp],
+            LineTo(kp) => vec![*kp],
+            QuadTo(kpa, kp) => vec![*kp, *kpa],
+            CurveTo(kpa, kpb, kp) => vec![*kp, *kpb, *kpa],
+            ClosePath => vec![],
         }
-        let mut on_points_no_double_close = VecDeque::new();
-        let mut bad_kpi = VecDeque::new();
-        for (k, mut g) in &(on_points.clone().into_iter().group_by(|(_, el, _)| *el == QClose)) {
-            if !k {
-                on_points_no_double_close.extend(g.collect::<VecDeque<_>>());
+    }
+}
+
+impl SplitKurboPath for BezPath {
+    fn split_kurbo_path(&self) -> Vec<Vec<(PointType, Vec<kurbo::Point>)>> {
+        let mut koutline = vec![];
+        let mut kcontour = vec![];
+        // split a kurbo path into its constituent contours
+        let iterable: Vec<_> = if self.iter().last().unwrap() != ClosePath {
+            self.into_iter().chain([ClosePath].into_iter()).collect()
+        } else {
+            self.into_iter().collect()
+        };
+        for p in iterable {
+            let ptype: PointType = p.into();
+            let kpv = p.into_kpoint_vec();
+            if ptype == PointType::Move {
+                if kcontour.len() > 0 {
+                    koutline.push(kcontour);
+                }
+                kcontour = vec![(ptype, kpv)];
+            } else if kpv.len() > 0 {
+                kcontour.push((ptype, kpv));
             } else {
-                log::warn!("Kurbo bug — consecutive ClosePath's detected. Patching Kurbo vec.");
-                on_points_no_double_close.push_back(g.next().unwrap());
-                for (remainder_kpi, _, _) in g {
-                    bad_kpi.push_back(remainder_kpi);
+                let lp = kcontour.last().unwrap().clone().1;
+                let mut rm = kcontour.remove(0);
+                if rm.1[0].x.approx_eq(lp[0].x, (f32::EPSILON as f64, 4)) && rm.1[0].y.approx_eq(lp[0].y, (f32::EPSILON as f64, 4)) {
+                    kcontour[0].0 = PointType::Curve;
+                } else {
+                    rm.0 = PointType::Line;
+                    kcontour.insert(0, rm);
                 }
             }
         }
-        on_points = on_points_no_double_close;
-        let mut next_handles: VecDeque<_> = a_handles.into_iter().filter(|(kpi, _, a)|a.is_some() && !bad_kpi.contains(kpi)).collect();
-        let mut prev_handles: VecDeque<_> = b_handles.into_iter().filter(|(kpi, _, b)|b.is_some() && !bad_kpi.contains(kpi)).collect();
-        //next_handles.rotate_right(1);
-        //prev_handles.rotate_left(1);
-        //next_handles.rotate_left(1);
-        let mut outline = vec![];
-        let mut contour = vec![];
-        let mut open_closed = vec![];
 
-        for (kpi, pt, kp) in on_points {
-            match (kp, pt, contour.len()) {
-                (Some(kpo), PointType::Move, 1..) => {
-                    outline.push(contour);
-                    contour = vec![(kpi, GlifPoint::from_kurbo(kpo, pt)); 1];
-                    open_closed.push(true);
-                },
-                (Some(kpo), pt, _) => contour.push((kpi, GlifPoint::from_kurbo(kpo, pt))),
-                (None, _, 0..=1) => {
-                    log::warn!("Ignoring consecutive ClosePath / lone point — Kurbo bug?");
-                },
-                (None, _, 2..) => { // got a close path
-                    let (_, lp) = contour.last().unwrap().clone();
-                    if lp.ptype == PointType::Curve {
-                        let (first_kpi, _kp) = contour.remove(0);
-                        if let Some((first_prev, _)) = prev_handles.iter().find_position(|(pkpi, _, _)|*pkpi == first_kpi + 1) {
-                            let ph = prev_handles.remove(first_prev).unwrap();
-                            let nh = next_handles.remove(first_prev).unwrap();
-                            let (cur_kpi, _) = prev_handles.iter().find_position(|(pkpi, _, _)|*pkpi == kpi - 1).unwrap();
-                            next_handles.insert(cur_kpi + 1, nh);
-                            prev_handles.insert(cur_kpi + 1, ph);
-                        }
-                    } else {
-                        let (_, fp) = contour.first_mut().unwrap();
-                        if !( fp.x.approx_eq(lp.x, F32Margin::default()) && fp.y.approx_eq(lp.y, F32Margin::default()) ) {
-                            fp.ptype = PointType::Line;
-                        }
-                    }
-                    outline.push(contour);
-                    contour = vec![];
-                    open_closed.push(false);
-                },
-                _ => unreachable!()
-            }
+        if kcontour.len() > 0 {
+            koutline.push(kcontour);
         }
 
-        let mut goutline = vec![];
-        let mut gcontour = vec![];
+        koutline
+    }
+}
 
-        for c in outline {
-            for (_, p) in c {
-                gcontour.push(p.clone());
-                let (a, b) = match p.ptype {
-                    PointType::QCurve => {
-                        (Some(next_handles.pop_front()), None)
-                    },
-                    PointType::Curve => {
-                        (Some(next_handles.pop_front()), Some(prev_handles.pop_front()))
-                    },
-                    _ => continue
+impl<PD: PointData> FromKurbo for Outline<PD> {
+    fn from_kurbo(kpath: &BezPath) -> Self {
+        let mut ret: Outline<PD> = Outline::new();
+        let koutline = kpath.split_kurbo_path();
+
+        for skc in koutline.iter() {
+            let skc_len = skc.len();
+            let mut contour: Contour<PD> = Contour::new();
+            let mut next_points;
+            for (i, (ptype, points)) in skc.iter().enumerate() {
+                if i != skc_len - 1 {
+                    next_points = &skc[i+1];
+                } else {
+                    next_points = &skc[0];
+                }
+
+                let mut point = Point::<PD> {
+                    name: None,
+                    data: None,
+                    x: points[0].x as f32,
+                    y: points[0].y as f32,
+                    smooth: false,
+                    // These will be fixed below, if needed
+                    a: Handle::Colocated,
+                    b: Handle::Colocated,
+                    ptype: *ptype,
                 };
 
-                if let Some(Some((_, _, Some(akp)))) = a {
-                    gcontour.push(GlifPoint::from_kurbo_offcurve(akp));
+                match ptype {
+                    PointType::Move => {},
+                    PointType::Curve => {
+                        if next_points.1.len() == 3 {
+                            point.a = Handle::At(next_points.1[2].x as f32, next_points.1[2].y as f32);
+                        }
+                        point.b = Handle::At(points[1].x as f32, points[1].y as f32);
+                    },
+                    PointType::Line => {
+                        if next_points.1.len() == 3 {
+                            // Lines aren't allowed to have off-curve points in glif format
+                            point.ptype = PointType::Curve;
+                            point.a = Handle::At(next_points.1[2].x as f32, next_points.1[2].y as f32);
+                        }
+                    },
+                    _ => unreachable!("")
                 }
-                if let Some(Some((_, _, Some(bkp)))) = b {
-                    gcontour.push(GlifPoint::from_kurbo_offcurve(bkp));
-                }
+                contour.push(point);
             }
-            goutline.push(gcontour);
-            gcontour = vec![];
+
+            if contour.first().map(|p|p.ptype == PointType::Move).unwrap_or(false) {
+                //fixup_kurbo_open_contour(&mut contour, &skc);
+            }
+
+            ret.push(contour);
         }
-        let goutline_t = GlifOutline::from(goutline);
-        goutline_t.try_into().unwrap()
+
+        ret
     }
 }
