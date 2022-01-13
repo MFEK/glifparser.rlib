@@ -4,12 +4,17 @@ use crate::point::{Handle, Point, PointData, PointType};
 // TODO: Implement this trait on the `data` members of ContourOperations.
 /// Reverse the logical (visual) order of Bézier splines in a contour, flipping handles as
 /// necessary, and taking into account open/closed state.
-pub trait Reverse {
-    fn reverse(self) -> Self;
+pub trait Reverse: Sized + Clone {
+    fn to_reversed(&self) -> Self;
+    // Following semantics of std::slice::reverse
+    fn reverse(&mut self) {
+        let reversed = self.clone().to_reversed();
+        *self = reversed;
+    }
 }
 
 impl<PD: PointData> Reverse for Contour<PD> {
-    fn reverse(self) -> Contour<PD> {
+    fn to_reversed(&self) -> Contour<PD> {
         let mut new_c = Contour::with_capacity(self.len());
         let open_contour = self.first().unwrap().ptype == PointType::Move && self.len() > 1;
         // This is necessary because although Rev and Chain both implement Iterator, they're
