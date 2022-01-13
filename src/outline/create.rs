@@ -1,11 +1,13 @@
 use std::collections::VecDeque;
 
-use super::{Outline, GlifOutline, Contour};
+use super::{GlifOutline, GlifOutlineType, Contour, Outline, OutlineType};
+use crate::error::GlifParserError;
 use crate::point::{Point, Handle, PointData, PointType, GlifPoint};
 
+use integer_or_float::IntegerOrFloat;
 use log::warn;
 
-fn midpoint(x1: f32, x2: f32, y1: f32, y2: f32) -> (f32, f32) {
+fn midpoint(x1: IntegerOrFloat, x2: IntegerOrFloat, y1: IntegerOrFloat, y2: IntegerOrFloat) -> (IntegerOrFloat, IntegerOrFloat) {
     ((x1 + x2) / 2., (y1 + y2) / 2.)
 }
 
@@ -34,13 +36,7 @@ pub fn quadratic_outline<PD: PointData>(goutline: &GlifOutline) -> Outline<PD> {
                 let mp = midpoint(h1.x, h2.x, h1.y, h2.y);
 
                 temp_contour.push_back(h1.clone());
-                temp_contour.push_back(GlifPoint {
-                    x: mp.0,
-                    y: mp.1,
-                    ptype: PointType::QCurve,
-                    smooth: true,
-                    name: gp.name.clone(),
-                });
+                temp_contour.push_back(GlifPoint::from_x_y_type((mp.0, mp.1), PointType::QCurve).name(gp.name.clone()));
                 stack.push_back(h2);
             } else if gp.ptype != PointType::OffCurve {
                 let h1 = stack.pop_front();
@@ -54,24 +50,13 @@ pub fn quadratic_outline<PD: PointData>(goutline: &GlifOutline) -> Outline<PD> {
         if let (Some(h1), Some(h2)) = (stack.pop_front(), temp_contour.get(0)) {
             let mp = midpoint(h1.x, h2.x, h1.y, h2.y);
             let (t, tx, ty) = (h2.ptype, h2.x, h2.y);
-            temp_contour.push_back(h1.clone());
-            if t == PointType::OffCurve {
-                temp_contour.push_back(GlifPoint {
-                    x: mp.0,
-                    y: mp.1,
-                    ptype: PointType::QCurve,
-                    smooth: true,
-                    name: None,
-                });
+            let (xy, ptype) = if t == PointType::OffCurve {
+                ((mp.0, mp.1), PointType::QCurve)
             } else {
-                temp_contour.push_back(GlifPoint {
-                    x: tx,
-                    y: ty,
-                    ptype: PointType::QClose, // TODO: Change to QCurve & vigorously test quadratic, often ignored
-                    smooth: true,
-                    name: None,
-                });
-            }
+                ((tx, ty), PointType::QClose) // TODO: Change to QCurve & vigorously test quadratic, often ignored
+            };
+            temp_contour.push_back(h1.clone());
+            temp_contour.push_back(GlifPoint::from_x_y_type(xy, ptype));
         }
 
         temp_outline.push_back(temp_contour);
@@ -81,7 +66,7 @@ pub fn quadratic_outline<PD: PointData>(goutline: &GlifOutline) -> Outline<PD> {
     for gc in temp_outline.iter() {
         let mut contour: Contour<PD> = Vec::new();
 
-        for gp in gc.iter() {
+        for gp in gc {
             match gp.ptype {
                 PointType::OffCurve => {
                     stack.push_back(&gp);
@@ -94,15 +79,14 @@ pub fn quadratic_outline<PD: PointData>(goutline: &GlifOutline) -> Outline<PD> {
                         contour.last_mut().map(|p| p.a = Handle::from(h1));
                     }
 
+                    let (x, y) = (gp.x.into(), gp.y.into());
+
                     contour.push(Point {
-                        x: gp.x,
-                        y: gp.y,
-                        a: Handle::Colocated,
-                        b: Handle::Colocated,
+                        x, y,
                         smooth: gp.smooth,
                         name: gp.name.clone(),
                         ptype: gp.ptype,
-                        data: None,
+                        .. Default::default()
                     });
                 }
             }
@@ -140,15 +124,15 @@ pub fn cubic_outline<PD: PointData>(goutline: &GlifOutline) -> Outline<PD> {
 
                     contour.last_mut().map(|p| p.a = Handle::from(h1));
 
+                    let (x, y) = (gp.x.into(), gp.y.into());
+
                     contour.push(Point {
-                        x: gp.x,
-                        y: gp.y,
-                        a: Handle::Colocated,
+                        x, y,
                         b: Handle::from(h2),
                         smooth: gp.smooth,
                         name: gp.name.clone(),
                         ptype: gp.ptype,
-                        data: None,
+                        .. Default::default()
                     });
                 }
                 PointType::QCurve => {
@@ -176,4 +160,18 @@ pub fn cubic_outline<PD: PointData>(goutline: &GlifOutline) -> Outline<PD> {
     }
 
     outline
+}
+
+impl<PD: PointData> TryInto<Outline<PD>> for GlifOutline {
+    type Error = GlifParserError;
+    fn try_into(mut self) -> Result<Outline<PD>, GlifParserError> {
+        if self.otype == GlifOutlineType::default() {
+            self.figure_type();
+        }
+        Ok(match self.otype.into() {
+            OutlineType::Cubic => cubic_outline(&self),
+            OutlineType::Quadratic => quadratic_outline(&self),
+            OutlineType::Spiro => Err(GlifParserError::GlifInputError("Spiro as yet unimplemented".to_string()))?,
+        })
+    }
 }

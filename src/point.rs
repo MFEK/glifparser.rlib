@@ -1,15 +1,21 @@
-pub mod conv;
+mod conv;
+pub use self::conv::kurbo::*;
 mod xml;
 
 use std::fmt::{Display, Debug};
 use std::str::FromStr;
+
+use integer_or_float::IntegerOrFloat;
+
 #[cfg(feature = "glifserde")]
 use serde::{Serialize, Deserialize};
+
 /// A "close to the source" .glif `<point>`
-#[derive(Clone, Debug, Default, PartialEq)]
+#[cfg_attr(feature = "glifserde", derive(Serialize, Deserialize))]
+#[derive(Clone, Debug, Default, Hash, PartialEq)]
 pub struct GlifPoint {
-    pub x: f32,
-    pub y: f32,
+    pub x: IntegerOrFloat,
+    pub y: IntegerOrFloat,
     pub smooth: bool,
     pub name: Option<String>,
     pub ptype: PointType,
@@ -17,8 +23,14 @@ pub struct GlifPoint {
 
 impl GlifPoint {
     /// Make a point from its x and y position and type
-    pub fn from_x_y_type((x, y): (f32, f32), ptype: PointType) -> GlifPoint {
+    pub fn from_x_y_type((x, y): (impl Into<IntegerOrFloat>, impl Into<IntegerOrFloat>), ptype: PointType) -> GlifPoint {
+        let (x, y) = (x.into(), y.into());
         GlifPoint { x, y, ptype, ..Default::default() }
+    }
+
+    pub fn name(mut self, name: Option<String>) -> Self {
+        self.name = name;
+        self
     }
 }
 
@@ -29,7 +41,7 @@ impl GlifPoint {
 }
 
 #[cfg_attr(feature = "glifserde", derive(Serialize, Deserialize))]
-#[derive(Debug, Copy, Clone, PartialEq)]
+#[derive(Debug, Copy, Clone, Hash, PartialEq)]
 pub enum PointType {
     Undefined,
     /// .glif "move", can act as any point type!
@@ -57,7 +69,7 @@ pub enum Handle {
 impl From<Option<&GlifPoint>> for Handle {
     fn from(point: Option<&GlifPoint>) -> Handle {
         match point {
-            Some(p) => Handle::At(p.x, p.y),
+            Some(p) => Handle::At(p.x.into(), p.y.into()),
             None => Handle::Colocated,
         }
     }
@@ -230,17 +242,17 @@ impl<PD: PointData> Point<PD> {
     pub fn handle_as_point(
         &self,
         which: WhichHandle,
-    ) -> kurbo::Point {
+    ) -> KurboPoint {
         let handle = self.handle(which);
         let (x, y) = match handle {
             Handle::At(x, y) => (x, y),
             Handle::Colocated => (self.x, self.y),
         };
-        kurbo::Point::new(x as f64, y as f64)
+        KurboPoint::new(x as f64, y as f64)
     }
 
-    pub fn as_kpoint(&self) -> kurbo::Point {
-        kurbo::Point::new(self.x as f64, self.y as f64)
+    pub fn as_kpoint(&self) -> KurboPoint {
+        KurboPoint::new(self.x as f64, self.y as f64)
     }
 
     /// This function is intended for use by generic functions that can work on either handle, to
@@ -339,6 +351,23 @@ impl Into<char> for WhichHandle {
     }
 }
 
+impl PointType {
+    pub fn is_valid(self) -> bool {
+        match self {
+            Self::Move | Self::Line | Self::QCurve | Self::Curve | Self::OffCurve => true,
+            _ => false
+        }
+    }
+
+    pub fn is_valid_oncurve(self) -> bool {
+        if self == Self::OffCurve {
+            false
+        } else {
+            self.is_valid()
+        }
+    }
+}
+
 impl Display for PointType {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> Result<(), std::fmt::Error> {
         write!(f, "{}", match self {
@@ -350,14 +379,5 @@ impl Display for PointType {
             PointType::QCurve => "qcurve",
             PointType::Line => "line",
         })
-    }
-}
-
-impl PointType {
-    pub fn should_write_to_ufo(&self) -> bool {
-        match self {
-            PointType::Undefined | PointType::QClose => false,
-            _ => true,
-        }
     }
 }

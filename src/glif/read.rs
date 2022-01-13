@@ -11,7 +11,7 @@ use super::{Glif, Lib};
 use crate::error::GlifParserError::{self, GlifInputError};
 use crate::component::GlifComponent;
 use crate::guideline::Guideline;
-use crate::outline::{self, get_outline_type, GlifContour, GlifOutline, OutlineType};
+use crate::outline::{GlifContour, GlifOutline, Outline};
 use crate::point::{GlifPoint, PointData, PointType};
 use crate::anchor::Anchor;
 #[cfg(feature = "glifimage")]
@@ -200,7 +200,7 @@ pub fn read_ufo_glif<PD: PointData>(glif: &str) -> Result<Glif<PD>, GlifParserEr
         note_el.get_text().map(|t|ret.note=Some(t.into_owned()));
     }
 
-    let mut goutline: GlifOutline = Vec::new();
+    let mut goutline: GlifOutline = GlifOutline::new();
 
     let outline_el = glif.take_child("outline");
 
@@ -241,7 +241,7 @@ pub fn read_ufo_glif<PD: PointData>(glif: &str) -> Result<Glif<PD>, GlifParserEr
                     _ => {}
                 }
 
-                if gpoint.ptype.should_write_to_ufo() {
+                if gpoint.ptype.is_valid() {
                     gcontour.push(gpoint);
                 } else {
                     Err(GlifInputError(format!("Shouldn't write <point type={}> to UFO .glif!", gpoint.ptype)))?;
@@ -279,15 +279,12 @@ pub fn read_ufo_glif<PD: PointData>(glif: &str) -> Result<Glif<PD>, GlifParserEr
         log::warn!("Without glifserde, cannot decode plist!")
     }
 
-    ret.order = get_outline_type(&goutline);
+    goutline.figure_type();
+    ret.order = goutline.otype.into();
 
-    let outline = match ret.order {
-        OutlineType::Cubic => outline::create::cubic_outline(&goutline),
-        OutlineType::Quadratic => outline::create::quadratic_outline(&goutline),
-        OutlineType::Spiro => Err(input_error!("Spiro as yet unimplemented"))?,
-    };
+    let outline: Outline<PD> = goutline.try_into()?;
 
-    if outline.len() > 0 {
+    if outline.len() > 0 || ret.components.vec.len() > 0 {
         ret.outline = Some(outline);
     }
 

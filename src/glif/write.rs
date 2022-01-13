@@ -65,7 +65,9 @@ impl<PD: PointData> IntoXML for Glif<PD> {
             outline_node.children.push(XMLNode::Element(component.xml()));
         }
 
-        glyph.children.push(XMLNode::Element(outline_node));
+        if outline_node.children.len() >= 1 {
+            glyph.children.push(XMLNode::Element(outline_node));
+        }
 
         #[cfg(feature = "glifimage")]
         for image in &self.images {

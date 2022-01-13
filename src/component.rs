@@ -20,7 +20,7 @@ use std::path::{Path, PathBuf};
 
 #[allow(non_snake_case)] // to match UFO spec https://unifiedfontobject.org/versions/ufo3/glyphs/glif/#component
 #[cfg_attr(feature = "glifserde", derive(Serialize, Deserialize))]
-#[derive(Clone, Debug, Default, PartialEq)]
+#[derive(Clone, Debug, Default, Hash, PartialEq)]
 pub struct GlifComponent {
     pub base: String,
     pub filename: Option<PathBuf>,

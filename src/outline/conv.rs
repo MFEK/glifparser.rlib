@@ -1,6 +1,5 @@
 use super::{Contour, GlifContour};
 
-use crate::outline::contour::State as _;
 use crate::point::{GlifPoint, PointData, PointType, WhichHandle};
 
 use std::collections::{HashSet, VecDeque};
@@ -24,8 +23,9 @@ macro_rules! impl_igp {
 impl_igp!(Vec);
 impl_igp!(VecDeque);
 
-fn cleanup_offcurves(contour: &mut Vec<GlifPoint>) {
-    let types = contour.iter().enumerate().filter_map(|(i, gp)|(gp.ptype != PointType::OffCurve).then(||(i, gp.ptype)));
+pub(crate) fn cleanup_offcurves(contour: &mut Vec<GlifPoint>) {
+    let types: Vec<_> = contour.iter().enumerate().filter_map(|(i, gp)|(gp.ptype != PointType::OffCurve).then(||(i, gp.ptype))).collect();
+    debug_assert!(types.iter().all(|(_, t)|t.is_valid_oncurve()));
 
     let keep_indices: HashSet<usize> = types.into_iter().map(|(i, pt)| {
         let i = i as isize;
@@ -49,14 +49,13 @@ impl<PD: PointData> IntoGlifPoints for Contour<PD> {
     fn into_glifpoints(self) -> Self::Output {
         let contour_len = self.len();
         let mut on_points: VecDeque<GlifPoint> = self.iter().map(|p|GlifPoint::from(p)).collect();
-        let open_contour = self.is_open();
         let mut next_handles: VecDeque<GlifPoint> = self.iter().map(|p|GlifPoint::from_handle(p, WhichHandle::A)).collect();
         let mut prev_handles: VecDeque<GlifPoint> = self.iter().map(|p|GlifPoint::from_handle(p, WhichHandle::B)).collect();
         next_handles.rotate_right(1);
         debug_assert!(on_points.len() == next_handles.len() && next_handles.len() == prev_handles.len());
         let mut drains = [next_handles.drain(..), prev_handles.drain(..), on_points.drain(..)];
         let mut glifpoints: Vec<GlifPoint> = std::iter::repeat(()).take(contour_len).fold(Vec::with_capacity(contour_len), |mut acc, _|{acc.extend(drains.iter_mut().map(|d|d.next().unwrap())); acc});
-        assert!(drains.into_iter().all(|mut d|d.next().is_none()));
+        debug_assert!(drains.into_iter().all(|mut d|d.next().is_none()));
         cleanup_offcurves(&mut glifpoints);
         while let PointType::OffCurve = glifpoints[0].ptype {
             glifpoints.rotate_right(1);

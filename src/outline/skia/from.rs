@@ -5,7 +5,7 @@ use skia::path::{Verb as SkVerb};
 use crate::point::{Handle, Point, PointData, PointType};
 use crate::{Contour, Outline};
 
-use super::QuadsToCubics;
+use crate::outline::QuadToCubic;
 
 /// Get an outline from a Skia path. Outline is guaranteed to contain only Curve's, no QCurve's.
 pub trait FromSkiaPath {
@@ -133,9 +133,9 @@ impl ConicsToCubics for SkOutline {
                     // We don't want any quads, despite all the work we've done to get them. Skia
                     // doesn't have a function like convert_conic_to_cubics, only to_quads, so now
                     // that we have the quads we can make cubics.
-                    skcontour.push((PointType::Curve, [points[0], points[1], points[2]].quads_to_cubics().to_vec(), None));
+                    skcontour.push((PointType::Curve, [points[0], points[1], points[2]].quad_to_cubic().to_vec(), None));
                     if new_points_n == 2 {
-                        skcontour.push((PointType::Curve, [points[2], points[3], points[4]].quads_to_cubics().to_vec(), None));
+                        skcontour.push((PointType::Curve, [points[2], points[3], points[4]].quad_to_cubic().to_vec(), None));
                     }
                 } else {
                     skcontour.push((ptype, points, conic_weight));

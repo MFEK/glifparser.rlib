@@ -1,3 +1,8 @@
+mod flo;
+pub mod kurbo;
+#[cfg(feature = "skia")]
+mod skia;
+
 use crate::point::{GlifPoint, Handle, Point, PointData, PointType, WhichHandle};
 
 impl<PD: PointData> From<&Point<PD>> for Handle {
@@ -17,8 +22,8 @@ impl GlifPoint {
 impl<PD: PointData> From<&Point<PD>> for GlifPoint {
     fn from(p: &Point<PD>) -> GlifPoint {
         Self {
-            x: p.x,
-            y: p.y,
+            x: p.x.into(),
+            y: p.y.into(),
             ptype: p.ptype,
             name: p.name.clone(),
             smooth: p.smooth,
@@ -30,8 +35,8 @@ impl<PD: PointData> From<&Point<PD>> for GlifPoint {
 impl<PD: PointData> From<&GlifPoint> for Point<PD> {
     fn from(gp: &GlifPoint) -> Self {
         Self {
-            x: gp.x,
-            y: gp.y,
+            x: gp.x.into(),
+            y: gp.y.into(),
             ptype: gp.ptype,
             name: gp.name.clone(),
             smooth: gp.smooth,

@@ -1,7 +1,11 @@
 use super::{Contour, Outline};
 
 use crate::contour::{PrevNext as ContourPrevNext, State as ContourState};
-use crate::point::{Handle, PointData, PointType};
+use crate::point::{GlifPoint, Handle, Point, PointData, PointType};
+
+use std::collections::VecDeque;
+
+use integer_or_float::IntegerOrFloat::*;
 
 pub trait RefigurePointTypes<PD: PointData> {
     fn refigure_point_types(&mut self);
@@ -67,3 +71,40 @@ impl<PD: PointData> PointTypeForIdx for Contour<PD> {
         }
     }
 }
+
+/// This trait is primarily intended for easing .glif equality testing internally by our test
+/// suite. It therefore doesn't do any of the fancy things it could like change point types and
+/// assert handles as colocated. Consider MFEKmath::Refigure, RefigurePointTypes, etc., and not
+/// this (or perhaps together?).
+pub trait RoundToInt {
+    fn round_to_int(&mut self);
+}
+
+impl<PD: PointData> RoundToInt for Point<PD> {
+    fn round_to_int(&mut self) {
+        self.x = self.x.round();
+        self.y = self.y.round();
+    }
+}
+
+impl RoundToInt for GlifPoint {
+    fn round_to_int(&mut self) {
+        self.x = Integer(f32::from(self.x).round() as i32);
+        self.y = Integer(f32::from(self.y).round() as i32);
+    }
+}
+
+macro_rules! impl_rti {
+    ($type:ident) => {
+        impl<R: RoundToInt> RoundToInt for $type<R> {
+            fn round_to_int(&mut self) {
+                for p in self.iter_mut() {
+                    p.round_to_int();
+                }
+            }
+        }
+    }
+}
+
+impl_rti!(Vec);
+impl_rti!(VecDeque);
