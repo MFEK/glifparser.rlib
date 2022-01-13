@@ -1,3 +1,5 @@
+mod reverse;
+pub use reverse::Reverse;
 mod xml;
 
 use kurbo;

@@ -1,4 +1,5 @@
 pub mod contour;
+pub use contour::Reverse;
 mod conv;
 pub use conv::IntoGlifPoints;
 pub mod create;
