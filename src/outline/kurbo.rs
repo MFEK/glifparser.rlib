@@ -204,7 +204,11 @@ impl<PD: PointData> FromKurbo for Outline<PD> {
                         if next_points.1.len() == 3 {
                             point.a = Handle::At(next_points.1[2].x as f32, next_points.1[2].y as f32);
                         }
-                        point.b = Handle::At(points[1].x as f32, points[1].y as f32);
+                        if let Some(p) = points.get(1) {
+                            point.b = Handle::At(p.x as f32, p.y as f32);
+                        } else {
+                            log::warn!("Expected a next handle that does not exist")
+                        }
                     },
                     PointType::Line => {
                         if next_points.1.len() == 3 {
