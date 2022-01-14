@@ -1,5 +1,4 @@
 use super::Contour;
-use crate::outline::refigure::RefigurePointTypes as _;
 use crate::point::{Handle, Point, PointData, PointType};
 
 // TODO: Implement this trait on the `data` members of ContourOperations.

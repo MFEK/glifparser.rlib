@@ -232,8 +232,6 @@ impl<PD: PointData> FromSkOutline for Outline<PD> {
             ret.push(contour);
         }
 
-        //eprintln!("{:#?}", &ret);
-
         ret
     }
 }

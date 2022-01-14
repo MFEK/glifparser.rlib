@@ -14,12 +14,12 @@ static ITERATIONS: usize = 5_000;
 fn test_rev_outline() {
     let gcircle = CIRCLE.clone();
     let mut gcircle2 = CIRCLE.clone();
-    for i in 0 .. ITERATIONS {
+    for _ in 0 .. ITERATIONS {
         gcircle2.reverse();
     }
     assert_eq!(gcircle, gcircle2);
     let mut gcircle2 = CIRCLE.clone();
-    for i in 0 .. ITERATIONS - 1 {
+    for _ in 0 .. ITERATIONS - 1 {
         gcircle2.reverse();
     }
     assert_ne!(gcircle, gcircle2);
@@ -30,12 +30,12 @@ fn test_rev_contour() {
     let gcircle = &*CIRCLE;
     let gcircle_contour: Contour<()> = gcircle.clone().pop().unwrap();
     let mut gcircle2_contour: Contour<()> = gcircle_contour.clone();
-    for i in 0 .. ITERATIONS {
+    for _ in 0 .. ITERATIONS {
         gcircle2_contour.reverse();
     }
     assert_eq!(gcircle_contour, gcircle2_contour);
     let mut gcircle2_contour: Contour<()> = gcircle_contour.clone();
-    for i in 0 .. ITERATIONS - 1 {
+    for _ in 0 .. ITERATIONS - 1 {
         gcircle2_contour.reverse();
     }
     assert_ne!(gcircle_contour, gcircle2_contour);
