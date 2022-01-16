@@ -88,7 +88,7 @@ impl<PD: PointData> IntoXML for Glif<PD> {
         }
 
         #[rustfmt::skip]
-        let lib = match &self.lib {
+        let mut lib = match &self.lib {
             Lib::Plist(lib_node) => {
                 let mut plist_buf: Vec<u8> = vec![];
                 match plist::to_writer_xml(&mut plist_buf, &lib_node).map(|()|Element::parse(plist_buf.as_slice())) {
@@ -106,6 +106,12 @@ impl<PD: PointData> IntoXML for Glif<PD> {
             Lib::Xml(lib) => lib.clone(),
             Lib::None => return glyph,
         };
+
+        // plist library will transform the root to <plist>
+        lib.name = String::from("lib");
+        // and will add a version, which makes little sense inline, and is likely invalid in .glif
+        // (?)
+        lib.attributes.clear();
 
         glyph.children.push(XMLNode::Element(lib));
 

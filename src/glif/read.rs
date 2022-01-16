@@ -261,8 +261,9 @@ pub fn read_ufo_glif<PD: PointData>(glif: &str) -> Result<Glif<PD>, GlifParserEr
     }
 
     #[cfg(feature = "glifserde")]
-    if let Some(lib) = glif.take_child("lib") {
+    if let Some(mut lib) = glif.take_child("lib") {
         let mut plist_temp: Vec<u8> = vec![];
+        lib.name = String::from("plist");
         match lib.write(&mut plist_temp).map(|()|plist::from_bytes(&plist_temp)) {
             Ok(Ok(lib_p)) => ret.lib = Lib::Plist(lib_p),
             Err(e) => {
