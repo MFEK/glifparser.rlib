@@ -7,6 +7,8 @@ license = "Apache-2.0"
 keywords = ["glif", "parsers", "ufo-format", "fonts"]
 
 [dependencies]
+derive_more = "0.99"
+derivative = "2.2"
 xmltree = { version = "0.10", features = ["attribute-order"] }
 log = "0.4"
 kurbo = { version = "0.8", default-features = false }

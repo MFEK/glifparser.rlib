@@ -12,8 +12,10 @@ use crate::error::GlifParserError::{self, GlifInputError};
 use crate::component::GlifComponent;
 use crate::guideline::Guideline;
 use crate::outline::{GlifContour, GlifOutline, Outline};
+use crate::pedantry::Pedantry;
 use crate::point::{GlifPoint, PointData, PointType};
-use crate::anchor::Anchor;
+use crate::string::GlifStringLenOne;
+use crate::anchor::{Anchor, GlifAnchor};
 #[cfg(feature = "glifimage")]
 use crate::image::GlifImage;
 
@@ -43,11 +45,15 @@ use std::fs;
 /// filename on the Glif<PD> as well as on its GlifComponent's, easing their transition into
 /// Component's.
 pub fn read_ufo_glif_from_filename<F: AsRef<path::Path> + Clone, PD: PointData>(filename: F) -> Result<Glif<PD>, GlifParserError> {
+    read_ufo_glif_from_filename_pedantic(filename, Pedantry::default())
+}
+
+pub fn read_ufo_glif_from_filename_pedantic<F: AsRef<path::Path> + Clone, PD: PointData>(filename: F, pedantry: Pedantry) -> Result<Glif<PD>, GlifParserError> {
     let glifxml = match fs::read_to_string(&filename) {
         Ok(s) => s,
         Err(ioe) => Err(GlifParserError::GlifFileIoError(Some(Rc::new(ioe))))?
     };
-    let mut glif: Glif<PD> = read_ufo_glif(&glifxml)?;
+    let mut glif: Glif<PD> = read_ufo_glif_pedantic(&glifxml, pedantry)?;
     let filenamepb = filename.as_ref().to_path_buf();
     for component in glif.components.vec.iter_mut() {
         component.set_file_name(&filenamepb);
@@ -59,6 +65,10 @@ pub fn read_ufo_glif_from_filename<F: AsRef<path::Path> + Clone, PD: PointData>(
 /// Read UFO .glif XML to Glif struct. This should only be used when you have no known filename,
 /// and the glif is unattached from a UFO.
 pub fn read_ufo_glif<PD: PointData>(glif: &str) -> Result<Glif<PD>, GlifParserError> {
+    read_ufo_glif_pedantic(glif, Pedantry::default())
+}
+
+pub fn read_ufo_glif_pedantic<PD: PointData>(glif: &str, pedantry: Pedantry) -> Result<Glif<PD>, GlifParserError> {
     let mut glif = xmltree::Element::parse(glif.as_bytes())?;
 
     let mut ret = Glif::new();
@@ -111,26 +121,26 @@ pub fn read_ufo_glif<PD: PointData>(glif: &str) -> Result<Glif<PD>, GlifParserEr
     let mut anchors: Vec<Anchor<PD>> = Vec::new();
 
     while let Some(anchor_el) = glif.take_child("anchor") {
-        let mut anchor = Anchor::new();
+        let mut anchor = GlifAnchor::default();
 
         anchor.x = anchor_el
             .attributes
             .get("x")
             .ok_or(input_error!("<anchor> missing x"))?
             .parse()
-            .or(Err(input_error!("<anchor> x not float")))?;
+            .or(Err(input_error!("<anchor> x not integer/float")))?;
         anchor.y = anchor_el
             .attributes
             .get("y")
             .ok_or(input_error!("<anchor> missing y"))?
             .parse()
-            .or(Err(input_error!("<anchor> y not float")))?;
+            .or(Err(input_error!("<anchor> y not integer/float")))?;
         anchor.class = anchor_el
             .attributes
             .get("name")
-            .ok_or(input_error!("<anchor> missing class"))?
-            .clone();
-        anchors.push(anchor);
+            .map(|a|GlifStringLenOne::try_from(a.clone()))
+            .map_or(None, |r|r.ok());
+        anchors.push(Anchor::from_glif(&anchor, pedantry)?);
     }
 
     ret.anchors = anchors;

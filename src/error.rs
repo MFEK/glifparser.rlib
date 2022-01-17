@@ -1,13 +1,15 @@
 #[cfg(feature = "mfek")]
 pub mod mfek;
 
+mod string;
+pub use string::*;
+
 use crate::point::PointType;
 
 use std::error::Error;
 use std::fmt::{Formatter, Display};
 use std::io;
 use std::rc::Rc;
-use std::string;
 
 use xmltree::{ParseError, Error as XMLTreeError};
 #[cfg(feature = "glifserde")]
@@ -36,6 +38,8 @@ pub enum GlifParserError {
     GlifNotUtf8,
     /// The XML making up the glif is invalid
     XmlParseError(String),
+    /// The XML making up the glif is invalid
+    PedanticXmlParseError(String),
     /// Failures when writing glif XML
     XmlWriteError(String),
     /// The XML is valid, but doesn't meet the UFO .glif spec
@@ -96,6 +100,9 @@ impl Display for GlifParserError {
 
             Self::XmlParseError(s) | Self::XmlWriteError(s) => {
                 format!("XML error: {}", &s)
+            },
+            Self::PedanticXmlParseError(s) => {
+                format!("XML error (requested pedantry, would not normally be an error): {}", &s)
             },
             Self::GlifInputError(s) => {
                 format!("Glif format spec error: {}", &s)
@@ -163,8 +170,8 @@ impl From<PlistError> for GlifParserError {
     }
 }
 
-impl From<string::FromUtf8Error> for GlifParserError {
-    fn from(_: string::FromUtf8Error) -> Self {
+impl From<std::string::FromUtf8Error> for GlifParserError {
+    fn from(_: std::string::FromUtf8Error) -> Self {
         Self::GlifNotUtf8
     }
 }

@@ -11,7 +11,7 @@ use crate::outline::Outline;
 use integer_or_float::IntegerOrFloat;
 use IntegerOrFloat::Float;
 use kurbo::Affine;
-use trees::{Forest, Tree, Node};
+pub use trees::{Forest, Tree, Node};
 
 #[cfg(feature = "glifserde")]
 use serde::{Serialize, Deserialize};
