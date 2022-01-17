@@ -1,0 +1,100 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src&#x2F;lib.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>lib.rs - source</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled ><script id="default-settings" ></script><script src="../../storage.js"></script><script src="../../crates.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../glifparser/index.html'><div class='logo-container rust-logo'><img src='../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="18" height="18" alt="Pick another theme!" src="../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../settings.html" title="settings"><img width="18" height="18" alt="Change settings" src="../../wheel.svg"></a></div></form></nav><section id="main" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1"> 1</span>
+<span id="2"> 2</span>
+<span id="3"> 3</span>
+<span id="4"> 4</span>
+<span id="5"> 5</span>
+<span id="6"> 6</span>
+<span id="7"> 7</span>
+<span id="8"> 8</span>
+<span id="9"> 9</span>
+<span id="10">10</span>
+<span id="11">11</span>
+<span id="12">12</span>
+<span id="13">13</span>
+<span id="14">14</span>
+<span id="15">15</span>
+<span id="16">16</span>
+<span id="17">17</span>
+<span id="18">18</span>
+<span id="19">19</span>
+<span id="20">20</span>
+<span id="21">21</span>
+<span id="22">22</span>
+<span id="23">23</span>
+<span id="24">24</span>
+<span id="25">25</span>
+<span id="26">26</span>
+<span id="27">27</span>
+<span id="28">28</span>
+<span id="29">29</span>
+<span id="30">30</span>
+<span id="31">31</span>
+<span id="32">32</span>
+<span id="33">33</span>
+<span id="34">34</span>
+<span id="35">35</span>
+<span id="36">36</span>
+<span id="37">37</span>
+<span id="38">38</span>
+<span id="39">39</span>
+<span id="40">40</span>
+<span id="41">41</span>
+<span id="42">42</span>
+<span id="43">43</span>
+<span id="44">44</span>
+<span id="45">45</span>
+<span id="46">46</span>
+<span id="47">47</span>
+<span id="48">48</span>
+</pre><pre class="rust"><code><span class="doccomment">//! A parser and writer for UFO `.glif` files.</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! © 2020–2022 Fredrick R. Brennan and MFEK Authors</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! `glifparser` supports the entire `.glif` spec as of 12 April 2021.</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! `glifparser` is not `norad` and is not meant to implement the UFO spec.</span>
+
+<span class="comment">// This #[macro_use] is necessary even in Rust 2021 because it auto-imports derive macros.</span>
+<span class="attribute">#[<span class="ident">macro_use</span>]</span>
+<span class="kw">extern</span> <span class="kw">crate</span> <span class="ident">derive_more</span>;
+<span class="attribute">#[<span class="ident">macro_use</span>]</span>
+<span class="kw">extern</span> <span class="kw">crate</span> <span class="ident">derivative</span>;
+
+<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">error</span>;
+
+<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">anchor</span>;
+<span class="kw">mod</span> <span class="ident">codepoint</span>; <span class="comment">// Unicode codepoint formatter</span>
+<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">color</span>; <span class="comment">// glif RGBA color for guidelines etc</span>
+<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">matrix</span>;
+<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">component</span>;
+<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">glif</span>;
+<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">guideline</span>;
+<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;glifimage&quot;</span>)]</span>
+<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">image</span>;
+<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">outline</span>;
+<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">pedantry</span>;
+<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">point</span>;
+<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">string</span>;
+
+<span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::anchor::Anchor</span>;
+<span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::codepoint::Codepoint</span>;
+<span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::color::Color</span>;
+<span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::component</span>::{<span class="ident">FlattenedGlif</span>, <span class="ident">GlifComponent</span>, <span class="ident">Component</span>, <span class="ident">ComponentRect</span>};
+<span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::glif</span>::{<span class="ident">read</span>, <span class="ident">read_pedantic</span>, <span class="ident">read_from_filename</span>, <span class="ident">read_from_filename_pedantic</span>, <span class="ident">write</span>, <span class="ident">write_to_filename</span>};
+<span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::glif::Glif</span>;
+<span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::glif::xml</span>;
+<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;mfek&quot;</span>)]</span>
+<span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::glif::mfek</span>::{<span class="ident">MFEKGlif</span>, <span class="ident">VWSContour</span>, <span class="ident">JoinType</span>, <span class="ident">CapType</span>};
+<span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::guideline</span>::{<span class="ident">Guideline</span>, <span class="ident">GuidelinePoint</span>};
+<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;glifimage&quot;</span>)]</span>
+<span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::image</span>::{<span class="ident">GlifImage</span>, <span class="ident">Image</span>, <span class="ident">ImageCodec</span>};
+<span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::outline</span>::{<span class="ident">contour</span>, <span class="ident">Contour</span>, <span class="ident">Outline</span>, <span class="ident">OutlineType</span>};
+<span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::pedantry::Pedantry</span>;
+<span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::point</span>::{<span class="ident">Point</span>, <span class="ident">PointType</span>, <span class="ident">Handle</span>, <span class="ident">WhichHandle</span>, <span class="ident">PointData</span>};
+<span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::string::GlifString</span>;
+
+<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">integer_or_float::IntegerOrFloat</span>;
+</code></pre></div>
+</section><section id="search" class="content hidden"></section><div id="rustdoc-vars" data-root-path="../../" data-current-crate="glifparser" data-search-index-js="../../search-index.js" data-search-js="../../search.js"></div>
+    <script src="../../main.js"></script><script src="../../source-script.js"></script><script src="../../source-files.js"></script>
+</body></html>

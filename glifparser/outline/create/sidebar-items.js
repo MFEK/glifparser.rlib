@@ -1,0 +1,1 @@
+initSidebarItems({"fn":[["cubic_outline",""],["quadratic_outline",""]]});

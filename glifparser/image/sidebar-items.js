@@ -1,0 +1,1 @@
+initSidebarItems({"enum":[["DataLoadState",""],["DataOrBitmap",""],["ImageCodec",""]],"struct":[["GlifImage",""],["Image",""],["ImageData",""]]});

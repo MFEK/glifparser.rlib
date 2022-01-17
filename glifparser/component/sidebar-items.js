@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["Component",""],["ComponentRect",""],["Forest","List of `Node`s as its children."],["GlifComponent",""],["GlifComponents",""],["Node","Composed of `data` and a list of its child `Node`s. Size infomation tracked."],["Tree","Composed of a root `Node` and a list of its child `Node`s."]],"trait":[["FlattenedGlif",""]]});

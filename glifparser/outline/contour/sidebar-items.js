@@ -1,0 +1,1 @@
+initSidebarItems({"enum":[["End",""]],"trait":[["CheckSmooth",""],["GenericPrevNext",""],["PrevNext",""],["Reverse","Reverse the logical (visual) order of Bézier splines in a contour, flipping handles as necessary, and taking into account open/closed state."],["State",""]]});

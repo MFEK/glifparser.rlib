@@ -1,0 +1,1 @@
+initSidebarItems({"enum":[["GlifParserError",""],["GlifStringConversionError",""]],"type":[["GlifParserResult",""]]});

@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["Guideline",""],["GuidelinePoint",""]]});
