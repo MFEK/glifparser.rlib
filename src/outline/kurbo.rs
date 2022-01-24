@@ -71,17 +71,17 @@ impl<PD: PointData> IntoKurbo for Contour<PD> {
                 PointType::Move => PathEl::MoveTo(point.as_kpoint()),
                 PointType::Line => PathEl::LineTo(point.as_kpoint()),
                 PointType::QCurve => {
-                    PathEl::QuadTo(point.handle_as_point(WhichHandle::A), point.as_kpoint())
+                    PathEl::QuadTo(point.handle_as_kpoint(WhichHandle::A), point.as_kpoint())
                 }
                 PointType::Curve => match self.contour_prev_next(pi)? {
                     (_, Some(next)) => PathEl::CurveTo(
-                        point.handle_as_point(WhichHandle::A),
-                        self[next].handle_as_point(WhichHandle::B),
+                        point.handle_as_kpoint(WhichHandle::A),
+                        self[next].handle_as_kpoint(WhichHandle::B),
                         self[next].as_kpoint(),
                     ),
                     (Some(prev), None) => PathEl::CurveTo(
-                        self[prev].handle_as_point(WhichHandle::A),
-                        point.handle_as_point(WhichHandle::B),
+                        self[prev].handle_as_kpoint(WhichHandle::A),
+                        point.handle_as_kpoint(WhichHandle::B),
                         point.as_kpoint(),
                     ),
                     (None, None) => unreachable!(),

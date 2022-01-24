@@ -239,16 +239,28 @@ impl<PD: PointData> Point<PD> {
         }
     }
 
-    pub fn handle_as_point(
+    pub fn handle_as_gpoint(
         &self,
         which: WhichHandle,
-    ) -> KurboPoint {
+    ) -> GlifPoint {
         let handle = self.handle(which);
         let (x, y) = match handle {
             Handle::At(x, y) => (x, y),
             Handle::Colocated => (self.x, self.y),
         };
-        KurboPoint::new(x as f64, y as f64)
+        GlifPoint::from_x_y_type((x, y), PointType::OffCurve)
+    }
+
+    pub fn handle_as_point(&self, which: WhichHandle) -> Self {
+        (&self.handle_as_gpoint(which)).into()
+    }
+
+    pub fn handle_as_kpoint(
+        &self,
+        which: WhichHandle,
+    ) -> KurboPoint {
+        let p = self.handle_as_gpoint(which);
+        KurboPoint::new(f64::from(p.x), f64::from(p.y))
     }
 
     pub fn as_kpoint(&self) -> KurboPoint {
