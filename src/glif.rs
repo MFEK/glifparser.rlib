@@ -26,7 +26,7 @@ pub mod xml;
 pub use self::{read::FromXML, write::IntoXML, xml::XMLConversion};
 
 #[cfg(feature = "glifserde")]
-use serde::{Deserialize, Deserializer, Serialize, Serializer, ser::SerializeStruct, ser::Error as SerdeError, de::Error as SerdeDeError};
+use serde::{Deserialize, Serialize};
 
 #[cfg(feature = "mfek")]
 pub use mfek::*;
@@ -35,6 +35,7 @@ pub use mfek::*;
 ///
 /// TODO: use different generic types on Anchor and Guideline, making this declaration
 /// `Glif<PD,GD,AD>`
+#[cfg_attr(feature = "glifserde", derive(Serialize, Deserialize))]
 #[derive(Clone, Debug, Default, PartialEq)]
 pub struct Glif<PD: PointData> {
     pub outline: Option<Outline<PD>>,
@@ -60,38 +61,10 @@ pub struct Glif<PD: PointData> {
     /// This is an arbitrary glyph comment, exactly like the comment field in FontForge SFD.
     pub note: Option<String>,
     /// It's up to the API consumer to set this.
+    #[cfg_attr(feature = "glifserde", serde(skip_serializing, skip_deserializing))]
     pub filename: Option<path::PathBuf>,
     /// glif private library
     pub lib: Lib,
-}
-
-#[cfg(feature = "glifserde")]
-impl<PD: PointData> Serialize for Glif<PD> {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        // 3 is the number of fields in the struct.
-        let mut state = serializer.serialize_struct("Glif", 1)?;
-        let self_string = write(&self);
-        if self_string.is_err() { return Err(SerdeError::custom("Could not serialize glif!")) }
-        state.serialize_field("inner", &self_string.unwrap())?;
-        state.end()
-    }
-}
-
-#[cfg(feature = "glifserde")]
-impl<'de, PD: PointData> Deserialize<'de> for Glif<PD> {
-    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
-    where
-        D: Deserializer<'de>,
-    {
-        let s = String::deserialize(deserializer)?;
-        let loaded_glif = read(&s);
-        if loaded_glif.is_err() { return Err(SerdeDeError::custom("Could not deserialize glif!")) }
-
-        return Ok(loaded_glif.unwrap());
-    }
 }
 
 impl<PD: PointData> Glif<PD> {
