@@ -1,17 +1,16 @@
 /// Kurbo module — warning: only guaranteed to round trip closed contours!
 
 use float_cmp::ApproxEq as _;
-use kurbo::{BezPath, PathEl};
+use kurbo::{BezPath, PathEl, PathEl::*};
 
 use super::{Contour, Outline};
 use crate::error::GlifParserError;
-use crate::point::{Handle, Point, PointData, PointType, WhichHandle};
+use crate::point::{Handle, Point, PointData, PointType, PointType::*, WhichHandle};
 
 use super::RefigurePointTypes as _;
 use crate::outline::contour::{PrevNext as _, State as _};
 
-use PathEl::*;
-use PointType::*;
+use std::iter::Iterator;
 
 impl From<PathEl> for PointType {
     fn from(el: PathEl) -> Self {
@@ -129,7 +128,6 @@ impl IntoKurboPointsVec for PathEl {
         }
     }
 }
-
 impl SplitKurboPath for BezPath {
     fn split_kurbo_path(&self) -> Vec<Vec<(PointType, Vec<kurbo::Point>)>> {
         let mut koutline = vec![];
@@ -153,8 +151,11 @@ impl SplitKurboPath for BezPath {
             } else {
                 let lp = kcontour.last().unwrap().clone().1;
                 let mut rm = kcontour.remove(0);
+                let _fp = kcontour.first().unwrap().clone().1;
                 if rm.1[0].x.approx_eq(lp[0].x, (f32::EPSILON as f64, 4)) && rm.1[0].y.approx_eq(lp[0].y, (f32::EPSILON as f64, 4)) {
+                    rm.0 = PointType::Curve;
                     kcontour[0].0 = PointType::Curve;
+                    kcontour.insert(0, rm);
                 } else {
                     rm.0 = PointType::Line;
                     kcontour.insert(0, rm);
@@ -220,10 +221,6 @@ impl<PD: PointData> FromKurbo for Outline<PD> {
                     _ => unreachable!("")
                 }
                 contour.push(point);
-            }
-
-            if contour.first().map(|p|p.ptype == PointType::Move).unwrap_or(false) {
-                //fixup_kurbo_open_contour(&mut contour, &skc);
             }
 
             ret.push(contour);
