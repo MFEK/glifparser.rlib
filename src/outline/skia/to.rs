@@ -29,21 +29,21 @@ impl Into<skia::Path> for SkiaPaths {
 }
 
 #[derive(Copy, Clone)]
-pub struct SkiaPointTransforms {
-    pub calc_x: fn(f32) -> f32,
-    pub calc_y: fn(f32) -> f32,
+pub struct SkiaPointTransforms<'a> {
+    pub calc_x: &'a dyn Fn(f32) -> f32,
+    pub calc_y: &'a dyn Fn(f32) -> f32,
 }
 
-impl Default for SkiaPointTransforms {
+impl Default for SkiaPointTransforms<'_> {
     fn default() -> Self {
         Self {
-            calc_x: |f|f,
-            calc_y: |f|f
+            calc_x: &|f|f,
+            calc_y: &|f|f
         }
     }
 }
 
-impl SkiaPointTransforms {
+impl SkiaPointTransforms<'_> {
     pub fn new() -> Self {
         Self::default()
     }
@@ -104,8 +104,8 @@ impl<PD: PointData> ToSkiaPath for Contour<PD> {
         let mut outline_type = OutlineType::Cubic;
 
         let transforms = spt.unwrap_or(SkiaPointTransforms::new());
-        let calc_x = transforms.calc_x;
-        let calc_y = transforms.calc_y;
+        let calc_x: &dyn Fn(f32) -> f32 = transforms.calc_x;
+        let calc_y: &dyn Fn(f32) -> f32 = transforms.calc_y;
 
         path.move_to((calc_x(self[0].x), calc_y(self[0].y)));
 
@@ -122,13 +122,13 @@ impl<PD: PointData> ToSkiaPath for Contour<PD> {
                     if outline_type == OutlineType::Quadratic {
                         panic!("Got a cubic point after a quadratic point");
                     }
-                    let h1 = prevpoint.handle_or_colocated(WhichHandle::A, calc_x, calc_y);
-                    let h2 = point.handle_or_colocated(WhichHandle::B, calc_x, calc_y);
+                    let h1 = prevpoint.handle_or_colocated(WhichHandle::A, &calc_x, &calc_y);
+                    let h2 = point.handle_or_colocated(WhichHandle::B, &calc_x, &calc_y);
                     path.cubic_to(h1, h2, (calc_x(point.x), calc_y(point.y)));
                 }
                 PointType::QCurve => {
                     outline_type = OutlineType::Quadratic;
-                    let h1 = prevpoint.handle_or_colocated(WhichHandle::A, calc_x, calc_y);
+                    let h1 = prevpoint.handle_or_colocated(WhichHandle::A, &calc_x, &calc_y);
                     path.quad_to(h1, (calc_x(point.x), calc_y(point.y)));
                 }
                 _ => {}
@@ -139,10 +139,10 @@ impl<PD: PointData> ToSkiaPath for Contour<PD> {
         if firstpoint.ptype != PointType::Move {
             match self.last() {
                 Some(lastpoint) => {
-                    let h1 = lastpoint.handle_or_colocated(WhichHandle::A, calc_x, calc_y);
+                    let h1 = lastpoint.handle_or_colocated(WhichHandle::A, &calc_x, &calc_y);
                     match outline_type {
                         OutlineType::Cubic => {
-                            let h2 = firstpoint.handle_or_colocated(WhichHandle::B, calc_x, calc_y);
+                            let h2 = firstpoint.handle_or_colocated(WhichHandle::B, &calc_x, &calc_y);
                             path.cubic_to(h1, h2, (calc_x(firstpoint.x), calc_y(firstpoint.y)))
                         }
                         OutlineType::Quadratic => {
@@ -152,7 +152,7 @@ impl<PD: PointData> ToSkiaPath for Contour<PD> {
                                     // cause a crash anyway if it's happening.
                                     let prevpoint = &self[self.len() - 2];
                                     let ph =
-                                        prevpoint.handle_or_colocated(WhichHandle::A, calc_x, calc_y);
+                                        prevpoint.handle_or_colocated(WhichHandle::A, &calc_x, &calc_y);
                                     path.quad_to(ph, h1)
                                 }
                                 _ => path.quad_to(h1, (calc_x(firstpoint.x), calc_y(firstpoint.y))),

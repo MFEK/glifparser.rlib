@@ -229,8 +229,8 @@ impl<PD: PointData> Point<PD> {
     pub fn handle_or_colocated(
         &self,
         which: WhichHandle,
-        transform_x: fn(f32) -> f32,
-        transform_y: fn(f32) -> f32,
+        transform_x: &dyn Fn(f32) -> f32,
+        transform_y: &dyn Fn(f32) -> f32,
     ) -> (f32, f32) {
         let handle = self.handle(which);
         match handle {

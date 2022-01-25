@@ -157,13 +157,13 @@ fn apply_component_rect<PD: PointData>(last: &Node<Component<PD>>, minx: &mut f3
                     if p.y > *maxy || is_first { *maxy = p.y; }
 
                     if p.a != Handle::Colocated {
-                        let (ax, ay) = p.handle_or_colocated(WhichHandle::A, |f|f, |f|f);
+                        let (ax, ay) = p.handle_or_colocated(WhichHandle::A, &|f|f, &|f|f);
                         let kbpa = matrices.iter().fold(KurboPoint::new(ax as f64, ay as f64), |p, m| *m * p);
                         p.a = Handle::At(kbpa.x as f32, kbpa.y as f32);
                     }
 
                     if p.b != Handle::Colocated {
-                        let (bx, by) = p.handle_or_colocated(WhichHandle::B, |f|f, |f|f);
+                        let (bx, by) = p.handle_or_colocated(WhichHandle::B, &|f|f, &|f|f);
                         let kbpb = matrices.iter().fold(KurboPoint::new(bx as f64, by as f64), |p, m| *m * p);
                         p.b = Handle::At(kbpb.x as f32, kbpb.y as f32);
                     }
