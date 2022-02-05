@@ -33,6 +33,6 @@ fn test_kurbo_from() {
     println!("{}", glifparser::write(&glif).unwrap());
     glif.outline = Some(outline2.clone());
     println!("{}", glifparser::write(&glif).unwrap());
-    //assert_eq!(len1, len2);
-    //assert_eq!(&outline, &outline2);
+    assert_eq!(len1, len2);
+    assert_eq!(&outline, &outline2);
 }

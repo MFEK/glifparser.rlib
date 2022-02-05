@@ -3,12 +3,10 @@
 use float_cmp::ApproxEq as _;
 use kurbo::{BezPath, PathEl, PathEl::*};
 
-use super::{Contour, Outline};
+use super::{Contour, Outline, conv::PenOperations};
 use crate::error::GlifParserError;
-use crate::point::{Handle, Point, PointData, PointType, PointType::*, WhichHandle};
-
-use super::RefigurePointTypes as _;
-use crate::outline::contour::{PrevNext as _, State as _};
+use crate::point::{Handle, Point, PointData, PointType, PointType::*};
+use crate::point::PointLike;
 
 use std::iter::Iterator;
 
@@ -34,6 +32,18 @@ impl From<&mut PathEl> for PointType {
     }
 }
 
+impl Into<PathEl> for PenOperations {
+    fn into(self) -> PathEl {
+        match self {
+            PenOperations::MoveTo(gp) => PathEl::MoveTo(gp.as_kpoint()),
+            PenOperations::LineTo(gp) => PathEl::LineTo(gp.as_kpoint()),
+            PenOperations::QuadTo(gpa, gp) => PathEl::QuadTo(gpa.as_kpoint(), gp.as_kpoint()),
+            PenOperations::CurveTo(gpa, gp2b, gp) => PathEl::CurveTo(gpa.as_kpoint(), gp2b.as_kpoint(), gp.as_kpoint()),
+            PenOperations::Close => PathEl::ClosePath,
+        }
+    }
+}
+
 pub trait IntoKurbo: Sized {
     fn into_kurbo(self) -> Result<BezPath, GlifParserError> {
         Ok(BezPath::from_vec(self.into_kurbo_vec()?))
@@ -55,53 +65,16 @@ impl<PD: PointData> IntoKurbo for Outline<PD> {
     }
 }
 
+use crate::outline::conv::IntoPenOperations;
 impl<PD: PointData> IntoKurbo for Contour<PD> {
     fn into_kurbo_vec(mut self) -> Result<Vec<PathEl>, GlifParserError> {
-        let is_closed = self.is_closed();
-        self.refigure_point_types();
-        let mut kurbo_vec = vec![];
+        let ret = self
+            .into_pen_operations()?
+            .into_iter()
+            .map(|po| po.into())
+            .collect();
 
-        if is_closed {
-            kurbo_vec.push(PathEl::MoveTo(self.first().unwrap().as_kpoint()));
-        }
-
-        for (pi, point) in self.iter().enumerate() {
-            kurbo_vec.push(match point.ptype {
-                PointType::Move => PathEl::MoveTo(point.as_kpoint()),
-                PointType::Line => PathEl::LineTo(point.as_kpoint()),
-                PointType::QCurve => {
-                    PathEl::QuadTo(point.handle_as_kpoint(WhichHandle::A), point.as_kpoint())
-                }
-                PointType::Curve => match self.contour_prev_next(pi)? {
-                    (_, Some(next)) => PathEl::CurveTo(
-                        point.handle_as_kpoint(WhichHandle::A),
-                        self[next].handle_as_kpoint(WhichHandle::B),
-                        self[next].as_kpoint(),
-                    ),
-                    (Some(prev), None) => PathEl::CurveTo(
-                        self[prev].handle_as_kpoint(WhichHandle::A),
-                        point.handle_as_kpoint(WhichHandle::B),
-                        point.as_kpoint(),
-                    ),
-                    (None, None) => unreachable!(),
-                },
-                ptype => return Err(GlifParserError::GlifContourHasBadPointType { pi, ptype }),
-            });
-        }
-
-        if is_closed {
-            if self.last().unwrap().ptype == Curve && self.first().unwrap().ptype == Curve {
-                let lp = kurbo_vec.last().unwrap().clone();
-                if let PathEl::CurveTo(p1, p2, _p3) = lp {
-                    *kurbo_vec.last_mut().unwrap() = PathEl::CurveTo(
-                        p1, p2, self.first().unwrap().as_kpoint()
-                    );
-                }
-            }
-            kurbo_vec.push(PathEl::ClosePath);
-        }
-
-        Ok(kurbo_vec)
+        Ok(ret)
     }
 }
 
@@ -138,6 +111,7 @@ impl SplitKurboPath for BezPath {
         } else {
             self.into_iter().collect()
         };
+        let mut last_type = None;
         for p in iterable {
             let ptype: PointType = p.into();
             let kpv = p.into_kpoint_vec();
@@ -161,6 +135,7 @@ impl SplitKurboPath for BezPath {
                     kcontour.insert(0, rm);
                 }
             }
+            last_type = Some(p);
         }
 
         if kcontour.len() > 0 {
@@ -221,6 +196,15 @@ impl<PD: PointData> FromKurbo for Outline<PD> {
                     _ => unreachable!("")
                 }
                 contour.push(point);
+            }
+
+            let first = contour.first().unwrap();
+            let last = contour.last().unwrap();
+            let (x, y, a, b) = (last.x, last.y, last.a, last.b);
+            if contour.len() >= 2 && x == first.x && y == first.y {
+                let rm = contour.pop().unwrap();
+                contour.first_mut().unwrap().b = b;
+                //contour.first_mut().unwrap().b = a;
             }
 
             ret.push(contour);

@@ -1,3 +1,6 @@
+mod penops;
+pub use penops::{IntoPenOperations, PenOperations};
+
 use super::{Contour, GlifContour};
 
 use crate::point::{GlifPoint, PointData, PointType, WhichHandle};
