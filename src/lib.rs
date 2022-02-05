@@ -42,6 +42,7 @@ pub use crate::guideline::{Guideline, GuidelinePoint};
 pub use crate::image::{GlifImage, Image, ImageCodec};
 pub use crate::outline::{contour, Contour, Outline, OutlineType};
 pub use crate::pedantry::Pedantry;
+pub use crate::point::{IsValid, PointLike};
 pub use crate::point::{Point, PointType, Handle, WhichHandle, PointData};
 pub use crate::string::GlifString;
 

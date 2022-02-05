@@ -14,6 +14,7 @@ use crate::guideline::Guideline;
 use crate::outline::{GlifContour, GlifOutline, Outline};
 use crate::pedantry::Pedantry;
 use crate::point::{GlifPoint, PointData, PointType};
+use crate::point::IsValid as _;
 use crate::string::GlifStringLenOne;
 use crate::anchor::{Anchor, GlifAnchor};
 #[cfg(feature = "glifimage")]

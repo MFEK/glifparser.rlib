@@ -1,5 +1,7 @@
 mod conv;
 pub use self::conv::kurbo::*;
+mod valid;
+pub use self::valid::{IsValid, PointLike};
 mod xml;
 
 use std::fmt::{Display, Debug};
@@ -131,6 +133,7 @@ pub trait PointData where Self: Clone + Default + Debug + Serialize {}
 #[cfg(not(feature = "glifserde"))]
 pub trait PointData where Self: Clone + Default + Debug {}
 impl PointData for () {}
+impl<PD: PointData> IsValid for PD {}
 
 /// A Skia-friendly point
 #[cfg_attr(feature = "glifserde", derive(Serialize, Deserialize))]
@@ -149,36 +152,6 @@ pub struct Point<PD: PointData> {
     pub smooth: bool,
     #[cfg_attr(feature = "glifserde", serde(default))]
     pub data: Option<PD>,
-}
-
-impl<PD: PointData> Point<PD> {
-    /// `validate_data` parameter allows you to define an `is_valid` (or whatever) impl on your
-    /// `PointData` struct's. You can then pass the function while validating the point as e.g.
-    /// `Some(MyPointData::is_valid)`. It takes an `Option<&PD>` so that you have the choice as to
-    /// whether it's valid or not for your type not to be defined; `Point.data` should probably not
-    /// be defined as an Option<PD>, but removing that's TODO. This API will change when that does
-    /// and should be considered unstable/testing.
-    pub fn is_valid(&self, validate_data: Option<fn(Option<&PD>)->bool>) -> bool {
-        if let Some(validate_point_data_function) = validate_data {
-            if !validate_point_data_function(self.data.as_ref()) {
-                return false
-            }
-        }
-        if self.ptype == PointType::Undefined {
-            return false
-        }
-        if self.x.is_subnormal() || self.y.is_subnormal() {
-            return false
-        }
-        for handle in [self.handle(WhichHandle::A), self.handle(WhichHandle::B)] {
-            if let Handle::At(hx, hy) = handle {
-                if hx.is_subnormal() || hy.is_subnormal() {
-                    return false
-                }
-            }
-        }
-        true
-    }
 }
 
 /// For use by ``Point::handle_or_colocated``
@@ -263,10 +236,6 @@ impl<PD: PointData> Point<PD> {
         KurboPoint::new(f64::from(p.x), f64::from(p.y))
     }
 
-    pub fn as_kpoint(&self) -> KurboPoint {
-        KurboPoint::new(self.x as f64, self.y as f64)
-    }
-
     /// This function is intended for use by generic functions that can work on either handle, to
     /// decrease the use of macros like `move_mirror!(a, b)`.
     pub fn set_handle(&mut self, which: WhichHandle, handle: Handle) {
@@ -347,8 +316,10 @@ impl WhichHandle {
             }
         }
     }
+}
 
-    pub fn is_valid(&self) -> bool {
+impl IsValid for WhichHandle {
+    fn is_valid(&self) -> bool {
         *self == Self::A || *self == Self::B
     }
 }
@@ -363,14 +334,16 @@ impl Into<char> for WhichHandle {
     }
 }
 
-impl PointType {
-    pub fn is_valid(self) -> bool {
-        match self {
+impl IsValid for PointType {
+    fn is_valid(&self) -> bool {
+        match *self {
             Self::Move | Self::Line | Self::QCurve | Self::Curve | Self::OffCurve => true,
             _ => false
         }
     }
+}
 
+impl PointType {
     pub fn is_valid_oncurve(self) -> bool {
         if self == Self::OffCurve {
             false
