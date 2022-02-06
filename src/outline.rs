@@ -1,7 +1,7 @@
 pub mod contour;
 pub use contour::Reverse;
 mod conv;
-pub use conv::IntoGlifPoints;
+pub use conv::{IntoGlifPoints, ToOutline};
 pub mod create;
 mod kurbo;
 pub use self::kurbo::*;

@@ -1,5 +1,11 @@
 pub use kurbo::Point as KurboPoint;
-use crate::point::{GlifPoint, PointType};
+use crate::point::{GlifPoint, PointLike, PointType};
+
+impl<'a> Into<KurboPoint> for &'a dyn PointLike {
+    fn into(self) -> KurboPoint {
+        KurboPoint{ x: self.x64(), y: self.y64() }
+    }
+}
 
 pub trait FromKurboPoint {
     fn from_kurbo(kp: &kurbo::Point) -> Self;

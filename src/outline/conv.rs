@@ -1,5 +1,5 @@
 mod penops;
-pub use penops::{IntoPenOperations, PenOperations};
+pub use penops::{IntoPenOperations, PenOperations, SplitPenOperations, ToOutline};
 
 use super::{Contour, GlifContour};
 
