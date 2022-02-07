@@ -1,6 +1,8 @@
+use integer_or_float::IntegerOrFloat;
 use skia_safe as skia;
 use skia::{Point as SkPoint};
 use super::kurbo::{KurboPoint, FromKurboPoint, ToKurboPoint};
+use crate::point::{IsValid, PointLike};
 
 pub trait ToSkiaPoint {
     fn to_skia(&self) -> SkPoint;
@@ -21,5 +23,26 @@ impl ToSkiaPoint for KurboPoint {
 impl FromKurboPoint for SkPoint {
     fn from_kurbo(kp: &KurboPoint) -> SkPoint {
         kp.to_skia()
+    }
+}
+
+impl IsValid for SkPoint {
+    fn is_valid(&self) -> bool {
+        !self.x.is_nan() && !self.y.is_nan()
+    }
+}
+
+impl PointLike for SkPoint {
+    fn x(&self) -> IntegerOrFloat {
+        IntegerOrFloat::Float(self.x)
+    }
+    fn y(&self) -> IntegerOrFloat {
+        IntegerOrFloat::Float(self.y)
+    }
+    fn set_x(&mut self, x: IntegerOrFloat) {
+        self.set(f32::from(x), self.y)
+    }
+    fn set_y(&mut self, y: IntegerOrFloat) {
+        self.set(self.x, f32::from(y))
     }
 }
