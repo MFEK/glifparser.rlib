@@ -14,6 +14,8 @@ pub trait IsValid: Debug {
 pub trait PointLike: IsValid {
     fn x(&self) -> IntegerOrFloat;
     fn y(&self) -> IntegerOrFloat;
+    fn set_x(&mut self, x: IntegerOrFloat);
+    fn set_y(&mut self, y: IntegerOrFloat);
     fn x32(&self) -> f32 { f32::from(self.x()) }
     fn y32(&self) -> f32 { f32::from(self.y()) }
     fn x64(&self) -> f64 { f64::from(self.x()) }
@@ -61,6 +63,12 @@ impl<PD: PointData> PointLike for Point<PD> {
     fn y(&self) -> IntegerOrFloat {
         IntegerOrFloat::from(self.y)
     }
+    fn set_x(&mut self, x: IntegerOrFloat) {
+        self.x = f32::from(x);
+    }
+    fn set_y(&mut self, y: IntegerOrFloat) {
+        self.y = f32::from(y);
+    }
 }
 
 impl IsValid for GlifPoint {
@@ -84,5 +92,11 @@ impl PointLike for GlifPoint {
     }
     fn y(&self) -> IntegerOrFloat {
         self.y
+    }
+    fn set_x(&mut self, x: IntegerOrFloat) {
+        self.x = x;
+    }
+    fn set_y(&mut self, y: IntegerOrFloat) {
+        self.y = y;
     }
 }
