@@ -173,16 +173,19 @@ impl<PD: PointData> Point<PD> {
 
     /// Make a point from its x and y position and type
     pub fn from_x_y_type((x, y): (f32, f32), ptype: PointType) -> Point<PD> {
+        #[cfg(debug_assertions)] Self::check_ptype(ptype);
         Point { x, y, ptype, ..Default::default() }
     }
 
     /// Make a point from its x and y position, handles and type
     pub fn from_x_y_a_b_type((x, y): (f32, f32), (a, b): (Handle, Handle), ptype: PointType) -> Point<PD> {
+        #[cfg(debug_assertions)] Self::check_ptype(ptype);
         Point { x, y, a, b, ptype, ..Default::default() }
     }
 
     /// Make a point from its x and y position, handles and type
     pub fn from_fields((x, y): (f32, f32), (a, b): (Handle, Handle), smooth: bool, ptype: PointType, name: Option<String>, data: Option<PD>) -> Point<PD> {
+        #[cfg(debug_assertions)] Self::check_ptype(ptype);
         Point { x, y, a, b, smooth, ptype, name, data }
     }
 
@@ -247,12 +250,21 @@ impl<PD: PointData> Point<PD> {
     }
 }
 
+#[cfg(debug_assertions)]
+impl<PD: PointData> Point<PD> {
+    fn check_ptype(ptype: PointType) {
+        if ptype == PointType::OffCurve {
+            panic!("Illegal to create a Point<_> of OffCurve type—only OK for GlifPoint!");
+        }
+    }
+}
+
 impl Default for Handle {
     fn default() -> Handle { Handle::Colocated }
 }
 
 impl Default for PointType {
-    fn default() -> PointType { PointType::Undefined }
+    fn default() -> PointType { PointType::OffCurve }
 }
 
 impl Default for WhichHandle {
