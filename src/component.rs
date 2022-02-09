@@ -5,7 +5,7 @@ use crate::glif::{self, Glif};
 #[cfg(feature = "mfek")]
 use crate::glif::mfek::MFEKGlif;
 use crate::matrix::GlifMatrix;
-use crate::point::{Handle, PointData, WhichHandle};
+use crate::point::PointData;
 use crate::outline::Outline;
 
 use integer_or_float::IntegerOrFloat;
@@ -148,24 +148,13 @@ fn apply_component_rect<PD: PointData>(last: &Node<Component<PD>>, minx: &mut f3
                 for j in 0..to_transform[i].len() {
                     let is_first = i == 0 && j == 0;
                     let mut p = to_transform[i][j].clone();
-                    let kbp = matrices.iter().fold(KurboPoint::new(p.x as f64, p.y as f64), |p, m| *m * p);
-                    p.x = kbp.x as f32;
-                    p.y = kbp.y as f32;
                     if p.x < *minx || is_first { *minx = p.x; }
                     if p.y < *miny || is_first { *miny = p.y; }
                     if p.x > *maxx || is_first { *maxx = p.x; }
                     if p.y > *maxy || is_first { *maxy = p.y; }
 
-                    if p.a != Handle::Colocated {
-                        let (ax, ay) = p.handle_or_colocated(WhichHandle::A, &|f|f, &|f|f);
-                        let kbpa = matrices.iter().fold(KurboPoint::new(ax as f64, ay as f64), |p, m| *m * p);
-                        p.a = Handle::At(kbpa.x as f32, kbpa.y as f32);
-                    }
-
-                    if p.b != Handle::Colocated {
-                        let (bx, by) = p.handle_or_colocated(WhichHandle::B, &|f|f, &|f|f);
-                        let kbpb = matrices.iter().fold(KurboPoint::new(bx as f64, by as f64), |p, m| *m * p);
-                        p.b = Handle::At(kbpb.x as f32, kbpb.y as f32);
+                    for m in &matrices {
+                        p.apply_matrix(*m);
                     }
 
                     to_transform[i][j] = p;
@@ -178,7 +167,6 @@ fn apply_component_rect<PD: PointData>(last: &Node<Component<PD>>, minx: &mut f3
 }
 
 
-use kurbo::Point as KurboPoint;
 macro_rules! impl_flattened_glif {
     ($glifstruct:ident, $outline:ident) => { 
 
