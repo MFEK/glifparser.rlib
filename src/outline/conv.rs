@@ -1,11 +1,15 @@
 mod penops;
-pub use penops::{IntoPenOperations, PenOperations, SplitPenOperations, ToOutline};
+pub use penops::{IntoPenOperations, PenOperations, SplitPenOperations};
 
-use super::{Contour, GlifContour};
+use super::{Contour, GlifContour, Outline};
 
 use crate::point::{GlifPoint, PointData, PointType, WhichHandle};
 
 use std::collections::{HashSet, VecDeque};
+
+pub trait ToOutline<PD: PointData> {
+    fn to_outline(&self) -> Outline<PD>;
+}
 
 pub trait IntoGlifPoints {
     type Output;

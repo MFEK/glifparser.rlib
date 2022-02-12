@@ -1,9 +1,10 @@
+use super::ToOutline;
 use crate::error::GlifParserError;
 use crate::outline::contour::{PrevNext as _, State as _};
 use crate::outline::refigure::RefigurePointTypes as _;
 use crate::outline::{Contour, Outline};
 use crate::point::IsValid;
-use crate::point::{Handle, GlifPoint, Point, PointData, PointType, WhichHandle};
+use crate::point::{GlifPoint, Handle, Point, PointData, PointType, WhichHandle};
 use PointType::*;
 
 use float_cmp::ApproxEq;
@@ -27,6 +28,14 @@ impl PenOperations {
             QuadTo(..) => 2,
             CurveTo(..) => 3,
             Close => 0,
+        }
+    }
+
+    pub fn simplify(&mut self) {
+        if let CurveTo(pa, pb, p) = self {
+            if p.x == pa.x && p.y == pa.y && p.x == pb.x && p.y == pb.y {
+                *self = Self::LineTo(p.clone());
+            }
         }
     }
 }
@@ -168,9 +177,7 @@ impl SplitPenOperations for Vec<PenOperations> {
                 let removed = kcontour.remove(0);
                 let rm = removed.unwrap_move_to();
                 let _fp = kcontour.first().unwrap().clone();
-                if rm.x.approx_eq(lp.x, (f32::EPSILON, 4))
-                    && rm.y.approx_eq(lp.y, (f32::EPSILON, 4))
-                {
+                if rm.x.approx_eq(lp.x, (f32::EPSILON, 4)) && rm.y.approx_eq(lp.y, (f32::EPSILON, 4)) {
                     kcontour.insert(0, PenOperations::CurveTo(rm.clone(), rm.clone(), rm));
                 } else {
                     kcontour.insert(0, PenOperations::LineTo(rm));
@@ -187,10 +194,6 @@ impl SplitPenOperations for Vec<PenOperations> {
     }
 }
 
-pub trait ToOutline<PD: PointData> {
-    fn to_outline(&self) -> Outline<PD>;
-}
-
 impl<PD: PointData> ToOutline<PD> for PenOperationsPath {
     fn to_outline(&self) -> Outline<PD> {
         let mut ret: Outline<PD> = Outline::new();
@@ -201,6 +204,7 @@ impl<PD: PointData> ToOutline<PD> for PenOperationsPath {
             let mut next_points: Vec<GlifPoint>;
             for (i, el) in skc.iter().enumerate() {
                 let points: Vec<GlifPoint> = el.clone().into();
+                if points.len() == 0 { continue }
                 if i != skc_len - 1 {
                     next_points = skc[i + 1].clone().into();
                 } else {
