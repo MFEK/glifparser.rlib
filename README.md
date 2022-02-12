@@ -147,6 +147,28 @@ well as Cartesian coordinates (in polar mode, the point is the origin).
 You can also find in MFEK/math.rlib piecewise spline types that can be
 converted to and from glifparser's `Glif<PD>` and `Outline<PD>` types.
 
+## Discretionary features
+
+All discretionary features can be enabled with the meta-feature named `fat`. By
+`default`, the enabled features are image format support (`glifimage`) and
+Serde (de)serialization of all types (`glifserde`; which also enables Serde in
+the libraries we use, such as Kurbo and IntegerOrFloat).
+
+The feature `skia` adds conversion into and out of `SkPath` for the `Outline`
+and `Contour` types.
+
+The feature `mfek` adds a bunch of types which are represented in `.glif` files
+in their `<lib/>`.
+
+Both `skia` and `mfek` require `default`.
+
+Finally, `more-image-formats` enables GIF, JPEG, WEBP, BMP and TIFF support for
+`.glif`'s—note the caveat that because only PNG are in the spec, only PNG will
+be "seen" by other software, and this feature only exists for "drafting" /
+"background" images, not images you expect to appear in final fonts if you run
+_e.g._ `fontmake` on a UFO containing a `.glif` glifparser has put a non-PNG
+image in.
+
 ## License
 
     Copyright 2020–2022 Fredrick R. Brennan and MFEK Authors

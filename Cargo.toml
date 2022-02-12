@@ -1,6 +1,6 @@
 [package]
 name = "glifparser"
-version = "1.2.0"
+version = "1.2.1"
 authors = ["Fredrick Brennan <copypaste@kittens.ph>", "MFEK Authors"]
 edition = "2021"
 license = "Apache-2.0"
@@ -32,8 +32,10 @@ lazy_static = "1"
 
 [features]
 glifimage = ["image"]
-glifserde = ["serde", "kurbo/serde", "integer_or_float/default", "plist/default"]
+glifserde = ["serde", "kurbo/serde", "integer_or_float/serde", "plist/default"]
 default = ["glifimage", "glifserde"]
 skia = ["default", "skia-safe"]
 mfek = ["default", "skia"]
 more-image-formats = ["image/gif", "image/jpeg", "image/webp", "image/bmp", "image/tiff"]
+
+fat = ["glifimage", "glifserde", "skia", "mfek", "more-image-formats"]
