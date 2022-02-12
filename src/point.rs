@@ -1,3 +1,5 @@
+//! .glif `<point>`
+
 mod conv;
 pub use self::conv::kurbo::*;
 mod valid;

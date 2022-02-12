@@ -1,3 +1,5 @@
+//! .glif `<image>` w/ability to read to a bitmap if filename valid
+
 mod xml;
 
 use std::io;

@@ -1,3 +1,5 @@
+//! .glif `<outline>` and `<contour>`
+
 pub mod contour;
 pub use contour::Reverse;
 mod conv;

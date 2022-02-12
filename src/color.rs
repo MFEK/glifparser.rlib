@@ -1,3 +1,5 @@
+//! impl's/struct for shared `<image>`/`<guideline>`/layer color behavior
+
 use integer_or_float::IntegerOrFloat;
 
 use crate::error::GlifParserError;

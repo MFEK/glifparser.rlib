@@ -1,3 +1,5 @@
+//! .glif `<guideline>`
+
 mod xml;
 
 use integer_or_float::IntegerOrFloat;

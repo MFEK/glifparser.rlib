@@ -1,3 +1,5 @@
+//! Enforcers for UFO format string rules — no control characters ([`GlifString`]), len ≥ 0 ([`GlifStringLenOne`])
+
 use crate::error::GlifStringConversionError;
 
 use itertools::Itertools as _;

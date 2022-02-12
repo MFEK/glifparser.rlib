@@ -1,3 +1,5 @@
+//! [`Glif`] (`<glif>` toplevel), read/write modules, + [`Lib`]
+
 use std::path;
 
 use crate::anchor::Anchor;

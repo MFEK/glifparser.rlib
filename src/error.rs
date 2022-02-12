@@ -1,3 +1,5 @@
+//! Provides main error type [`GlifParserError`] & its impl's
+
 #[cfg(feature = "mfek")]
 pub mod mfek;
 

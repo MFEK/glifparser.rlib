@@ -1,3 +1,5 @@
+//! Shared behavior between `<component>`, `<image>` based on PostScript-style matrices of 6 values
+
 #[cfg(feature = "skia")]
 pub mod skia;
 #[cfg(feature = "skia")]

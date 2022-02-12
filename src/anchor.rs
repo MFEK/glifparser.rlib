@@ -1,3 +1,5 @@
+//! .glif `<anchor>` + ufo2ft `_` mark/base determination
+
 use integer_or_float::IntegerOrFloat;
 
 mod xml;

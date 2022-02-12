@@ -1,3 +1,5 @@
+//! .glif `<component>`
+
 mod xml;
 
 use crate::error::GlifParserError;
@@ -96,6 +98,7 @@ impl ComponentRect {
 
 use std::fs;
 impl GlifComponent {
+    /// Sets the filename of a component relative to its base's filename (`gliffn`)
     pub fn set_file_name<F: AsRef<Path>>(&mut self, gliffn: F) {
         let mut retglifname = gliffn.as_ref().to_path_buf();
         retglifname.set_file_name(glif::name_to_filename(&self.base, true));
@@ -127,6 +130,9 @@ impl GlifComponent {
 }
 
 pub trait FlattenedGlif where Self: Clone {
+    /// Check that all components in your .glif file really resolve, and if they do, get their
+    /// contours and apply their matrices. If you want bounding rectangles as this process is done
+    /// with a logical name for each rectangle you can draw, pass in `rects` as a `&mut` 
     fn flattened(&self, rects: &mut Option<Vec<ComponentRect>>) -> Result<Self, GlifParserError>;
 }
 
