@@ -1,4 +1,4 @@
-# glifparser
+# glifparser v1.2.1 (⏫︎2022-02-12)
 
 (c) 2020–2022 Fredrick R. Brennan and MFEK Authors
 
@@ -15,10 +15,15 @@ inclusion tree includes any parent glyph). `glifparser` supports images
 completely, including colored images, and can generate the colored to-spec UFO
 bitmaps for you.
 
-## Main type: `Glif`
+`glifparser` is meant to be tuned for situation using Cargo's features
+mechanism. See the § "Discretionary features" for non-default features, and
+default features which can be disabled to make it smaller.
+
+## API
 `glifparser`'s main type is `Glif<PD: PointData>`. You can get this type by
 calling `glifparser::read_from_filename`.
 
+### Toplevel type: `Glif`
 ```rust
 /// A UFO .glif
 ///
@@ -97,7 +102,7 @@ fn testing() {
 }
 ```
 
-## Comparison with Norad
+### Comparison with Norad
 
 First and foremost, `glifparser` has different goals than Norad. `glifparser`
 is intended to support _only_ the `.glif` part of the UFO spec, while Norad
