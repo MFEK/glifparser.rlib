@@ -1,11 +1,12 @@
-use std::fs;
-use std::path;
-use integer_or_float::IntegerOrFloat;
+#![cfg(feature = "glifimage")]
 use glifparser;
 use glifparser::{Image, Color, image::DataOrBitmap};
+use integer_or_float::IntegerOrFloat;
 use log;
-
 use test_log::test;
+
+use std::fs;
+use std::path;
 
 #[test]
 fn test_load_image() {

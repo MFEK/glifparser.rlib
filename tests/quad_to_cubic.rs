@@ -1,4 +1,3 @@
-use glifparser::glif::IntoXML as _;
 use glifparser::outline::{GlifOutline, QuadToCubic as _};
 use glifparser::point::{GlifPoint, PointType};
 use glifparser::write;

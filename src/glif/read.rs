@@ -7,7 +7,9 @@ use std::rc::Rc;
 
 use integer_or_float::IntegerOrFloat;
 
-use super::{Glif, Lib};
+use super::Glif;
+#[cfg(feature = "glifserde")]
+use super::Lib;
 use crate::error::GlifParserError::{self, GlifInputError};
 use crate::component::GlifComponent;
 use crate::guideline::Guideline;
