@@ -301,6 +301,9 @@
 <span id="301">301</span>
 <span id="302">302</span>
 <span id="303">303</span>
+<span id="304">304</span>
+<span id="305">305</span>
+<span id="306">306</span>
 </pre><pre class="rust"><code><span class="kw">mod</span> <span class="ident">xml</span>;
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="self">self</span>::xml::FromXML</span>;
 
@@ -310,13 +313,16 @@
 
 <span class="kw">use</span> <span class="ident">integer_or_float::IntegerOrFloat</span>;
 
-<span class="kw">use</span> <span class="kw">super</span>::{<span class="ident">Glif</span>, <span class="ident">Lib</span>};
+<span class="kw">use</span> <span class="ident"><span class="kw">super</span>::Glif</span>;
+<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;glifserde&quot;</span>)]</span>
+<span class="kw">use</span> <span class="ident"><span class="kw">super</span>::Lib</span>;
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::error::GlifParserError</span>::{<span class="self">self</span>, <span class="ident">GlifInputError</span>};
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::component::GlifComponent</span>;
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::guideline::Guideline</span>;
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::outline</span>::{<span class="ident">GlifContour</span>, <span class="ident">GlifOutline</span>, <span class="ident">Outline</span>};
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::pedantry::Pedantry</span>;
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::point</span>::{<span class="ident">GlifPoint</span>, <span class="ident">PointData</span>, <span class="ident">PointType</span>};
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::point::IsValid</span> <span class="kw">as</span> <span class="kw">_</span>;
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::string::GlifStringLenOne</span>;
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::anchor</span>::{<span class="ident">Anchor</span>, <span class="ident">GlifAnchor</span>};
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;glifimage&quot;</span>)]</span>

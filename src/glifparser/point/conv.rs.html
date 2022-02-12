@@ -43,9 +43,7 @@
 <span id="43">43</span>
 <span id="44">44</span>
 <span id="45">45</span>
-<span id="46">46</span>
-</pre><pre class="rust"><code><span class="kw">mod</span> <span class="ident">flo</span>;
-<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">kurbo</span>;
+</pre><pre class="rust"><code><span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">kurbo</span>;
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;skia&quot;</span>)]</span>
 <span class="kw">mod</span> <span class="ident">skia</span>;
 
@@ -59,7 +57,7 @@
 
 <span class="kw">impl</span> <span class="ident">GlifPoint</span> {
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_handle</span><span class="op">&lt;</span><span class="ident">PD</span>: <span class="ident">PointData</span><span class="op">&gt;</span>(<span class="ident">point</span>: <span class="kw-2">&amp;</span><span class="ident">Point</span><span class="op">&lt;</span><span class="ident">PD</span><span class="op">&gt;</span>, <span class="ident">wh</span>: <span class="ident">WhichHandle</span>) -&gt; <span class="self">Self</span> {
-        <span class="kw">let</span> (<span class="ident">x</span>, <span class="ident">y</span>) <span class="op">=</span> <span class="ident">point</span>.<span class="ident">handle_or_colocated</span>(<span class="ident">wh</span>, <span class="op">|</span><span class="ident">f</span><span class="op">|</span><span class="ident">f</span>, <span class="op">|</span><span class="ident">f</span><span class="op">|</span><span class="ident">f</span>);
+        <span class="kw">let</span> (<span class="ident">x</span>, <span class="ident">y</span>) <span class="op">=</span> <span class="ident">point</span>.<span class="ident">handle_or_colocated</span>(<span class="ident">wh</span>, <span class="kw-2">&amp;</span><span class="op">|</span><span class="ident">f</span><span class="op">|</span><span class="ident">f</span>, <span class="kw-2">&amp;</span><span class="op">|</span><span class="ident">f</span><span class="op">|</span><span class="ident">f</span>);
         <span class="ident">GlifPoint::from_x_y_type</span>((<span class="ident">x</span>, <span class="ident">y</span>), <span class="ident">PointType::OffCurve</span>)
     }
 }

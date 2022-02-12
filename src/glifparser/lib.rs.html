@@ -46,6 +46,7 @@
 <span id="46">46</span>
 <span id="47">47</span>
 <span id="48">48</span>
+<span id="49">49</span>
 </pre><pre class="rust"><code><span class="doccomment">//! A parser and writer for UFO `.glif` files.</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! © 2020–2022 Fredrick R. Brennan and MFEK Authors</span>
@@ -90,6 +91,7 @@
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::image</span>::{<span class="ident">GlifImage</span>, <span class="ident">Image</span>, <span class="ident">ImageCodec</span>};
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::outline</span>::{<span class="ident">contour</span>, <span class="ident">Contour</span>, <span class="ident">Outline</span>, <span class="ident">OutlineType</span>};
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::pedantry::Pedantry</span>;
+<span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::point</span>::{<span class="ident">IsValid</span>, <span class="ident">PointLike</span>};
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::point</span>::{<span class="ident">Point</span>, <span class="ident">PointType</span>, <span class="ident">Handle</span>, <span class="ident">WhichHandle</span>, <span class="ident">PointData</span>};
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::string::GlifString</span>;
 

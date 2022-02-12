@@ -148,10 +148,14 @@
 <span id="148">148</span>
 <span id="149">149</span>
 <span id="150">150</span>
-</pre><pre class="rust"><code><span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">contour</span>;
+<span id="151">151</span>
+<span id="152">152</span>
+</pre><pre class="rust"><code><span class="doccomment">//! .glif `&lt;outline&gt;` and `&lt;contour&gt;`</span>
+
+<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">contour</span>;
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">contour::Reverse</span>;
 <span class="kw">mod</span> <span class="ident">conv</span>;
-<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">conv::IntoGlifPoints</span>;
+<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">conv</span>::{<span class="ident">IntoGlifPoints</span>, <span class="ident">ToOutline</span>};
 <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">create</span>;
 <span class="kw">mod</span> <span class="ident">kurbo</span>;
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="self">self</span>::kurbo</span>::<span class="kw-2">*</span>;

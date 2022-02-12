@@ -18,7 +18,30 @@
 <span id="18">18</span>
 <span id="19">19</span>
 <span id="20">20</span>
-</pre><pre class="rust"><code><span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;skia&quot;</span>)]</span>
+<span id="21">21</span>
+<span id="22">22</span>
+<span id="23">23</span>
+<span id="24">24</span>
+<span id="25">25</span>
+<span id="26">26</span>
+<span id="27">27</span>
+<span id="28">28</span>
+<span id="29">29</span>
+<span id="30">30</span>
+<span id="31">31</span>
+<span id="32">32</span>
+<span id="33">33</span>
+<span id="34">34</span>
+<span id="35">35</span>
+<span id="36">36</span>
+<span id="37">37</span>
+<span id="38">38</span>
+<span id="39">39</span>
+<span id="40">40</span>
+<span id="41">41</span>
+</pre><pre class="rust"><code><span class="doccomment">//! Shared behavior between `&lt;component&gt;`, `&lt;image&gt;` based on PostScript-style matrices of 6 values</span>
+
+<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;skia&quot;</span>)]</span>
 <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">skia</span>;
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;skia&quot;</span>)]</span>
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">skia::ToSkiaMatrix</span>;
@@ -26,6 +49,8 @@
 <span class="kw">mod</span> <span class="ident">write</span>;
 <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">use</span> <span class="ident"><span class="self">self</span>::write::write_matrix</span> <span class="kw">as</span> <span class="ident">write</span>;
 
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::point</span>::{<span class="ident">Handle</span>, <span class="ident">PointData</span>, <span class="ident">Point</span>};
+<span class="kw">use</span> <span class="ident">kurbo::Point</span> <span class="kw">as</span> <span class="ident">KurboPoint</span>;
 <span class="kw">use</span> <span class="ident">integer_or_float::IntegerOrFloat</span>;
 
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>, <span class="ident">Copy</span>, <span class="ident">Debug</span>, <span class="ident">Default</span>, <span class="ident">PartialEq</span>)]</span>
@@ -38,6 +63,23 @@
     }
 }
 
+<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">PD</span>: <span class="ident">PointData</span><span class="op">&gt;</span> <span class="ident">Point</span><span class="op">&lt;</span><span class="ident">PD</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">apply_matrix</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">matrix</span>: <span class="ident">Affine</span>) {
+        <span class="kw">let</span> <span class="ident">kbp</span> <span class="op">=</span> <span class="ident">matrix</span> <span class="op">*</span> <span class="ident">KurboPoint::new</span>(<span class="self">self</span>.<span class="ident">x</span> <span class="kw">as</span> <span class="ident">f64</span>, <span class="self">self</span>.<span class="ident">y</span> <span class="kw">as</span> <span class="ident">f64</span>);
+        <span class="self">self</span>.<span class="ident">x</span> <span class="op">=</span> <span class="ident">kbp</span>.<span class="ident">x</span> <span class="kw">as</span> <span class="ident">f32</span>;
+        <span class="self">self</span>.<span class="ident">y</span> <span class="op">=</span> <span class="ident">kbp</span>.<span class="ident">y</span> <span class="kw">as</span> <span class="ident">f32</span>;
+
+        <span class="kw">if</span> <span class="kw">let</span> <span class="ident">Handle::At</span>(<span class="ident">ax</span>, <span class="ident">ay</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">a</span> {
+            <span class="kw">let</span> <span class="ident">kbpa</span> <span class="op">=</span> <span class="ident">matrix</span> <span class="op">*</span> <span class="ident">KurboPoint::new</span>(<span class="ident">ax</span> <span class="kw">as</span> <span class="ident">f64</span>, <span class="ident">ay</span> <span class="kw">as</span> <span class="ident">f64</span>);
+            <span class="self">self</span>.<span class="ident">a</span> <span class="op">=</span> <span class="ident">Handle::At</span>(<span class="ident">kbpa</span>.<span class="ident">x</span> <span class="kw">as</span> <span class="ident">f32</span>, <span class="ident">kbpa</span>.<span class="ident">y</span> <span class="kw">as</span> <span class="ident">f32</span>);
+        }
+
+        <span class="kw">if</span> <span class="kw">let</span> <span class="ident">Handle::At</span>(<span class="ident">bx</span>, <span class="ident">by</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">a</span> {
+            <span class="kw">let</span> <span class="ident">kbpb</span> <span class="op">=</span> <span class="ident">matrix</span> <span class="op">*</span> <span class="ident">KurboPoint::new</span>(<span class="ident">bx</span> <span class="kw">as</span> <span class="ident">f64</span>, <span class="ident">by</span> <span class="kw">as</span> <span class="ident">f64</span>);
+            <span class="self">self</span>.<span class="ident">b</span> <span class="op">=</span> <span class="ident">Handle::At</span>(<span class="ident">kbpb</span>.<span class="ident">x</span> <span class="kw">as</span> <span class="ident">f32</span>, <span class="ident">kbpb</span>.<span class="ident">y</span> <span class="kw">as</span> <span class="ident">f32</span>);
+        }
+    }
+}
 </code></pre></div>
 </section><section id="search" class="content hidden"></section><div id="rustdoc-vars" data-root-path="../../" data-current-crate="glifparser" data-search-index-js="../../search-index.js" data-search-js="../../search.js"></div>
     <script src="../../main.js"></script><script src="../../source-script.js"></script><script src="../../source-files.js"></script>

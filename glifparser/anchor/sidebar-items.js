@@ -1,1 +1,1 @@
-initSidebarItems({"struct":[["Anchor",""],["GlifAnchor",""]]});
+initSidebarItems({"enum":[["AnchorType",""]],"struct":[["Anchor",""],["GlifAnchor",""]],"trait":[["FromOption",""]]});

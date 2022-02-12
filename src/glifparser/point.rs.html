@@ -380,9 +380,12 @@
 <span id="380">380</span>
 <span id="381">381</span>
 <span id="382">382</span>
-<span id="383">383</span>
-</pre><pre class="rust"><code><span class="kw">mod</span> <span class="ident">conv</span>;
+</pre><pre class="rust"><code><span class="doccomment">//! .glif `&lt;point&gt;`</span>
+
+<span class="kw">mod</span> <span class="ident">conv</span>;
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="self">self</span>::conv::kurbo</span>::<span class="kw-2">*</span>;
+<span class="kw">mod</span> <span class="ident">valid</span>;
+<span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="self">self</span>::valid</span>::{<span class="ident">IsValid</span>, <span class="ident">PointLike</span>};
 <span class="kw">mod</span> <span class="ident">xml</span>;
 
 <span class="kw">use</span> <span class="ident">std::fmt</span>::{<span class="ident">Display</span>, <span class="ident">Debug</span>};
@@ -514,6 +517,7 @@
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">not</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;glifserde&quot;</span>))]</span>
 <span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">PointData</span> <span class="kw">where</span> <span class="self">Self</span>: <span class="ident">Clone</span> <span class="op">+</span> <span class="ident">Default</span> <span class="op">+</span> <span class="ident">Debug</span> {}
 <span class="kw">impl</span> <span class="ident">PointData</span> <span class="kw">for</span> () {}
+<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">PD</span>: <span class="ident">PointData</span><span class="op">&gt;</span> <span class="ident">IsValid</span> <span class="kw">for</span> <span class="ident">PD</span> {}
 
 <span class="doccomment">/// A Skia-friendly point</span>
 <span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;glifserde&quot;</span>, <span class="ident">derive</span>(<span class="ident">Serialize</span>, <span class="ident">Deserialize</span>))]</span>
@@ -532,36 +536,6 @@
     <span class="kw">pub</span> <span class="ident">smooth</span>: <span class="ident">bool</span>,
     <span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;glifserde&quot;</span>, <span class="ident">serde</span>(<span class="ident">default</span>))]</span>
     <span class="kw">pub</span> <span class="ident">data</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">PD</span><span class="op">&gt;</span>,
-}
-
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">PD</span>: <span class="ident">PointData</span><span class="op">&gt;</span> <span class="ident">Point</span><span class="op">&lt;</span><span class="ident">PD</span><span class="op">&gt;</span> {
-    <span class="doccomment">/// `validate_data` parameter allows you to define an `is_valid` (or whatever) impl on your</span>
-    <span class="doccomment">/// `PointData` struct&#39;s. You can then pass the function while validating the point as e.g.</span>
-    <span class="doccomment">/// `Some(MyPointData::is_valid)`. It takes an `Option&lt;&amp;PD&gt;` so that you have the choice as to</span>
-    <span class="doccomment">/// whether it&#39;s valid or not for your type not to be defined; `Point.data` should probably not</span>
-    <span class="doccomment">/// be defined as an Option&lt;PD&gt;, but removing that&#39;s TODO. This API will change when that does</span>
-    <span class="doccomment">/// and should be considered unstable/testing.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">is_valid</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">validate_data</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw">fn</span>(<span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">PD</span><span class="op">&gt;</span>)-&gt;<span class="ident">bool</span><span class="op">&gt;</span>) -&gt; <span class="ident">bool</span> {
-        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">validate_point_data_function</span>) <span class="op">=</span> <span class="ident">validate_data</span> {
-            <span class="kw">if</span> <span class="op">!</span><span class="ident">validate_point_data_function</span>(<span class="self">self</span>.<span class="ident">data</span>.<span class="ident">as_ref</span>()) {
-                <span class="kw">return</span> <span class="bool-val">false</span>
-            }
-        }
-        <span class="kw">if</span> <span class="self">self</span>.<span class="ident">ptype</span> <span class="op">==</span> <span class="ident">PointType::Undefined</span> {
-            <span class="kw">return</span> <span class="bool-val">false</span>
-        }
-        <span class="kw">if</span> <span class="self">self</span>.<span class="ident">x</span>.<span class="ident">is_subnormal</span>() <span class="op">|</span><span class="op">|</span> <span class="self">self</span>.<span class="ident">y</span>.<span class="ident">is_subnormal</span>() {
-            <span class="kw">return</span> <span class="bool-val">false</span>
-        }
-        <span class="kw">for</span> <span class="ident">handle</span> <span class="kw">in</span> [<span class="self">self</span>.<span class="ident">handle</span>(<span class="ident">WhichHandle::A</span>), <span class="self">self</span>.<span class="ident">handle</span>(<span class="ident">WhichHandle::B</span>)] {
-            <span class="kw">if</span> <span class="kw">let</span> <span class="ident">Handle::At</span>(<span class="ident">hx</span>, <span class="ident">hy</span>) <span class="op">=</span> <span class="ident">handle</span> {
-                <span class="kw">if</span> <span class="ident">hx</span>.<span class="ident">is_subnormal</span>() <span class="op">|</span><span class="op">|</span> <span class="ident">hy</span>.<span class="ident">is_subnormal</span>() {
-                    <span class="kw">return</span> <span class="bool-val">false</span>
-                }
-            }
-        }
-        <span class="bool-val">true</span>
-    }
 }
 
 <span class="doccomment">/// For use by ``Point::handle_or_colocated``</span>
@@ -583,16 +557,19 @@
 
     <span class="doccomment">/// Make a point from its x and y position and type</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_x_y_type</span>((<span class="ident">x</span>, <span class="ident">y</span>): (<span class="ident">f32</span>, <span class="ident">f32</span>), <span class="ident">ptype</span>: <span class="ident">PointType</span>) -&gt; <span class="ident">Point</span><span class="op">&lt;</span><span class="ident">PD</span><span class="op">&gt;</span> {
+        <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">debug_assertions</span>)]</span> <span class="ident"><span class="self">Self</span>::check_ptype</span>(<span class="ident">ptype</span>);
         <span class="ident">Point</span> { <span class="ident">x</span>, <span class="ident">y</span>, <span class="ident">ptype</span>, ..<span class="ident">Default::default</span>() }
     }
 
     <span class="doccomment">/// Make a point from its x and y position, handles and type</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_x_y_a_b_type</span>((<span class="ident">x</span>, <span class="ident">y</span>): (<span class="ident">f32</span>, <span class="ident">f32</span>), (<span class="ident">a</span>, <span class="ident">b</span>): (<span class="ident">Handle</span>, <span class="ident">Handle</span>), <span class="ident">ptype</span>: <span class="ident">PointType</span>) -&gt; <span class="ident">Point</span><span class="op">&lt;</span><span class="ident">PD</span><span class="op">&gt;</span> {
+        <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">debug_assertions</span>)]</span> <span class="ident"><span class="self">Self</span>::check_ptype</span>(<span class="ident">ptype</span>);
         <span class="ident">Point</span> { <span class="ident">x</span>, <span class="ident">y</span>, <span class="ident">a</span>, <span class="ident">b</span>, <span class="ident">ptype</span>, ..<span class="ident">Default::default</span>() }
     }
 
     <span class="doccomment">/// Make a point from its x and y position, handles and type</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_fields</span>((<span class="ident">x</span>, <span class="ident">y</span>): (<span class="ident">f32</span>, <span class="ident">f32</span>), (<span class="ident">a</span>, <span class="ident">b</span>): (<span class="ident">Handle</span>, <span class="ident">Handle</span>), <span class="ident">smooth</span>: <span class="ident">bool</span>, <span class="ident">ptype</span>: <span class="ident">PointType</span>, <span class="ident">name</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span>, <span class="ident">data</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">PD</span><span class="op">&gt;</span>) -&gt; <span class="ident">Point</span><span class="op">&lt;</span><span class="ident">PD</span><span class="op">&gt;</span> {
+        <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">debug_assertions</span>)]</span> <span class="ident"><span class="self">Self</span>::check_ptype</span>(<span class="ident">ptype</span>);
         <span class="ident">Point</span> { <span class="ident">x</span>, <span class="ident">y</span>, <span class="ident">a</span>, <span class="ident">b</span>, <span class="ident">smooth</span>, <span class="ident">ptype</span>, <span class="ident">name</span>, <span class="ident">data</span> }
     }
 
@@ -612,8 +589,8 @@
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">handle_or_colocated</span>(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         <span class="ident">which</span>: <span class="ident">WhichHandle</span>,
-        <span class="ident">transform_x</span>: <span class="kw">fn</span>(<span class="ident">f32</span>) -&gt; <span class="ident">f32</span>,
-        <span class="ident">transform_y</span>: <span class="kw">fn</span>(<span class="ident">f32</span>) -&gt; <span class="ident">f32</span>,
+        <span class="ident">transform_x</span>: <span class="kw-2">&amp;</span><span class="kw">dyn</span> <span class="ident">Fn</span>(<span class="ident">f32</span>) -&gt; <span class="ident">f32</span>,
+        <span class="ident">transform_y</span>: <span class="kw-2">&amp;</span><span class="kw">dyn</span> <span class="ident">Fn</span>(<span class="ident">f32</span>) -&gt; <span class="ident">f32</span>,
     ) -&gt; (<span class="ident">f32</span>, <span class="ident">f32</span>) {
         <span class="kw">let</span> <span class="ident">handle</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">handle</span>(<span class="ident">which</span>);
         <span class="kw">match</span> <span class="ident">handle</span> {
@@ -622,20 +599,28 @@
         }
     }
 
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">handle_as_point</span>(
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">handle_as_gpoint</span>(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         <span class="ident">which</span>: <span class="ident">WhichHandle</span>,
-    ) -&gt; <span class="ident">KurboPoint</span> {
+    ) -&gt; <span class="ident">GlifPoint</span> {
         <span class="kw">let</span> <span class="ident">handle</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">handle</span>(<span class="ident">which</span>);
         <span class="kw">let</span> (<span class="ident">x</span>, <span class="ident">y</span>) <span class="op">=</span> <span class="kw">match</span> <span class="ident">handle</span> {
             <span class="ident">Handle::At</span>(<span class="ident">x</span>, <span class="ident">y</span>) =&gt; (<span class="ident">x</span>, <span class="ident">y</span>),
             <span class="ident">Handle::Colocated</span> =&gt; (<span class="self">self</span>.<span class="ident">x</span>, <span class="self">self</span>.<span class="ident">y</span>),
         };
-        <span class="ident">KurboPoint::new</span>(<span class="ident">x</span> <span class="kw">as</span> <span class="ident">f64</span>, <span class="ident">y</span> <span class="kw">as</span> <span class="ident">f64</span>)
+        <span class="ident">GlifPoint::from_x_y_type</span>((<span class="ident">x</span>, <span class="ident">y</span>), <span class="ident">PointType::OffCurve</span>)
     }
 
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">as_kpoint</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">KurboPoint</span> {
-        <span class="ident">KurboPoint::new</span>(<span class="self">self</span>.<span class="ident">x</span> <span class="kw">as</span> <span class="ident">f64</span>, <span class="self">self</span>.<span class="ident">y</span> <span class="kw">as</span> <span class="ident">f64</span>)
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">handle_as_point</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">which</span>: <span class="ident">WhichHandle</span>) -&gt; <span class="self">Self</span> {
+        (<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">handle_as_gpoint</span>(<span class="ident">which</span>)).<span class="ident">into</span>()
+    }
+
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">handle_as_kpoint</span>(
+        <span class="kw-2">&amp;</span><span class="self">self</span>,
+        <span class="ident">which</span>: <span class="ident">WhichHandle</span>,
+    ) -&gt; <span class="ident">KurboPoint</span> {
+        <span class="kw">let</span> <span class="ident">p</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">handle_as_gpoint</span>(<span class="ident">which</span>);
+        <span class="ident">KurboPoint::new</span>(<span class="ident">f64::from</span>(<span class="ident">p</span>.<span class="ident">x</span>), <span class="ident">f64::from</span>(<span class="ident">p</span>.<span class="ident">y</span>))
     }
 
     <span class="doccomment">/// This function is intended for use by generic functions that can work on either handle, to</span>
@@ -649,12 +634,21 @@
     }
 }
 
+<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">debug_assertions</span>)]</span>
+<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">PD</span>: <span class="ident">PointData</span><span class="op">&gt;</span> <span class="ident">Point</span><span class="op">&lt;</span><span class="ident">PD</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">check_ptype</span>(<span class="ident">ptype</span>: <span class="ident">PointType</span>) {
+        <span class="kw">if</span> <span class="ident">ptype</span> <span class="op">==</span> <span class="ident">PointType::OffCurve</span> {
+            <span class="macro">panic!</span>(<span class="string">&quot;Illegal to create a Point&lt;_&gt; of OffCurve type—only OK for GlifPoint!&quot;</span>);
+        }
+    }
+}
+
 <span class="kw">impl</span> <span class="ident">Default</span> <span class="kw">for</span> <span class="ident">Handle</span> {
     <span class="kw">fn</span> <span class="ident">default</span>() -&gt; <span class="ident">Handle</span> { <span class="ident">Handle::Colocated</span> }
 }
 
 <span class="kw">impl</span> <span class="ident">Default</span> <span class="kw">for</span> <span class="ident">PointType</span> {
-    <span class="kw">fn</span> <span class="ident">default</span>() -&gt; <span class="ident">PointType</span> { <span class="ident">PointType::Undefined</span> }
+    <span class="kw">fn</span> <span class="ident">default</span>() -&gt; <span class="ident">PointType</span> { <span class="ident">PointType::OffCurve</span> }
 }
 
 <span class="kw">impl</span> <span class="ident">Default</span> <span class="kw">for</span> <span class="ident">WhichHandle</span> {
@@ -718,8 +712,10 @@
             }
         }
     }
+}
 
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">is_valid</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">bool</span> {
+<span class="kw">impl</span> <span class="ident">IsValid</span> <span class="kw">for</span> <span class="ident">WhichHandle</span> {
+    <span class="kw">fn</span> <span class="ident">is_valid</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">bool</span> {
         <span class="kw-2">*</span><span class="self">self</span> <span class="op">==</span> <span class="ident"><span class="self">Self</span>::A</span> <span class="op">|</span><span class="op">|</span> <span class="kw-2">*</span><span class="self">self</span> <span class="op">==</span> <span class="ident"><span class="self">Self</span>::B</span>
     }
 }
@@ -734,14 +730,16 @@
     }
 }
 
-<span class="kw">impl</span> <span class="ident">PointType</span> {
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">is_valid</span>(<span class="self">self</span>) -&gt; <span class="ident">bool</span> {
-        <span class="kw">match</span> <span class="self">self</span> {
+<span class="kw">impl</span> <span class="ident">IsValid</span> <span class="kw">for</span> <span class="ident">PointType</span> {
+    <span class="kw">fn</span> <span class="ident">is_valid</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">bool</span> {
+        <span class="kw">match</span> <span class="kw-2">*</span><span class="self">self</span> {
             <span class="ident"><span class="self">Self</span>::Move</span> <span class="op">|</span> <span class="ident"><span class="self">Self</span>::Line</span> <span class="op">|</span> <span class="ident"><span class="self">Self</span>::QCurve</span> <span class="op">|</span> <span class="ident"><span class="self">Self</span>::Curve</span> <span class="op">|</span> <span class="ident"><span class="self">Self</span>::OffCurve</span> =&gt; <span class="bool-val">true</span>,
             <span class="kw">_</span> =&gt; <span class="bool-val">false</span>
         }
     }
+}
 
+<span class="kw">impl</span> <span class="ident">PointType</span> {
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">is_valid_oncurve</span>(<span class="self">self</span>) -&gt; <span class="ident">bool</span> {
         <span class="kw">if</span> <span class="self">self</span> <span class="op">==</span> <span class="ident"><span class="self">Self</span>::OffCurve</span> {
             <span class="bool-val">false</span>

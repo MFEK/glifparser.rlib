@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["DEFAULT_LAYER_FORMAT_STR",""]],"struct":[["Layer",""]],"trait":[["ToLayerContentsPlist","Create UFO(3) specification layer layercontents.plist’s for our glyph."],["ToLayerInfoPlist","Create UFO(3) specification layer layerinfo.plist’s for our glyph."]]});

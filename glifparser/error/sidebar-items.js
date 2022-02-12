@@ -1,1 +1,1 @@
-initSidebarItems({"enum":[["GlifParserError",""],["GlifStringConversionError",""]],"type":[["GlifParserResult",""]]});
+initSidebarItems({"enum":[["GlifParserError",""],["GlifStringConversionError",""]],"mod":[["mfek",""]],"type":[["GlifParserResult",""]]});
