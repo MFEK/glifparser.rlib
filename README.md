@@ -1,6 +1,10 @@
 # glifparser docs
 
-Docs start @ <./glifparser/>.
+© 2020-2022 Fredrick R. Brennan and MFEK Authors
+
+See README in `master` branch for license, &c.
+
+Docs start [here](./glifparser/).
 
 ## Build process
 
@@ -18,3 +22,10 @@ Docs start @ <./glifparser/>.
     ```bash
     rsync -Paz /tmp/GLIFdoc/ ../$(basename $PWD)/
     ```
+5. Commit to Git.
+    ```bash
+    git add .
+    git commit # write something into $EDITOR…:wq
+    git push
+    ```
+6. Flip back to `master`.
