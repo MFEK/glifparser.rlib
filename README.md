@@ -1,10 +1,11 @@
 # glifparser
 
+(c) 2020–2022 Fredrick R. Brennan and MFEK Authors
+
 A parser and writer for UFO `.glif` files.
 
-`glifparser` is one of the most important MFEK libraries, and is considered a
-core library. Almost all modules and non-core libraries are expected to in some
-way rely on `glifparser` and its types.
+`glifparser` is a core MFEK library. Almost all modules and non-core libraries
+are expected to in some way rely on `glifparser` and its types.
 
 `glifparser` supports the entire `.glif` spec as of 12 April 2021
 ([`0a79aa7`](https://github.com/MFEK/glifparser.rlib/commit/0a79aa7a050d978b2774f8e32621790e6b5538b2)),
@@ -146,3 +147,18 @@ well as Cartesian coordinates (in polar mode, the point is the origin).
 You can also find in MFEK/math.rlib piecewise spline types that can be
 converted to and from glifparser's `Glif<PD>` and `Outline<PD>` types.
 
+## License
+
+    Copyright 2020–2022 Fredrick R. Brennan and MFEK Authors
+    
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+    
+      http://www.apache.org/licenses/LICENSE-2.0
+    
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
