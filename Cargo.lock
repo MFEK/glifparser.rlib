@@ -810,13 +810,12 @@ checksum = "43b2853a4d09f215c24cc5489c992ce46052d359b5109343cbafbf26bc62f8a3"
 
 [[package]]
 name = "skia-bindings"
-version = "0.46.0"
+version = "0.49.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b6ec5a9aa5469d56bf3eb3268194196867765fddd978301e5503f2ce8cdd1900"
+checksum = "8d76ec712cf71e315fe3a422856b2b5b5728cf032b471dbd0314d66d44ab664c"
 dependencies = [
  "bindgen",
  "cc",
- "clang-sys",
  "flate2",
  "heck",
  "lazy_static",
@@ -829,9 +828,9 @@ dependencies = [
 
 [[package]]
 name = "skia-safe"
-version = "0.46.0"
+version = "0.49.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6d9408344ab39441d23a3af9e4519dfb6c02dca7ac776751605541bce25c307c"
+checksum = "6e0efb06a310e4fc06b506cb46c65cf319089c91ac5732138f681899adaae598"
 dependencies = [
  "bitflags",
  "lazy_static",
