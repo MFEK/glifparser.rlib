@@ -290,11 +290,21 @@ impl FromStr for PointType {
 impl FromStr for WhichHandle {
     type Err = ();
     fn from_str(s: &str) -> Result<WhichHandle, ()> {
-        Ok(match s.trim() {
-            "A" | "a" => WhichHandle::A,
-            "B" | "b" => WhichHandle::B,
-            _ => WhichHandle::Neither,
-        })
+        debug_assert!(s.chars().count() == 1);
+        s.trim().chars().nth(0).map(|c| Ok(c.into())).unwrap_or(Err(()))
+    }
+}
+
+impl From<char> for WhichHandle {
+    fn from(c: char) -> WhichHandle {
+        match c {
+            'A' | 'a' | 'Ａ' | 'ａ' => WhichHandle::A,
+            'B' | 'b' | 'Ｂ' | 'ｂ' => WhichHandle::B,
+            _ => {
+                debug_assert!(c == 0 as char);
+                WhichHandle::Neither
+            },
+        }
     }
 }
 
