@@ -12,7 +12,7 @@ impl<PD: PointData> From<&Point<PD>> for Handle {
 
 impl GlifPoint {
     pub fn from_handle<PD: PointData>(point: &Point<PD>, wh: WhichHandle) -> Self {
-        let (x, y) = point.handle_or_colocated(wh, &|f|f, &|f|f);
+        let (x, y) = point.handle_or_colocated(wh, &|f| f, &|f| f);
         GlifPoint::from_x_y_type((x, y), PointType::OffCurve)
     }
 }
