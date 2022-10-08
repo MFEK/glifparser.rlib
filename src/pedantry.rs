@@ -8,6 +8,12 @@ pub struct Pedantry {
     pub mend: Mend,
 }
 
+impl Pedantry {
+    pub fn should_mend(&self) -> bool {
+        !(self.level.is_sfnt() && self.mend.is_never())
+    }
+}
+
 #[derive(Derivative, Debug, Copy, Clone, PartialEq, Eq, IsVariant, Unwrap)]
 #[derivative(Default)]
 pub enum Mend {
@@ -39,14 +45,25 @@ pub enum Level {
 #[derive(Debug, Copy, Clone, PartialEq, Eq, IsVariant, Unwrap)]
 pub enum FloatClass {
     Anchor,
+    AdvanceWidth
+}
+
+impl FloatClass {
+    fn should_round(&self) -> bool {
+        *self == FloatClass::Anchor
+    }
 }
 
 impl Level {
     pub fn maybe_round(&self, f: IntegerOrFloat, fc: FloatClass) -> f32 {
-        if (self.is_open_type() || self.is_true_type()) && fc == FloatClass::Anchor {
+        if self.is_sfnt() && fc.should_round() {
             f32::from(f).round()
         } else {
             f.into()
         }
+    }
+
+    pub fn is_sfnt(&self) -> bool {
+        self.is_open_type() || self.is_true_type()
     }
 }

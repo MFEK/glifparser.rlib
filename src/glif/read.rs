@@ -102,7 +102,11 @@ pub fn read_ufo_glif_pedantic<PD: PointData>(glif: &str, pedantry: Pedantry) -> 
 
         match widthc {
             Err(e) => if let Ok((f, false)) = width.parse::<f32>().map(|f|(f, f.is_subnormal())) {
-                log::warn!("Floating point value given as <advance> width — OpenType `hmtx` / `vmtx` will truncate it, so we do too!");
+                const FLOATPOINTWARNING: &str = "Floating point value given as <advance> width — OpenType `hmtx` / `vmtx` will truncate it";
+                if !pedantry.should_mend() {
+                    Err(input_error!(FLOATPOINTWARNING))?
+                }
+                log::warn!("{}, so we do too!", FLOATPOINTWARNING);
                 Some(f as u64)
             } else {
                 log::trace!("<advance> parsing as int rose {:?}", e);
