@@ -95,11 +95,21 @@ pub fn read_ufo_glif_pedantic<PD: PointData>(glif: &str, pedantry: Pedantry) -> 
         .take_child("advance");
 
     ret.width = if let Some(a) = advance {
-        Some(a.attributes
-        .get("width")
-        .ok_or(input_error!("<advance> has no width"))?
-        .parse()
-        .or(Err(input_error!("<advance> width not int")))?)
+        let width = a.attributes
+            .get("width")
+            .ok_or(input_error!("<advance> has no width"))?;
+        let widthc = width.parse::<u64>();
+
+        match widthc {
+            Err(e) => if let Ok((f, false)) = width.parse::<f32>().map(|f|(f, f.is_subnormal())) {
+                log::warn!("Floating point value given as <advance> width — OpenType `hmtx` / `vmtx` will truncate it, so we do too!");
+                Some(f as u64)
+            } else {
+                log::trace!("<advance> parsing as int rose {:?}", e);
+                Err(input_error!("<advance> width neither int nor downgradable (not subnormal) float!"))?
+            },
+            Ok(i) => Some(i)
+        }
     } else {
         None
     };
