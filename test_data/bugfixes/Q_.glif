@@ -1,0 +1,19 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<glyph name="Q" format="2">
+  <advance width="b0rked"/>
+  <unicode hex="0051"/>
+  <anchor x="787.2" y="688.0" name="_center"/>
+  <outline>
+    <contour>
+      <point x="712.0" y="483.2" type="line"/>
+      <point x="956.8" y="160.8" type="line"/>
+      <point x="1014.0" y="81.6" type="line"/>
+      <point x="1179.2" y="-134.0" type="line"/>
+      <point x="1409.2" y="-134.0" type="line"/>
+      <point x="1160.8" y="190.4" type="line"/>
+      <point x="1088.8" y="280.4" type="line"/>
+      <point x="933.2" y="483.2" type="line"/>
+    </contour>
+    <component base="O"/>
+  </outline>
+</glyph>

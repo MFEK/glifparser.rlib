@@ -1,0 +1,12 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<glyph name="iecyrillic" format="2">
+  <advance width="1143.6666666666667"/>
+  <unicode hex="0435"/>
+  <anchor x="503.3333333333333" y="0.0" name="bottom"/>
+  <anchor x="506.6666666666667" y="0.0" name="cedilla"/>
+  <anchor x="972.3333333333334" y="218.0" name="ogonek"/>
+  <anchor x="719.3333333333334" y="1304.0" name="top"/>
+  <outline>
+    <component base="e"/>
+  </outline>
+</glyph>
