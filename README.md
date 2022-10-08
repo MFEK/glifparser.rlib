@@ -1,4 +1,4 @@
-# glifparser v1.2.1 (⏫︎2022-02-12)
+# glifparser v1.2.3 (⏫︎2022-10-08)
 
 (c) 2020–2022 Fredrick R. Brennan and MFEK Authors
 
