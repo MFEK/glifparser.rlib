@@ -2,17 +2,19 @@ use std::collections::HashSet;
 use std::path as stdpath;
 use std::{fmt::Display, str::FromStr};
 
-use skia_safe::{self as skia, Path};
 use kurbo::Affine;
-use serde::{Serialize, Deserialize};
+use serde::{Deserialize, Serialize};
+#[cfg(feature = "skia")]
+use skia_safe::{self as skia, Path};
 
 use crate::anchor::Anchor;
 use crate::component::{ComponentRect, GlifComponents};
 use crate::error::{mfek::*, GlifParserError};
 use crate::glif::Glif;
 use crate::guideline::Guideline;
-use crate::outline::{Outline, Contour, OutlineType};
+#[cfg(feature = "skia")]
 use crate::outline::skia::{SkiaPaths, SkiaPointTransforms, ToSkiaPath, ToSkiaPaths};
+use crate::outline::{Contour, Outline, OutlineType};
 use crate::point::{Point, PointData, PointType};
 
 #[macro_use] pub mod layer;

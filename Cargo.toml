@@ -35,7 +35,7 @@ glifimage = ["image"]
 glifserde = ["serde", "kurbo/serde", "integer_or_float/serde", "plist/default"]
 default = ["glifimage", "glifserde"]
 skia = ["default", "skia-safe"]
-mfek = ["default", "skia"]
+mfek = ["default"]
 more-image-formats = ["image/gif", "image/jpeg", "image/webp", "image/bmp", "image/tiff"]
 more-iof = ["integer_or_float/num-traits"]
 
