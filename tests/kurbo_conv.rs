@@ -10,9 +10,7 @@ use kurbo::Shape as _;
 fn test_kurbo_from() {
     log::info!("logging OK");
     let mut path: BezPath = kurbo::Circle{center:kurbo::Point::new(0., 0.), radius:50.0}.to_path(1.0);
-    path.close_path();
     path.extend(kurbo::Rect::new(0., 0., 100., 100.).to_path(1.0));
-    path.close_path();
     /*let mut path2 = BezPath::new();
     path2.move_to((30., 30.));
     path2.curve_to((-35., 80.), (-150., -50.), (-100., -100.));
