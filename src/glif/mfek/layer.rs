@@ -22,6 +22,8 @@ pub struct Layer<PD: PointData> {
     pub images: Vec<(GlifImage, Affine)>,
 }
 
+pub struct CubicLayer<PD: PointData> (Layer<PD>);
+
 impl<PD: PointData> Layer<PD> {
     pub fn to_glyphs_dir(&self, idx: usize) -> String {
         if idx == 0 {

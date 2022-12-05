@@ -36,7 +36,11 @@ pub use crate::glif::{read, read_pedantic, read_from_filename, read_from_filenam
 pub use crate::glif::Glif;
 pub use crate::glif::xml;
 #[cfg(feature = "mfek")]
-pub use crate::glif::mfek::{MFEKGlif, VWSContour, JoinType, CapType};
+pub use crate::glif::mfek::MFEKGlif;
+#[cfg(feature = "mfek")]
+pub use crate::glif::mfek::contour_operations::vws::{VWSContour, JoinType, CapType};
+#[cfg(feature = "mfek")]
+pub use crate::glif::mfek::pointdata::MFEKPointData;
 pub use crate::guideline::{Guideline, GuidelinePoint};
 #[cfg(feature = "glifimage")]
 pub use crate::image::{GlifImage, Image, ImageCodec};

@@ -1,4 +1,4 @@
-use super::*;
+use super::{*, contour_operations::ContourOperations};
 use crate::{outline, point};
 
 use std::collections::VecDeque;
@@ -34,13 +34,25 @@ pub trait ManageContourOperations {
 
 impl<PD: PointData> DowngradeOutline<PD> for MFEKOutline<PD> {
     fn cleanly_downgradable(&self) -> bool {
+        for contour in self {
+            match contour.inner {
+                MFEKContourInner::Cubic(_) => {},
+                _ => return false
+            }
+        }
+        
         self.iter().all(|c| c.operation.is_none())
     }
 
     fn downgrade(self) -> Outline<PD> {
         let mut ret = Outline::new();
         for contour in self {
-            ret.push(contour.inner);
+            match contour.inner {
+                MFEKContourInner::Cubic(cubic_contour) => {
+                    ret.push(cubic_contour);
+                }
+                _ => panic!()
+            }
         }
         ret
     }
@@ -49,7 +61,7 @@ impl<PD: PointData> DowngradeOutline<PD> for MFEKOutline<PD> {
 impl<PD: PointData> UpgradeOutline<PD> for Outline<PD> {
     fn upgrade(self) -> MFEKOutline<PD> {
         let mut ret = MFEKOutline::new();
-        for contour in self {
+        for contour in &self {
             ret.push(contour.into());
         }
         ret
