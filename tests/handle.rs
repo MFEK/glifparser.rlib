@@ -15,3 +15,32 @@ fn test_handles() {
     assert_eq!(wh.opposite(), WhichHandle::B);
     assert_eq!(wh.opposite().opposite(), WhichHandle::A);
 }
+
+#[test]
+fn test_which_handle() {
+    let wh1: WhichHandle = 'A'.into();
+    assert_eq!(wh1, WhichHandle::A);
+    let wh1: WhichHandle = 'Ａ'.into();
+    assert_eq!(wh1, WhichHandle::A);
+    let wh1: WhichHandle = "Ａ".into();
+    assert_eq!(wh1, WhichHandle::A);
+    let wh1: WhichHandle = "b".into();
+    assert_eq!(wh1, WhichHandle::B);
+    let wh1: WhichHandle = '\u{0}'.into();
+    assert_eq!(wh1, WhichHandle::Neither);
+}
+
+#[cfg(not(debug_assertions))]
+#[test]
+fn test_which_handle_nonstrict() {
+    use std::str::FromStr as _;
+
+    let wh1: WhichHandle = " b ".into();
+    assert_eq!(wh1, WhichHandle::B);
+    let wh1: WhichHandle = 'C'.into();
+    assert_eq!(wh1, WhichHandle::Neither);
+    let wh1 = WhichHandle::from_str("");
+    assert!(wh1.is_err());
+    let wh1 = WhichHandle::from_str("   BBBB  ");
+    assert_eq!(wh1, Ok(WhichHandle::B));
+}

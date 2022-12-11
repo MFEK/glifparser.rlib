@@ -11,11 +11,11 @@ impl GlifPoint {
         let ptype = self.ptype.to_string();
         match ptype.as_str() {
             "offcurve" => None, // while this name is OK, most often not written
-            _ => el.attributes.insert("type".to_owned(), ptype)
+            _ => el.attributes.insert("type".to_owned(), ptype),
         };
         match &self.name {
             Some(name) => el.attributes.insert("name".to_owned(), name.to_string()),
-            None => None
+            None => None,
         };
         if self.smooth {
             debug_assert!(self.ptype != PointType::OffCurve);

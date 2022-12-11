@@ -1,8 +1,8 @@
-use integer_or_float::IntegerOrFloat;
-use skia_safe as skia;
-use skia::{Point as SkPoint};
-use super::kurbo::{KurboPoint, FromKurboPoint, ToKurboPoint};
+use super::kurbo::{FromKurboPoint, KurboPoint, ToKurboPoint};
 use crate::point::{IsValid, PointLike};
+use integer_or_float::IntegerOrFloat;
+use skia::Point as SkPoint;
+use skia_safe as skia;
 
 pub trait ToSkiaPoint {
     fn to_skia(&self) -> SkPoint;

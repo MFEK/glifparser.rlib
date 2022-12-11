@@ -1,5 +1,5 @@
-pub use kurbo::Point as KurboPoint;
 use crate::point::{GlifPoint, PointLike, PointType};
+pub use kurbo::Point as KurboPoint;
 
 impl<'a> Into<KurboPoint> for &'a dyn PointLike {
     fn into(self) -> KurboPoint {

@@ -1,6 +1,6 @@
 [package]
 name = "glifparser"
-version = "1.2.1"
+version = "1.2.4"
 authors = ["Fredrick Brennan <copypaste@kittens.ph>", "MFEK Authors"]
 edition = "2021"
 license = "Apache-2.0"
@@ -11,10 +11,10 @@ derive_more = "0.99"
 derivative = "2.2"
 xmltree = { version = "0.10", features = ["attribute-order"] }
 log = "0.4"
-kurbo = { version = "0.8", default-features = false }
+kurbo = { version = "0.9", default-features = false }
 trees = "0.4"
 skia-safe = { version = "*", optional = true }
-image = { version = "0.23", features = ["png"], default-features = false, optional = true }
+image = { version = "0.24", features = ["png"], default-features = false, optional = true }
 serde = { version = "1.0", features = ["derive"], optional = true }
 plist = "1.3"
 itertools = "0.10"
@@ -35,7 +35,8 @@ glifimage = ["image"]
 glifserde = ["serde", "kurbo/serde", "integer_or_float/serde", "plist/default"]
 default = ["glifimage", "glifserde"]
 skia = ["default", "skia-safe"]
-mfek = ["default", "skia"]
+mfek = ["default"]
 more-image-formats = ["image/gif", "image/jpeg", "image/webp", "image/bmp", "image/tiff"]
+more-iof = ["integer_or_float/num-traits"]
 
-fat = ["glifimage", "glifserde", "skia", "mfek", "more-image-formats"]
+fat = ["glifimage", "glifserde", "skia", "mfek", "more-image-formats", "more-iof"]

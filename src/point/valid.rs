@@ -1,5 +1,5 @@
-use kurbo::Point as KurboPoint;
 use super::*;
+use kurbo::Point as KurboPoint;
 
 pub trait IsValid: Debug {
     /// You'll need to redefine this if you want to use it on PointData.
@@ -35,20 +35,20 @@ impl<PD: PointData> IsValid for Point<PD> {
     fn is_valid(&self) -> bool {
         if let Some(pd) = self.data.as_ref() {
             if !pd.is_valid() {
-                return false
+                return false;
             }
         }
 
         if self.ptype == PointType::Undefined {
-            return false
+            return false;
         }
         if self.x.is_nan() || self.y.is_subnormal() {
-            return false
+            return false;
         }
         for handle in [self.handle(WhichHandle::A), self.handle(WhichHandle::B)] {
             if let Handle::At(hx, hy) = handle {
                 if hx.is_nan() || hy.is_subnormal() {
-                    return false
+                    return false;
                 }
             }
         }
@@ -74,13 +74,23 @@ impl<PD: PointData> PointLike for Point<PD> {
 impl IsValid for GlifPoint {
     fn is_valid(&self) -> bool {
         if self.ptype == PointType::Undefined {
-            return false
+            return false;
         }
-        if self.x.holding_float().map(|x| x.is_subnormal() || x.is_nan()).unwrap_or(false) {
-            return false
+        if self
+            .x
+            .holding_float()
+            .map(|x| x.is_subnormal() || x.is_nan())
+            .unwrap_or(false)
+        {
+            return false;
         }
-        if self.y.holding_float().map(|y| y.is_subnormal() || y.is_nan()).unwrap_or(false) {
-            return false
+        if self
+            .y
+            .holding_float()
+            .map(|y| y.is_subnormal() || y.is_nan())
+            .unwrap_or(false)
+        {
+            return false;
         }
         true
     }
