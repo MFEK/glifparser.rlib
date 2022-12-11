@@ -22,6 +22,17 @@ pub struct QPoint<PD: PointData> {
     pub data: Option<PD>,
 }
 
+impl<PD: PointData> QPoint<PD> {
+    pub fn new() -> QPoint<PD> {
+        Self::default()
+    }
+
+    /// Make a point from its x and y position and type
+    pub fn from_x_y_type((x, y): (f32, f32), ptype: PointType) -> QPoint<PD> {
+        QPoint { x, y, ptype, ..Default::default() }
+    }
+}
+
 impl<PD: PointData> MFEKPointCommon<PD> for QPoint<PD> {
     fn get_handle(&self, wh: WhichHandle) -> Option<Handle> {
         if let WhichHandle::A = wh {

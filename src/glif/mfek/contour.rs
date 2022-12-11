@@ -1,4 +1,6 @@
 
+use core::panic;
+
 use serde::{Serialize, Deserialize};
 use crate::PointData;
 use crate::Point;
@@ -8,7 +10,9 @@ use super::inner::MFEKCommonInner;
 use super::inner::MFEKContourInner;
 use super::inner::MFEKContourInnerType;
 use super::inner::cubic::MFEKCubicInner;
+use super::inner::quad::MFEKQuadInner;
 use super::point::MFEKPointCommon;
+
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct MFEKContour<PD: PointData> {
@@ -16,7 +20,7 @@ pub struct MFEKContour<PD: PointData> {
     pub operation: Option<ContourOperations<PD>>,
 }
 
-// A wrapper type that indicates the contour inner is gaurunteed to be an MFEKCubicInner when returned
+// A wrapper type that indicates the contour inner is an MFEKCubicInner when returned
 // from a glifparser or math.rlib function.
 pub struct MFEKCubicContour<PD: PointData>(pub MFEKContour<PD>);
 
@@ -85,6 +89,9 @@ pub trait MFEKContourCommon<PD: PointData> {
     // advised to add new functions like these when you add new contour types.
     fn cubic(&self) -> Option<&MFEKCubicInner<PD>>;
     fn cubic_mut(&mut self) -> Option<&mut MFEKCubicInner<PD>>;
+    
+    fn quad(&self) -> Option<&MFEKQuadInner<PD>>;
+    fn quad_mut(&mut self) -> Option<&mut MFEKQuadInner<PD>>;
 
     // These modify the contour in place. Anything that returns a new object of the implementing type should
     // use the Outer/Inner traits instead.
@@ -168,6 +175,14 @@ impl<PD: PointData> MFEKContourCommon<PD> for MFEKContour<PD> {
         self.inner.get_type()
     }
 
+    fn first(&self) -> &dyn MFEKPointCommon<PD> {
+        self.get_point(0).unwrap()
+    }
+
+    fn last(&self) -> &dyn MFEKPointCommon<PD> {
+        self.get_point(self.len()-1).unwrap()
+    }
+
     fn cubic(&self) -> Option<&MFEKCubicInner<PD>> {
         self.inner.cubic()
     }
@@ -176,12 +191,12 @@ impl<PD: PointData> MFEKContourCommon<PD> for MFEKContour<PD> {
         self.inner.cubic_mut()
     }
 
-    fn first(&self) -> &dyn MFEKPointCommon<PD> {
-        self.get_point(0).unwrap()
+    fn quad(&self) -> Option<&MFEKQuadInner<PD>> {
+        self.inner.quad()
     }
 
-    fn last(&self) -> &dyn MFEKPointCommon<PD> {
-        self.get_point(self.len()-1).unwrap()
+    fn quad_mut(&mut self) -> Option<&mut MFEKQuadInner<PD>> {
+        self.inner.quad_mut()
     }
     
 }
@@ -233,6 +248,14 @@ impl<PD: PointData> MFEKContourCommon<PD> for MFEKCubicContour<PD> {
         self.0.inner.get_type()
     }
 
+    fn first(&self) -> &dyn MFEKPointCommon<PD> {
+        self.0.inner.first()
+    }
+
+    fn last(&self) -> &dyn MFEKPointCommon<PD> {
+        self.0.inner.last()
+    }
+
     fn cubic(&self) -> Option<&MFEKCubicInner<PD>> {
         self.0.inner.cubic()
     }
@@ -241,12 +264,12 @@ impl<PD: PointData> MFEKContourCommon<PD> for MFEKCubicContour<PD> {
         self.0.inner.cubic_mut()
     }
 
-    fn first(&self) -> &dyn MFEKPointCommon<PD> {
-        self.0.inner.first()
+    fn quad(&self) -> Option<&MFEKQuadInner<PD>> {
+        self.0.inner.quad()
     }
 
-    fn last(&self) -> &dyn MFEKPointCommon<PD> {
-        self.0.inner.last()
+    fn quad_mut(&mut self) -> Option<&mut MFEKQuadInner<PD>> {
+        self.0.inner.quad_mut()
     }
     
 }
@@ -256,6 +279,8 @@ impl<PD: PointData> From<&MFEKContourInner<PD>> for Vec<Point<PD>> {
     fn from(contour: &MFEKContourInner<PD>) -> Vec<Point<PD>> {
         match contour{
             MFEKContourInner::Cubic(contour) => {return contour.clone()}
+            // TODO: Better handling
+            _ => panic!("Can't turn a mixed contour into Vec<Point<PD>>!")
         }
     }
 }

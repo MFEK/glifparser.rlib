@@ -1,5 +1,6 @@
-use super::{*, contour_operations::ContourOperations};
-use crate::{outline, point};
+use super::{contour_operations::ContourOperations, inner::MFEKContourInner, MFEKOutline};
+use crate::{outline, point, PointData, error::mfek::UpgradeContourOpsError};
+use crate::{Outline, MFEKGlif};
 
 use std::collections::VecDeque;
 
@@ -51,7 +52,7 @@ impl<PD: PointData> DowngradeOutline<PD> for MFEKOutline<PD> {
                 MFEKContourInner::Cubic(cubic_contour) => {
                     ret.push(cubic_contour);
                 }
-                _ => panic!()
+                _ => panic!("Tried to downgrade a non-cubic glyph!")
             }
         }
         ret

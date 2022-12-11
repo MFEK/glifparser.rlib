@@ -1,3 +1,4 @@
+use core::panic;
 use std::collections::HashSet;
 use std::path as stdpath;
 
@@ -95,6 +96,8 @@ impl<PD: PointData> From<MFEKGlif<PD>> for Glif<PD> {
         let outline = glif.layers[0].outline.iter().map(|contour| 
             match &contour.inner {
                 MFEKContourInner::Cubic(cubic) => cubic.clone(),
+                // TODO: BETTER HANDLING!
+                _ => panic!("Tried to convert non-cubic MFEKGlif to glif")
             }
             
         ).collect();
