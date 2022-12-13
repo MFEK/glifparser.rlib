@@ -23,7 +23,7 @@ float-cmp = "0.9"
 
 # Our submodules
 # The default feature is serde, dep:serde syntax still (Oct '21) not stabilized
-integer_or_float = { git = "https://github.com/MFEK/integer_or_float.rlib", branch = "main", default-features = false, features = ["hash", "float-cmp"] }
+integer_or_float = { version = "0.1.5", default-features = false, features = ["hash", "float-cmp"] }
 
 [dev-dependencies]
 env_logger = "0.9"
