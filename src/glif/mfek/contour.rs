@@ -10,14 +10,66 @@ use super::inner::MFEKCommonInner;
 use super::inner::MFEKContourInner;
 use super::inner::MFEKContourInnerType;
 use super::inner::cubic::MFEKCubicInner;
+use super::inner::hyper::MFEKHyperInner;
 use super::inner::quad::MFEKQuadInner;
 use super::point::MFEKPointCommon;
 
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct MFEKContour<PD: PointData> {
-    pub inner: MFEKContourInner<PD>,
-    pub operation: Option<ContourOperations<PD>>,
+    inner: MFEKContourInner<PD>,
+    operation: Option<ContourOperations<PD>>,
+}
+
+impl<PD: PointData> MFEKContour<PD> {
+    pub fn new(inner: MFEKContourInner<PD>, operation: Option<ContourOperations<PD>>) -> MFEKContour<PD> {
+        MFEKContour {
+            inner,
+            operation,
+        }
+    }
+
+    pub fn inner(&self) -> &MFEKContourInner<PD> {
+        &self.inner
+    }
+
+    pub fn inner_mut(&mut self) -> &mut MFEKContourInner<PD> {
+        &mut self.inner
+    }
+
+    pub fn operation(&self) -> &Option<ContourOperations<PD>> {
+        &self.operation
+    }
+
+    pub fn operation_mut(&mut self) -> &mut Option<ContourOperations<PD>> {
+        &mut self.operation
+    }
+
+    pub fn set_operation(&mut self, op: Option<ContourOperations<PD>>) {
+        self.operation = op;
+    }
+
+    pub fn sub(&self, start_index: usize, end_index: usize) -> MFEKContour<PD> {
+        let mut result: MFEKContour<PD> = MFEKContour::new(
+            self.inner.sub(start_index, end_index),
+            None,
+        );
+
+        result.operation = self.operation.clone();
+        result.operation.sub(start_index, end_index);
+
+        result
+    }
+
+    pub fn append(&mut self, other: &MFEKContour<PD>) -> Result<(), MFEKCommonMismatchError> {
+        let inner_result = self.inner.append(&other.inner);
+
+        if let Ok(_) = inner_result {
+            self.operation.append(other)
+        }
+
+        inner_result
+    }
 }
 
 // A wrapper type that indicates the contour inner is an MFEKCubicInner when returned
@@ -26,19 +78,19 @@ pub struct MFEKCubicContour<PD: PointData>(pub MFEKContour<PD>);
 
 impl<PD: PointData> From<&Vec<Point<PD>>> for MFEKContour<PD> {
     fn from(contour: &Vec<Point<PD>>) -> Self {
-        Self {
-            inner: MFEKContourInner::Cubic( contour.clone() ),
-            operation: None,
-        }
+        Self::new(
+            MFEKContourInner::Cubic( contour.clone() ),
+            None,
+        )
     }
 }
 
 impl<PD: PointData> From<Vec<Point<PD>>> for MFEKContour<PD> {
     fn from(contour: Vec<Point<PD>>) -> Self {
-        Self {
-            inner: MFEKContourInner::Cubic( contour ),
-            operation: None,
-        }
+        Self::new (
+            MFEKContourInner::Cubic( contour ),
+            None,
+        )
     }
 }
 
@@ -71,12 +123,10 @@ pub trait MFEKContourCommon<PD: PointData> {
     fn len(&self) -> usize;
     fn get_type(&self) -> MFEKContourInnerType;
 
-
-    fn first(&self) -> &dyn MFEKPointCommon<PD>;
-    fn last(&self) -> &dyn MFEKPointCommon<PD>;
-
     fn is_open(&self) -> bool;
-    fn is_closed(&self) -> bool;
+    fn is_closed(&self) -> bool {
+        !self.is_open()
+    }
     fn set_open(&mut self);
     fn set_closed(&mut self);
 
@@ -93,39 +143,13 @@ pub trait MFEKContourCommon<PD: PointData> {
     fn quad(&self) -> Option<&MFEKQuadInner<PD>>;
     fn quad_mut(&mut self) -> Option<&mut MFEKQuadInner<PD>>;
 
+    fn hyper(&self) -> Option<&MFEKHyperInner<PD>>;
+    fn hyper_mut(&mut self) -> Option<&mut MFEKHyperInner<PD>>;
+
     // These modify the contour in place. Anything that returns a new object of the implementing type should
     // use the Outer/Inner traits instead.
     fn delete(&mut self, index: usize);
-    fn reverse(&mut self);
-}
-
-pub trait MFEKCommonOuter<PD: PointData> {
-    fn sub(&self, start_index: usize, end_index: usize) -> MFEKContour<PD>;
-    fn append(&mut self, other: &MFEKContour<PD>) -> Result<(), MFEKCommonMismatchError>;
-}
-
-impl<PD: PointData> MFEKCommonOuter<PD> for MFEKContour<PD> {
-    fn sub(&self, start_index: usize, end_index: usize) -> MFEKContour<PD> {
-        let mut result: MFEKContour<PD> = MFEKContour {
-            inner: self.inner.sub(start_index, end_index),
-            operation: None,
-        };
-
-        result.operation = self.operation.clone();
-        result.operation.sub(start_index, end_index);
-
-        result
-    }
-
-    fn append(&mut self, other: &MFEKContour<PD>) -> Result<(), MFEKCommonMismatchError> {
-        let inner_result = self.inner.append(&other.inner);
-
-        if let Ok(_) = inner_result {
-            self.operation.append(other)
-        }
-
-        inner_result
-    }
+    fn reverse_points(&mut self);
 }
 
 impl<PD: PointData> MFEKContourCommon<PD> for MFEKContour<PD> {
@@ -141,8 +165,8 @@ impl<PD: PointData> MFEKContourCommon<PD> for MFEKContour<PD> {
         !self.is_open()
     }
 
-    fn reverse(&mut self) {
-        self.inner.reverse()
+    fn reverse_points(&mut self) {
+        self.inner.reverse_points()
         //TODO: Contour operations go here.
     }
 
@@ -175,20 +199,16 @@ impl<PD: PointData> MFEKContourCommon<PD> for MFEKContour<PD> {
         self.inner.get_type()
     }
 
-    fn first(&self) -> &dyn MFEKPointCommon<PD> {
-        self.get_point(0).unwrap()
-    }
-
-    fn last(&self) -> &dyn MFEKPointCommon<PD> {
-        self.get_point(self.len()-1).unwrap()
-    }
-
     fn cubic(&self) -> Option<&MFEKCubicInner<PD>> {
         self.inner.cubic()
     }
 
     fn cubic_mut(&mut self) -> Option<&mut MFEKCubicInner<PD>> {
-        self.inner.cubic_mut()
+        if let Some(_) = self.inner.cubic_mut() {
+            return self.inner.cubic_mut()
+        }
+        
+        None
     }
 
     fn quad(&self) -> Option<&MFEKQuadInner<PD>> {
@@ -196,7 +216,22 @@ impl<PD: PointData> MFEKContourCommon<PD> for MFEKContour<PD> {
     }
 
     fn quad_mut(&mut self) -> Option<&mut MFEKQuadInner<PD>> {
-        self.inner.quad_mut()
+        if let Some(_) = self.inner.quad_mut() {
+            return self.inner.quad_mut()
+        }
+        
+        None    }
+
+    fn hyper(&self) -> Option<&MFEKHyperInner<PD>> {
+        self.inner.hyper()
+    }
+
+    fn hyper_mut(&mut self) -> Option<&mut MFEKHyperInner<PD>> {
+        if let Some(_) = self.inner.hyper_mut() {
+            return self.inner.hyper_mut()
+        }
+        
+        None
     }
     
 }
@@ -214,8 +249,8 @@ impl<PD: PointData> MFEKContourCommon<PD> for MFEKCubicContour<PD> {
         !self.is_open()
     }
 
-    fn reverse(&mut self) {
-        self.0.inner.reverse()
+    fn reverse_points(&mut self) {
+        self.0.inner.reverse_points()
         //TODO: Contour operations go here.
     }
 
@@ -248,14 +283,6 @@ impl<PD: PointData> MFEKContourCommon<PD> for MFEKCubicContour<PD> {
         self.0.inner.get_type()
     }
 
-    fn first(&self) -> &dyn MFEKPointCommon<PD> {
-        self.0.inner.first()
-    }
-
-    fn last(&self) -> &dyn MFEKPointCommon<PD> {
-        self.0.inner.last()
-    }
-
     fn cubic(&self) -> Option<&MFEKCubicInner<PD>> {
         self.0.inner.cubic()
     }
@@ -270,6 +297,14 @@ impl<PD: PointData> MFEKContourCommon<PD> for MFEKCubicContour<PD> {
 
     fn quad_mut(&mut self) -> Option<&mut MFEKQuadInner<PD>> {
         self.0.inner.quad_mut()
+    }
+
+    fn hyper(&self) -> Option<&MFEKHyperInner<PD>> {
+        self.0.inner.hyper()
+    }
+
+    fn hyper_mut(&mut self) -> Option<&mut MFEKHyperInner<PD>> {
+        self.0.inner.hyper_mut()
     }
     
 }

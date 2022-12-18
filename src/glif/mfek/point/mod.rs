@@ -1,10 +1,11 @@
 use crate::{WhichHandle, PointData, Handle, Point};
 
 pub mod quad;
+pub mod hyper;
 
 use dyn_clone::DynClone;
 
-use self::quad::QPoint;
+use self::{quad::QPoint, hyper::HyperPoint};
 
 pub trait MFEKPointCommon<PD: PointData>: DynClone {
     fn get_handle(&self, handle: WhichHandle) -> Option<Handle>;
@@ -20,6 +21,7 @@ pub trait MFEKPointCommon<PD: PointData>: DynClone {
     fn set_position_no_handles(&mut self, x: f32, y:f32);
     fn cubic(&self) -> Option<&Point<PD>>;
     fn quad(&self) -> Option<&QPoint<PD>>;
+    fn hyper(&self) -> Option<&HyperPoint<PD>>;
 }
 
 impl<PD: PointData> MFEKPointCommon<PD> for Point<PD> {
@@ -115,6 +117,10 @@ impl<PD: PointData> MFEKPointCommon<PD> for Point<PD> {
     }
     
     fn quad(&self) -> Option<&QPoint<PD>> {
+        None
+    }
+
+    fn hyper(&self) -> Option<&HyperPoint<PD>> {
         None
     }
 }

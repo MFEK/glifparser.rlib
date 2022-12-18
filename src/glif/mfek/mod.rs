@@ -2,18 +2,20 @@ use core::panic;
 use std::collections::HashSet;
 use std::path as stdpath;
 
+#[cfg(feature = "skia")]
 use skia_safe::{self as skia, Path};
 use kurbo::Affine;
 use serde::{Serialize, Deserialize};
 
+use crate::{PointType, Point};
 use crate::anchor::Anchor;
 use crate::component::{ComponentRect, GlifComponents};
-use crate::error::{mfek::*};
 use crate::glif::Glif;
 use crate::guideline::Guideline;
 use crate::outline::{Outline, OutlineType};
+#[cfg(feature = "skia")]
 use crate::outline::skia::{SkiaPaths, SkiaPointTransforms, ToSkiaPath, ToSkiaPaths};
-use crate::point::{Point, PointData, PointType};
+use crate::point::PointData;
 
 #[macro_use] pub mod layer;
 pub use layer::Layer;
@@ -94,7 +96,7 @@ impl<PD: PointData> From<Glif<PD>> for MFEKGlif<PD> {
 impl<PD: PointData> From<MFEKGlif<PD>> for Glif<PD> {
     fn from(glif: MFEKGlif<PD>) -> Self {
         let outline = glif.layers[0].outline.iter().map(|contour| 
-            match &contour.inner {
+            match &contour.inner() {
                 MFEKContourInner::Cubic(cubic) => cubic.clone(),
                 // TODO: BETTER HANDLING!
                 _ => panic!("Tried to convert non-cubic MFEKGlif to glif")
@@ -136,6 +138,7 @@ pub struct HistoryEntry<PD: PointData> {
 
 pub type MFEKOutline<PD> = Vec<MFEKContour<PD>>;
 
+#[cfg(feature = "skia")]
 impl<PD: PointData> ToSkiaPaths for MFEKOutline<PD> {
     fn to_skia_paths(&self, spt: Option<SkiaPointTransforms>) -> SkiaPaths {
         let mut ret = SkiaPaths {
@@ -147,7 +150,7 @@ impl<PD: PointData> ToSkiaPaths for MFEKOutline<PD> {
         let mut closed = Path::new();
 
         for contour in self {
-            match &contour.inner {
+            match &contour.inner() {
                 MFEKContourInner::Cubic(cubic) => {
                     let firstpoint: &Point<PD> = match cubic.first() {
                         Some(p) => p,

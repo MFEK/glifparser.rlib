@@ -92,7 +92,7 @@ impl<PD: PointData> IntoXML for Glif<PD> {
             Lib::Plist(lib_node) => {
                 let mut plist_buf: Vec<u8> = vec![];
                 match plist::to_writer_xml(&mut plist_buf, &lib_node).map(|()|Element::parse(plist_buf.as_slice())) {
-                    Ok(Ok(plib)) => (plib),
+                    Ok(Ok(plib)) => plib,
                     Ok(Err(e)) => {
                         log::error!("Failed to write .glif <lib> as an inline plist. xmltree error: {:?}.", e);
                         return glyph

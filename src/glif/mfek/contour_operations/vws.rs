@@ -27,12 +27,12 @@ impl<PD: PointData> ContourOperation<PD> for VWSContour {
     fn append(&mut self, append: &MFEKContour<PD>) {
         let mut temp_handles = self.handles.clone();
 
-        match append.operation.clone() {
+        match append.operation().clone() {
             Some(ContourOperations::VariableWidthStroke { mut data }) => {
                 temp_handles.append(&mut data.handles)
             }
             Some(_) => {
-                for _idx in 0..append.inner.len() {
+                for _idx in 0..append.inner().len() {
                     let last_handle = *(temp_handles.last().unwrap_or(&VWSHandle {
                         left_offset: 10.,
                         right_offset: 10.,
@@ -43,7 +43,7 @@ impl<PD: PointData> ContourOperation<PD> for VWSContour {
                 }
             }
             None => {
-                for _idx in 0..append.inner.len() {
+                for _idx in 0..append.inner().len() {
                     let last_handle = *(temp_handles.last().unwrap_or(&VWSHandle {
                         left_offset: 10.,
                         right_offset: 10.,

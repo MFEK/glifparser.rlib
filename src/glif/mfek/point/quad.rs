@@ -108,4 +108,8 @@ impl<PD: PointData> MFEKPointCommon<PD> for QPoint<PD> {
     fn quad(&self) -> Option<&QPoint<PD>> {
         Some(self)
     }
+
+    fn hyper(&self) -> Option<&super::hyper::HyperPoint<PD>> {
+        None
+    }
 }
