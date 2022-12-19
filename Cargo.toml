@@ -43,3 +43,7 @@ more-image-formats = ["image/gif", "image/jpeg", "image/webp", "image/bmp", "ima
 more-iof = ["integer_or_float/num-traits"]
 
 fat = ["glifimage", "glifserde", "skia", "mfek", "more-image-formats", "more-iof"]
+
+[package.metadata.docs.rs]
+# Features to pass to Cargo (default: []) when building https://docs.rs/glifparser
+features = ["fat"]
