@@ -148,15 +148,15 @@ impl<PD: PointData> IntoPenOperations for Contour<PD> {
 }
 
 /// A list of pen operations that should contain one and only one contour.
-pub type PenOperationsContour = Vec<Vec<PenOperations>>;
+pub type PenOperationsContour = Vec<PenOperations>;
 /// A list of lists of pen operations creating an outline of [`Vec::len()`] contours.
 pub type PenOperationsPath = Vec<PenOperationsContour>;
 
 /// Split a long vec of pen operations into constitutent contours.
-pub trait SplitPenOperations {
+pub trait SplitPenOperations: Clone {
     fn split_pen_operations(self) -> PenOperationsPath;
     fn has_n_contours(&self, n: usize) -> bool {
-        self.split_pen_operations().len() == n
+        self.clone().split_pen_operations().len() == n
     }
 }
 
