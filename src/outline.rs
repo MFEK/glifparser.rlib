@@ -4,6 +4,7 @@ pub mod contour;
 pub use contour::Reverse;
 mod conv;
 pub use conv::{IntoGlifPoints, ToOutline};
+pub use conv::{PenOperations, PenOperationsContour, PenOperationsPath, IntoPenOperations, SplitPenOperations};
 pub mod create;
 mod kurbo;
 pub use self::kurbo::*;
