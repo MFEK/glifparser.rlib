@@ -1,3 +1,4 @@
-(function() {var implementors = {};
-implementors["glifparser"] = [{"text":"impl <a class=\"trait\" href=\"https://doc.rust-lang.org/1.57.0/alloc/string/trait.ToString.html\" title=\"trait alloc::string::ToString\">ToString</a> for <a class=\"struct\" href=\"glifparser/color/struct.Color.html\" title=\"struct glifparser::color::Color\">Color</a>","synthetic":false,"types":["glifparser::color::Color"]}];
-if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()
+(function() {var implementors = {
+"glifparser":[["impl <a class=\"trait\" href=\"https://doc.rust-lang.org/1.65.0/alloc/string/trait.ToString.html\" title=\"trait alloc::string::ToString\">ToString</a> for <a class=\"struct\" href=\"glifparser/color/struct.Color.html\" title=\"struct glifparser::color::Color\">Color</a>"]],
+"skia_safe":[["impl <a class=\"trait\" href=\"https://doc.rust-lang.org/1.65.0/alloc/string/trait.ToString.html\" title=\"trait alloc::string::ToString\">ToString</a> for <a class=\"struct\" href=\"skia_safe/struct.Handle.html\" title=\"struct skia_safe::Handle\">Handle</a>&lt;<a class=\"struct\" href=\"skia_bindings/bindings/struct.SkString.html\" title=\"struct skia_bindings::bindings::SkString\">SkString</a>&gt;"]]
+};if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()

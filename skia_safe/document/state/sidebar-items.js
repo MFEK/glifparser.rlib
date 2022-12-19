@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"struct":[["OnPage","Document is currently on a page and can be drawn onto."],["Open","Document is currently open. May contain several pages."]]};

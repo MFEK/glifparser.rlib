@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"enum":[["ConversionError",""],["IntegerOrFloat","A generic container for an “integer or a float”."]],"mod":[["backing_types","Allow user to have an i64/f64-holding backing store. Useful for kurbo etc."]]};

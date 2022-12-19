@@ -1,12 +1,12 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src&#x2F;outline&#x2F;conv.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>conv.rs - source</title><link rel="stylesheet" type="text/css" href="../../../normalize.css"><link rel="stylesheet" type="text/css" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../../ayu.css" disabled ><script id="default-settings" ></script><script src="../../../storage.js"></script><script src="../../../crates.js"></script><noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../../favicon.svg"><style type="text/css">#crate-search{background-image:url("../../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../../glifparser/index.html'><div class='logo-container rust-logo'><img src='../../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="18" height="18" alt="Pick another theme!" src="../../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../../settings.html" title="settings"><img width="18" height="18" alt="Change settings" src="../../../wheel.svg"></a></div></form></nav><section id="main" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1"> 1</span>
-<span id="2"> 2</span>
-<span id="3"> 3</span>
-<span id="4"> 4</span>
-<span id="5"> 5</span>
-<span id="6"> 6</span>
-<span id="7"> 7</span>
-<span id="8"> 8</span>
-<span id="9"> 9</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/outline/conv.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>conv.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" href="../../../normalize.css"><link rel="stylesheet" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" href="../../../ayu.css" disabled><link rel="stylesheet" href="../../../dark.css" disabled><link rel="stylesheet" href="../../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../../storage.js"></script><script defer src="../../../source-script.js"></script><script defer src="../../../source-files.js"></script><script defer src="../../../main.js"></script><noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../../glifparser/index.html"><div class="logo-container"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></div></a><h2 class="location"></h2></nav><nav class="sidebar"><a class="sidebar-logo" href="../../../glifparser/index.html"><div class="logo-container"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></div></a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../../glifparser/index.html"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></a><nav class="sub"><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><button type="button">?</button></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../wheel.svg"></a></div></div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">1</span>
+<span id="2">2</span>
+<span id="3">3</span>
+<span id="4">4</span>
+<span id="5">5</span>
+<span id="6">6</span>
+<span id="7">7</span>
+<span id="8">8</span>
+<span id="9">9</span>
 <span id="10">10</span>
 <span id="11">11</span>
 <span id="12">12</span>
@@ -70,79 +70,79 @@
 <span id="70">70</span>
 <span id="71">71</span>
 <span id="72">72</span>
-</pre><pre class="rust"><code><span class="kw">mod</span> <span class="ident">penops</span>;
-<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">penops</span>::{<span class="ident">IntoPenOperations</span>, <span class="ident">PenOperations</span>, <span class="ident">SplitPenOperations</span>};
+<span id="73">73</span>
+</pre><pre class="rust"><code><span class="kw">mod </span>penops;
+<span class="kw">pub use </span>penops::{IntoPenOperations, PenOperations, SplitPenOperations};
+<span class="kw">pub use </span>penops::{PenOperationsContour, PenOperationsPath};
 
-<span class="kw">use</span> <span class="kw">super</span>::{<span class="ident">Contour</span>, <span class="ident">GlifContour</span>, <span class="ident">Outline</span>};
+<span class="kw">use super</span>::{Contour, GlifContour, Outline};
 
-<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::point</span>::{<span class="ident">GlifPoint</span>, <span class="ident">PointData</span>, <span class="ident">PointType</span>, <span class="ident">WhichHandle</span>};
+<span class="kw">use </span><span class="kw">crate</span>::point::{GlifPoint, PointData, PointType, WhichHandle};
 
-<span class="kw">use</span> <span class="ident">std::collections</span>::{<span class="ident">HashSet</span>, <span class="ident">VecDeque</span>};
+<span class="kw">use </span>std::collections::{HashSet, VecDeque};
 
-<span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">ToOutline</span><span class="op">&lt;</span><span class="ident">PD</span>: <span class="ident">PointData</span><span class="op">&gt;</span> {
-    <span class="kw">fn</span> <span class="ident">to_outline</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">Outline</span><span class="op">&lt;</span><span class="ident">PD</span><span class="op">&gt;</span>;
+<span class="kw">pub trait </span>ToOutline&lt;PD: PointData&gt; {
+    <span class="kw">fn </span>to_outline(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Outline&lt;PD&gt;;
 }
 
-<span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">IntoGlifPoints</span> {
-    <span class="kw">type</span> <span class="ident">Output</span>;
-    <span class="kw">fn</span> <span class="ident">into_glifpoints</span>(<span class="self">self</span>) -&gt; <span class="ident"><span class="self">Self</span>::Output</span>;
+<span class="kw">pub trait </span>IntoGlifPoints {
+    <span class="kw">type </span>Output;
+    <span class="kw">fn </span>into_glifpoints(<span class="self">self</span>) -&gt; <span class="self">Self</span>::Output;
 }
 
-<span class="comment">// Handle implementations for Outline/GlifOutline/MFEKOutline (in future)</span>
-<span class="macro">macro_rules!</span> <span class="ident">impl_igp</span> {
-    (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">typ</span>:<span class="ident">ident</span>) =&gt; {
-        <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">IGP</span>: <span class="ident">IntoGlifPoints</span><span class="op">&gt;</span> <span class="ident">IntoGlifPoints</span> <span class="kw">for</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">typ</span><span class="op">&lt;</span><span class="ident">IGP</span><span class="op">&gt;</span> {
-            <span class="kw">type</span> <span class="ident">Output</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">typ</span><span class="op">&lt;</span><span class="op">&lt;</span><span class="ident">IGP</span> <span class="kw">as</span> <span class="ident">IntoGlifPoints</span><span class="op">&gt;</span><span class="ident">::Output</span><span class="op">&gt;</span>;
-            <span class="kw">fn</span> <span class="ident">into_glifpoints</span>(<span class="self">self</span>) -&gt; <span class="ident"><span class="self">Self</span>::Output</span> {
-                <span class="self">self</span>.<span class="ident">into_iter</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">it</span><span class="op">|</span><span class="ident">it</span>.<span class="ident">into_glifpoints</span>()).<span class="ident">collect</span>()
+<span class="comment">// Handle implementations for Outline/GlifOutline/MFEKOutline (in future)
+</span><span class="macro">macro_rules! </span>impl_igp {
+    (<span class="macro-nonterminal">$typ</span>:ident) =&gt; {
+        <span class="kw">impl</span>&lt;IGP: IntoGlifPoints&gt; IntoGlifPoints <span class="kw">for </span><span class="macro-nonterminal">$typ</span>&lt;IGP&gt; {
+            <span class="kw">type </span>Output = <span class="macro-nonterminal">$typ</span>&lt;&lt;IGP <span class="kw">as </span>IntoGlifPoints&gt;::Output&gt;;
+            <span class="kw">fn </span>into_glifpoints(<span class="self">self</span>) -&gt; <span class="self">Self</span>::Output {
+                <span class="self">self</span>.into_iter().map(|it|it.into_glifpoints()).collect()
             }
         }
     }
 }
-<span class="macro">impl_igp!</span>(<span class="ident">Vec</span>);
-<span class="macro">impl_igp!</span>(<span class="ident">VecDeque</span>);
+<span class="macro">impl_igp!</span>(Vec);
+<span class="macro">impl_igp!</span>(VecDeque);
 
-<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">cleanup_offcurves</span>(<span class="ident">contour</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">GlifPoint</span><span class="op">&gt;</span>) {
-    <span class="kw">let</span> <span class="ident">types</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">contour</span>.<span class="ident">iter</span>().<span class="ident">enumerate</span>().<span class="ident">filter_map</span>(<span class="op">|</span>(<span class="ident">i</span>, <span class="ident">gp</span>)<span class="op">|</span>(<span class="ident">gp</span>.<span class="ident">ptype</span> <span class="op">!</span><span class="op">=</span> <span class="ident">PointType::OffCurve</span>).<span class="ident">then</span>(<span class="op">|</span><span class="op">|</span>(<span class="ident">i</span>, <span class="ident">gp</span>.<span class="ident">ptype</span>))).<span class="ident">collect</span>();
-    <span class="macro">debug_assert!</span>(<span class="ident">types</span>.<span class="ident">iter</span>().<span class="ident">all</span>(<span class="op">|</span>(<span class="kw">_</span>, <span class="ident">t</span>)<span class="op">|</span><span class="ident">t</span>.<span class="ident">is_valid_oncurve</span>()));
+<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>cleanup_offcurves(contour: <span class="kw-2">&amp;mut </span>Vec&lt;GlifPoint&gt;) {
+    <span class="kw">let </span>types: Vec&lt;<span class="kw">_</span>&gt; = contour.iter().enumerate().filter_map(|(i, gp)|(gp.ptype != PointType::OffCurve).then(||(i, gp.ptype))).collect();
+    <span class="macro">debug_assert!</span>(types.iter().all(|(<span class="kw">_</span>, t)|t.is_valid_oncurve()));
 
-    <span class="kw">let</span> <span class="ident">keep_indices</span>: <span class="ident">HashSet</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">types</span>.<span class="ident">into_iter</span>().<span class="ident">map</span>(<span class="op">|</span>(<span class="ident">i</span>, <span class="ident">pt</span>)<span class="op">|</span> {
-        <span class="kw">let</span> <span class="ident">i</span> <span class="op">=</span> <span class="ident">i</span> <span class="kw">as</span> <span class="ident">isize</span>;
-        <span class="kw">match</span> <span class="ident">pt</span> {
-            <span class="ident">PointType::Move</span> =&gt; <span class="macro">vec!</span>[<span class="ident">i</span>],
-            <span class="ident">PointType::Line</span> =&gt; <span class="macro">vec!</span>[<span class="ident">i</span>],
-            <span class="ident">PointType::QCurve</span> =&gt; <span class="macro">vec!</span>[<span class="ident">i</span><span class="op">-</span><span class="number">1</span>, <span class="ident">i</span>],
-            <span class="ident">PointType::Curve</span> =&gt; <span class="macro">vec!</span>[<span class="ident">i</span><span class="op">-</span><span class="number">2</span>, <span class="ident">i</span><span class="op">-</span><span class="number">1</span>, <span class="ident">i</span>],
-            <span class="ident">pt</span> =&gt; <span class="macro">panic!</span>(<span class="string">&quot;PointType {:?} should be impossible when trying to convert back to an XML &lt;outline&gt;&quot;</span>, <span class="ident">pt</span>),
+    <span class="kw">let </span>keep_indices: HashSet&lt;usize&gt; = types.into_iter().map(|(i, pt)| {
+        <span class="kw">let </span>i = i <span class="kw">as </span>isize;
+        <span class="kw">match </span>pt {
+            PointType::Move =&gt; <span class="macro">vec!</span>[i],
+            PointType::Line =&gt; <span class="macro">vec!</span>[i],
+            PointType::QCurve =&gt; <span class="macro">vec!</span>[i-<span class="number">1</span>, i],
+            PointType::Curve =&gt; <span class="macro">vec!</span>[i-<span class="number">2</span>, i-<span class="number">1</span>, i],
+            pt =&gt; <span class="macro">panic!</span>(<span class="string">&quot;PointType {:?} should be impossible when trying to convert back to an XML &lt;outline&gt;&quot;</span>, pt),
         }
-    }).<span class="ident">flatten</span>().<span class="ident">filter_map</span>(<span class="op">|</span><span class="ident">i</span><span class="op">|</span> (<span class="ident">i</span> <span class="op">&gt;</span><span class="op">=</span> <span class="number">0</span>).<span class="ident">then</span>(<span class="op">|</span><span class="op">|</span><span class="ident">i</span>.<span class="ident">try_into</span>().<span class="ident">unwrap</span>())).<span class="ident">collect</span>();
-    <span class="kw">let</span> <span class="ident">keep</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">bool</span><span class="op">&gt;</span> <span class="op">=</span> (<span class="number">0</span>..<span class="ident">contour</span>.<span class="ident">len</span>()).<span class="ident">map</span>(<span class="op">|</span><span class="ident">idx</span><span class="op">|</span> <span class="ident">keep_indices</span>.<span class="ident">contains</span>(<span class="kw-2">&amp;</span><span class="ident">idx</span>)).<span class="ident">collect</span>();
-    <span class="macro">debug_assert_eq!</span>(<span class="ident">contour</span>.<span class="ident">len</span>(), <span class="ident">keep</span>.<span class="ident">len</span>());
-    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">iter</span> <span class="op">=</span> <span class="ident">keep</span>.<span class="ident">iter</span>();
-    <span class="ident">contour</span>.<span class="ident">retain</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span><span class="kw-2">*</span><span class="ident">iter</span>.<span class="ident">next</span>().<span class="ident">unwrap</span>());
-    <span class="macro">debug_assert_eq!</span>(<span class="ident">contour</span>.<span class="ident">len</span>(), <span class="ident">keep_indices</span>.<span class="ident">len</span>());
+    }).flatten().filter_map(|i| (i &gt;= <span class="number">0</span>).then(||i.try_into().unwrap())).collect();
+    <span class="kw">let </span>keep: Vec&lt;bool&gt; = (<span class="number">0</span>..contour.len()).map(|idx| keep_indices.contains(<span class="kw-2">&amp;</span>idx)).collect();
+    <span class="macro">debug_assert_eq!</span>(contour.len(), keep.len());
+    <span class="kw">let </span><span class="kw-2">mut </span>iter = keep.iter();
+    contour.retain(|<span class="kw">_</span>|<span class="kw-2">*</span>iter.next().unwrap());
+    <span class="macro">debug_assert_eq!</span>(contour.len(), keep_indices.len());
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">PD</span>: <span class="ident">PointData</span><span class="op">&gt;</span> <span class="ident">IntoGlifPoints</span> <span class="kw">for</span> <span class="ident">Contour</span><span class="op">&lt;</span><span class="ident">PD</span><span class="op">&gt;</span> {
-    <span class="kw">type</span> <span class="ident">Output</span> <span class="op">=</span> <span class="ident">GlifContour</span>;
-    <span class="kw">fn</span> <span class="ident">into_glifpoints</span>(<span class="self">self</span>) -&gt; <span class="ident"><span class="self">Self</span>::Output</span> {
-        <span class="kw">let</span> <span class="ident">contour_len</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">len</span>();
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">on_points</span>: <span class="ident">VecDeque</span><span class="op">&lt;</span><span class="ident">GlifPoint</span><span class="op">&gt;</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">iter</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">p</span><span class="op">|</span><span class="ident">GlifPoint::from</span>(<span class="ident">p</span>)).<span class="ident">collect</span>();
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">next_handles</span>: <span class="ident">VecDeque</span><span class="op">&lt;</span><span class="ident">GlifPoint</span><span class="op">&gt;</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">iter</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">p</span><span class="op">|</span><span class="ident">GlifPoint::from_handle</span>(<span class="ident">p</span>, <span class="ident">WhichHandle::A</span>)).<span class="ident">collect</span>();
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">prev_handles</span>: <span class="ident">VecDeque</span><span class="op">&lt;</span><span class="ident">GlifPoint</span><span class="op">&gt;</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">iter</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">p</span><span class="op">|</span><span class="ident">GlifPoint::from_handle</span>(<span class="ident">p</span>, <span class="ident">WhichHandle::B</span>)).<span class="ident">collect</span>();
-        <span class="ident">next_handles</span>.<span class="ident">rotate_right</span>(<span class="number">1</span>);
-        <span class="macro">debug_assert!</span>(<span class="ident">on_points</span>.<span class="ident">len</span>() <span class="op">==</span> <span class="ident">next_handles</span>.<span class="ident">len</span>() <span class="op">&amp;&amp;</span> <span class="ident">next_handles</span>.<span class="ident">len</span>() <span class="op">==</span> <span class="ident">prev_handles</span>.<span class="ident">len</span>());
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">drains</span> <span class="op">=</span> [<span class="ident">next_handles</span>.<span class="ident">drain</span>(..), <span class="ident">prev_handles</span>.<span class="ident">drain</span>(..), <span class="ident">on_points</span>.<span class="ident">drain</span>(..)];
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">glifpoints</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">GlifPoint</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">std::iter::repeat</span>(()).<span class="ident">take</span>(<span class="ident">contour_len</span>).<span class="ident">fold</span>(<span class="ident">Vec::with_capacity</span>(<span class="ident">contour_len</span>), <span class="op">|</span><span class="kw-2">mut</span> <span class="ident">acc</span>, <span class="kw">_</span><span class="op">|</span>{<span class="ident">acc</span>.<span class="ident">extend</span>(<span class="ident">drains</span>.<span class="ident">iter_mut</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">d</span><span class="op">|</span><span class="ident">d</span>.<span class="ident">next</span>().<span class="ident">unwrap</span>())); <span class="ident">acc</span>});
-        <span class="macro">debug_assert!</span>(<span class="ident">drains</span>.<span class="ident">into_iter</span>().<span class="ident">all</span>(<span class="op">|</span><span class="kw-2">mut</span> <span class="ident">d</span><span class="op">|</span><span class="ident">d</span>.<span class="ident">next</span>().<span class="ident">is_none</span>()));
-        <span class="ident">cleanup_offcurves</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">glifpoints</span>);
-        <span class="kw">while</span> <span class="kw">let</span> <span class="ident">PointType::OffCurve</span> <span class="op">=</span> <span class="ident">glifpoints</span>[<span class="number">0</span>].<span class="ident">ptype</span> {
-            <span class="ident">glifpoints</span>.<span class="ident">rotate_right</span>(<span class="number">1</span>);
+<span class="kw">impl</span>&lt;PD: PointData&gt; IntoGlifPoints <span class="kw">for </span>Contour&lt;PD&gt; {
+    <span class="kw">type </span>Output = GlifContour;
+    <span class="kw">fn </span>into_glifpoints(<span class="self">self</span>) -&gt; <span class="self">Self</span>::Output {
+        <span class="kw">let </span>contour_len = <span class="self">self</span>.len();
+        <span class="kw">let </span><span class="kw-2">mut </span>on_points: VecDeque&lt;GlifPoint&gt; = <span class="self">self</span>.iter().map(|p|GlifPoint::from(p)).collect();
+        <span class="kw">let </span><span class="kw-2">mut </span>next_handles: VecDeque&lt;GlifPoint&gt; = <span class="self">self</span>.iter().map(|p|GlifPoint::from_handle(p, WhichHandle::A)).collect();
+        <span class="kw">let </span><span class="kw-2">mut </span>prev_handles: VecDeque&lt;GlifPoint&gt; = <span class="self">self</span>.iter().map(|p|GlifPoint::from_handle(p, WhichHandle::B)).collect();
+        next_handles.rotate_right(<span class="number">1</span>);
+        <span class="macro">debug_assert!</span>(on_points.len() == next_handles.len() &amp;&amp; next_handles.len() == prev_handles.len());
+        <span class="kw">let </span><span class="kw-2">mut </span>drains = [next_handles.drain(..), prev_handles.drain(..), on_points.drain(..)];
+        <span class="kw">let </span><span class="kw-2">mut </span>glifpoints: Vec&lt;GlifPoint&gt; = std::iter::repeat(()).take(contour_len).fold(Vec::with_capacity(contour_len), |<span class="kw-2">mut </span>acc, <span class="kw">_</span>|{acc.extend(drains.iter_mut().map(|d|d.next().unwrap())); acc});
+        <span class="macro">debug_assert!</span>(drains.into_iter().all(|<span class="kw-2">mut </span>d|d.next().is_none()));
+        cleanup_offcurves(<span class="kw-2">&amp;mut </span>glifpoints);
+        <span class="kw">while let </span>PointType::OffCurve = glifpoints[<span class="number">0</span>].ptype {
+            glifpoints.rotate_right(<span class="number">1</span>);
         }
-        <span class="ident">glifpoints</span>
+        glifpoints
     }
 }
 </code></pre></div>
-</section><section id="search" class="content hidden"></section><div id="rustdoc-vars" data-root-path="../../../" data-current-crate="glifparser" data-search-index-js="../../../search-index.js" data-search-js="../../../search.js"></div>
-    <script src="../../../main.js"></script><script src="../../../source-script.js"></script><script src="../../../source-files.js"></script>
-</body></html>
+</section></div></main><div id="rustdoc-vars" data-root-path="../../../" data-current-crate="glifparser" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.65.0 (897e37553 2022-11-02)" ></div></body></html>

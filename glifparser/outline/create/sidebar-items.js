@@ -1,1 +1,1 @@
-initSidebarItems({"fn":[["cubic_outline",""],["quadratic_outline",""]]});
+window.SIDEBAR_ITEMS = {"fn":[["cubic_outline",""],["quadratic_outline",""]]};

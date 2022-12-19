@@ -1,1 +1,1 @@
-initSidebarItems({"trait":[["ToSkiaMatrix",""]]});
+window.SIDEBAR_ITEMS = {"trait":[["ToSkiaMatrix",""]]};

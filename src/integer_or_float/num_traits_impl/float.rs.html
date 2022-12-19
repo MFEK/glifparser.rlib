@@ -1,0 +1,150 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/fred/.cargo/registry/src/github.com-1ecc6299db9ec823/integer_or_float-0.1.5-1/src/num_traits_impl/float.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>float.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" href="../../../normalize.css"><link rel="stylesheet" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" href="../../../ayu.css" disabled><link rel="stylesheet" href="../../../dark.css" disabled><link rel="stylesheet" href="../../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../../storage.js"></script><script defer src="../../../source-script.js"></script><script defer src="../../../source-files.js"></script><script defer src="../../../main.js"></script><noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../../integer_or_float/index.html"><div class="logo-container"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></div></a><h2 class="location"></h2></nav><nav class="sidebar"><a class="sidebar-logo" href="../../../integer_or_float/index.html"><div class="logo-container"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></div></a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../../integer_or_float/index.html"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></a><nav class="sub"><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><button type="button">?</button></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../wheel.svg"></a></div></div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">1</span>
+<span id="2">2</span>
+<span id="3">3</span>
+<span id="4">4</span>
+<span id="5">5</span>
+<span id="6">6</span>
+<span id="7">7</span>
+<span id="8">8</span>
+<span id="9">9</span>
+<span id="10">10</span>
+<span id="11">11</span>
+<span id="12">12</span>
+<span id="13">13</span>
+<span id="14">14</span>
+<span id="15">15</span>
+<span id="16">16</span>
+<span id="17">17</span>
+<span id="18">18</span>
+<span id="19">19</span>
+<span id="20">20</span>
+<span id="21">21</span>
+<span id="22">22</span>
+<span id="23">23</span>
+<span id="24">24</span>
+<span id="25">25</span>
+<span id="26">26</span>
+<span id="27">27</span>
+<span id="28">28</span>
+<span id="29">29</span>
+<span id="30">30</span>
+<span id="31">31</span>
+<span id="32">32</span>
+<span id="33">33</span>
+<span id="34">34</span>
+<span id="35">35</span>
+<span id="36">36</span>
+<span id="37">37</span>
+<span id="38">38</span>
+<span id="39">39</span>
+<span id="40">40</span>
+<span id="41">41</span>
+<span id="42">42</span>
+<span id="43">43</span>
+<span id="44">44</span>
+<span id="45">45</span>
+<span id="46">46</span>
+<span id="47">47</span>
+<span id="48">48</span>
+<span id="49">49</span>
+<span id="50">50</span>
+<span id="51">51</span>
+<span id="52">52</span>
+<span id="53">53</span>
+<span id="54">54</span>
+<span id="55">55</span>
+<span id="56">56</span>
+<span id="57">57</span>
+<span id="58">58</span>
+<span id="59">59</span>
+<span id="60">60</span>
+<span id="61">61</span>
+<span id="62">62</span>
+<span id="63">63</span>
+<span id="64">64</span>
+<span id="65">65</span>
+<span id="66">66</span>
+<span id="67">67</span>
+<span id="68">68</span>
+<span id="69">69</span>
+<span id="70">70</span>
+<span id="71">71</span>
+<span id="72">72</span>
+<span id="73">73</span>
+<span id="74">74</span>
+</pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::f_iof;
+<span class="kw">use </span><span class="kw">crate</span>::IntegerOrFloat <span class="kw">as </span>IOF;
+<span class="kw">use </span>core::num::FpCategory;
+<span class="kw">use </span>num_traits::Float;
+
+<span class="attribute">#[rustfmt::skip]
+</span><span class="kw">impl </span>Float <span class="kw">for </span>IOF {
+    <span class="comment">// Statics
+    </span><span class="kw">fn </span>nan() -&gt; <span class="self">Self </span>{ IOF::Float(f_iof::NAN) }
+    <span class="kw">fn </span>infinity() -&gt; <span class="self">Self </span>{ IOF::Float(f_iof::INFINITY) }
+    <span class="kw">fn </span>neg_infinity() -&gt; <span class="self">Self </span>{ IOF::Float(-f_iof::INFINITY) }
+    <span class="kw">fn </span>neg_zero() -&gt; <span class="self">Self </span>{ IOF::Float(-f_iof::from(<span class="number">0.0</span>)) }
+    <span class="kw">fn </span>min_value() -&gt; <span class="self">Self </span>{ IOF::Float(f_iof::MIN) }
+    <span class="kw">fn </span>min_positive_value() -&gt; <span class="self">Self </span>{ IOF::Float(f_iof::MIN_POSITIVE) }
+    <span class="kw">fn </span>max_value() -&gt; <span class="self">Self </span>{ IOF::Float(f_iof::MAX) }
+    <span class="comment">// bool-returing
+    </span><span class="kw">fn </span>is_nan(<span class="self">self</span>) -&gt; bool { f_iof::from(<span class="self">self</span>).is_nan() }
+    <span class="kw">fn </span>is_infinite(<span class="self">self</span>) -&gt; bool { f_iof::from(<span class="self">self</span>).is_infinite() }
+    <span class="kw">fn </span>is_finite(<span class="self">self</span>) -&gt; bool { f_iof::from(<span class="self">self</span>).is_finite() }
+    <span class="kw">fn </span>is_normal(<span class="self">self</span>) -&gt; bool { f_iof::from(<span class="self">self</span>).is_normal() }
+    <span class="kw">fn </span>is_sign_positive(<span class="self">self</span>) -&gt; bool { f_iof::from(<span class="self">self</span>).is_sign_positive() }
+    <span class="kw">fn </span>is_sign_negative(<span class="self">self</span>) -&gt; bool { f_iof::from(<span class="self">self</span>).is_sign_negative() }
+    <span class="comment">// FpCategory-returning
+    </span><span class="kw">fn </span>classify(<span class="self">self</span>) -&gt; FpCategory { f_iof::from(<span class="self">self</span>).classify() }
+    <span class="comment">// Self → Self functions
+    </span><span class="kw">fn </span>floor(<span class="self">self</span>) -&gt; <span class="self">Self </span>{ IOF::Float(f_iof::from(<span class="self">self</span>).floor()) }
+    <span class="kw">fn </span>ceil(<span class="self">self</span>) -&gt; <span class="self">Self </span>{ IOF::Float(f_iof::from(<span class="self">self</span>).ceil()) }
+    <span class="kw">fn </span>round(<span class="self">self</span>) -&gt; <span class="self">Self </span>{ IOF::Float(f_iof::from(<span class="self">self</span>).round()) }
+    <span class="kw">fn </span>trunc(<span class="self">self</span>) -&gt; <span class="self">Self </span>{ IOF::Float(f_iof::from(<span class="self">self</span>).trunc()) }
+    <span class="kw">fn </span>fract(<span class="self">self</span>) -&gt; <span class="self">Self </span>{ IOF::Float(f_iof::from(<span class="self">self</span>).fract()) }
+    <span class="kw">fn </span>abs(<span class="self">self</span>) -&gt; <span class="self">Self </span>{ IOF::Float(f_iof::from(<span class="self">self</span>).abs()) }
+    <span class="kw">fn </span>signum(<span class="self">self</span>) -&gt; <span class="self">Self </span>{ IOF::Float(f_iof::from(<span class="self">self</span>).signum()) }
+    <span class="kw">fn </span>recip(<span class="self">self</span>) -&gt; <span class="self">Self </span>{ IOF::Float(f_iof::from(<span class="self">self</span>).recip()) }
+    <span class="kw">fn </span>sqrt(<span class="self">self</span>) -&gt; <span class="self">Self </span>{ IOF::Float(f_iof::from(<span class="self">self</span>).sqrt()) }
+    <span class="kw">fn </span>exp(<span class="self">self</span>) -&gt; <span class="self">Self </span>{ IOF::Float(f_iof::from(<span class="self">self</span>).exp()) }
+    <span class="kw">fn </span>exp2(<span class="self">self</span>) -&gt; <span class="self">Self </span>{ IOF::Float(f_iof::from(<span class="self">self</span>).exp2()) }
+    <span class="kw">fn </span>ln(<span class="self">self</span>) -&gt; <span class="self">Self </span>{ IOF::Float(f_iof::from(<span class="self">self</span>).ln()) }
+    <span class="kw">fn </span>log2(<span class="self">self</span>) -&gt; <span class="self">Self </span>{ IOF::Float(f_iof::from(<span class="self">self</span>).log2()) }
+    <span class="kw">fn </span>log10(<span class="self">self</span>) -&gt; <span class="self">Self </span>{ IOF::Float(f_iof::from(<span class="self">self</span>).log10()) }
+    <span class="kw">fn </span>cbrt(<span class="self">self</span>) -&gt; <span class="self">Self </span>{ IOF::Float(f_iof::from(<span class="self">self</span>).cbrt()) }
+    <span class="kw">fn </span>sin(<span class="self">self</span>) -&gt; <span class="self">Self </span>{ IOF::Float(f_iof::from(<span class="self">self</span>).sin()) }
+    <span class="kw">fn </span>cos(<span class="self">self</span>) -&gt; <span class="self">Self </span>{ IOF::Float(f_iof::from(<span class="self">self</span>).cos()) }
+    <span class="kw">fn </span>tan(<span class="self">self</span>) -&gt; <span class="self">Self </span>{ IOF::Float(f_iof::from(<span class="self">self</span>).tan()) }
+    <span class="kw">fn </span>asin(<span class="self">self</span>) -&gt; <span class="self">Self </span>{ IOF::Float(f_iof::from(<span class="self">self</span>).asin()) }
+    <span class="kw">fn </span>acos(<span class="self">self</span>) -&gt; <span class="self">Self </span>{ IOF::Float(f_iof::from(<span class="self">self</span>).acos()) }
+    <span class="kw">fn </span>atan(<span class="self">self</span>) -&gt; <span class="self">Self </span>{ IOF::Float(f_iof::from(<span class="self">self</span>).atan()) }
+    <span class="kw">fn </span>exp_m1(<span class="self">self</span>) -&gt; <span class="self">Self </span>{ IOF::Float(f_iof::from(<span class="self">self</span>).exp_m1()) }
+    <span class="kw">fn </span>ln_1p(<span class="self">self</span>) -&gt; <span class="self">Self </span>{ IOF::Float(f_iof::from(<span class="self">self</span>).ln_1p()) }
+    <span class="kw">fn </span>sinh(<span class="self">self</span>) -&gt; <span class="self">Self </span>{ IOF::Float(f_iof::from(<span class="self">self</span>).sinh()) }
+    <span class="kw">fn </span>cosh(<span class="self">self</span>) -&gt; <span class="self">Self </span>{ IOF::Float(f_iof::from(<span class="self">self</span>).cosh()) }
+    <span class="kw">fn </span>tanh(<span class="self">self</span>) -&gt; <span class="self">Self </span>{ IOF::Float(f_iof::from(<span class="self">self</span>).tanh()) }
+    <span class="kw">fn </span>asinh(<span class="self">self</span>) -&gt; <span class="self">Self </span>{ IOF::Float(f_iof::from(<span class="self">self</span>).asinh()) }
+    <span class="kw">fn </span>acosh(<span class="self">self</span>) -&gt; <span class="self">Self </span>{ IOF::Float(f_iof::from(<span class="self">self</span>).acosh()) }
+    <span class="kw">fn </span>atanh(<span class="self">self</span>) -&gt; <span class="self">Self </span>{ IOF::Float(f_iof::from(<span class="self">self</span>).atanh()) }
+    <span class="comment">// has rhs &amp; rhs2
+    </span><span class="kw">fn </span>mul_add(<span class="self">self</span>, rhs: <span class="self">Self</span>, rhs2: <span class="self">Self</span>) -&gt; <span class="self">Self </span>{ IOF::Float(f_iof::from(<span class="self">self</span>).mul_add(f_iof::from(rhs), f_iof::from(rhs2))) }
+    <span class="comment">// has rhs
+    </span><span class="doccomment">/// note: powi always i32 regardless of i_iof
+    </span><span class="kw">fn </span>powi(<span class="self">self</span>, rhs: i32) -&gt; <span class="self">Self </span>{ IOF::Float(f_iof::from(<span class="self">self</span>).powi(rhs)) }
+    <span class="kw">fn </span>powf(<span class="self">self</span>, rhs: <span class="self">Self</span>) -&gt; <span class="self">Self </span>{ IOF::Float(f_iof::from(<span class="self">self</span>).powf(f_iof::from(rhs))) }
+    <span class="kw">fn </span>log(<span class="self">self</span>, rhs: <span class="self">Self</span>) -&gt; <span class="self">Self </span>{ IOF::Float(f_iof::from(<span class="self">self</span>).log(f_iof::from(rhs))) }
+    <span class="kw">fn </span>max(<span class="self">self</span>, rhs: <span class="self">Self</span>) -&gt; <span class="self">Self </span>{ IOF::Float(f_iof::from(<span class="self">self</span>).max(f_iof::from(rhs))) }
+    <span class="kw">fn </span>min(<span class="self">self</span>, rhs: <span class="self">Self</span>) -&gt; <span class="self">Self </span>{ IOF::Float(f_iof::from(<span class="self">self</span>).min(f_iof::from(rhs))) }
+    <span class="kw">fn </span>hypot(<span class="self">self</span>, rhs: <span class="self">Self</span>) -&gt; <span class="self">Self </span>{ IOF::Float(f_iof::from(<span class="self">self</span>).hypot(f_iof::from(rhs))) }
+    <span class="kw">fn </span>atan2(<span class="self">self</span>, rhs: <span class="self">Self</span>) -&gt; <span class="self">Self </span>{ IOF::Float(f_iof::from(<span class="self">self</span>).atan2(f_iof::from(rhs))) }
+    <span class="comment">// specials
+    </span><span class="kw">fn </span>integer_decode(<span class="self">self</span>) -&gt; (u64, i16, i8) { f_iof::from(<span class="self">self</span>).integer_decode() }
+    <span class="kw">fn </span>sin_cos(<span class="self">self</span>) -&gt; (<span class="self">Self</span>, <span class="self">Self</span>) {
+        <span class="kw">let </span>(r1, r2) = f_iof::from(<span class="self">self</span>).sin_cos();
+        (IOF::Float(r1), IOF::Float(r2))
+    }
+    <span class="attribute">#[allow(deprecated)]
+    </span><span class="kw">fn </span>abs_sub(<span class="self">self</span>, rhs: <span class="self">Self</span>) -&gt; <span class="self">Self </span>{ IOF::Float(f_iof::from(<span class="self">self</span>).abs_sub(f_iof::from(rhs))) }
+}
+</code></pre></div>
+</section></div></main><div id="rustdoc-vars" data-root-path="../../../" data-current-crate="integer_or_float" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.65.0 (897e37553 2022-11-02)" ></div></body></html>

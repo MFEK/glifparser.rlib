@@ -1,0 +1,256 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/fred/.cargo/registry/src/github.com-1ecc6299db9ec823/roots-0.0.7/src/analytical/quartic_depressed.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>quartic_depressed.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" href="../../../normalize.css"><link rel="stylesheet" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" href="../../../ayu.css" disabled><link rel="stylesheet" href="../../../dark.css" disabled><link rel="stylesheet" href="../../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../../storage.js"></script><script defer src="../../../source-script.js"></script><script defer src="../../../source-files.js"></script><script defer src="../../../main.js"></script><noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../../roots/index.html"><div class="logo-container"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></div></a><h2 class="location"></h2></nav><nav class="sidebar"><a class="sidebar-logo" href="../../../roots/index.html"><div class="logo-container"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></div></a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../../roots/index.html"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></a><nav class="sub"><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><button type="button">?</button></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../wheel.svg"></a></div></div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">1</span>
+<span id="2">2</span>
+<span id="3">3</span>
+<span id="4">4</span>
+<span id="5">5</span>
+<span id="6">6</span>
+<span id="7">7</span>
+<span id="8">8</span>
+<span id="9">9</span>
+<span id="10">10</span>
+<span id="11">11</span>
+<span id="12">12</span>
+<span id="13">13</span>
+<span id="14">14</span>
+<span id="15">15</span>
+<span id="16">16</span>
+<span id="17">17</span>
+<span id="18">18</span>
+<span id="19">19</span>
+<span id="20">20</span>
+<span id="21">21</span>
+<span id="22">22</span>
+<span id="23">23</span>
+<span id="24">24</span>
+<span id="25">25</span>
+<span id="26">26</span>
+<span id="27">27</span>
+<span id="28">28</span>
+<span id="29">29</span>
+<span id="30">30</span>
+<span id="31">31</span>
+<span id="32">32</span>
+<span id="33">33</span>
+<span id="34">34</span>
+<span id="35">35</span>
+<span id="36">36</span>
+<span id="37">37</span>
+<span id="38">38</span>
+<span id="39">39</span>
+<span id="40">40</span>
+<span id="41">41</span>
+<span id="42">42</span>
+<span id="43">43</span>
+<span id="44">44</span>
+<span id="45">45</span>
+<span id="46">46</span>
+<span id="47">47</span>
+<span id="48">48</span>
+<span id="49">49</span>
+<span id="50">50</span>
+<span id="51">51</span>
+<span id="52">52</span>
+<span id="53">53</span>
+<span id="54">54</span>
+<span id="55">55</span>
+<span id="56">56</span>
+<span id="57">57</span>
+<span id="58">58</span>
+<span id="59">59</span>
+<span id="60">60</span>
+<span id="61">61</span>
+<span id="62">62</span>
+<span id="63">63</span>
+<span id="64">64</span>
+<span id="65">65</span>
+<span id="66">66</span>
+<span id="67">67</span>
+<span id="68">68</span>
+<span id="69">69</span>
+<span id="70">70</span>
+<span id="71">71</span>
+<span id="72">72</span>
+<span id="73">73</span>
+<span id="74">74</span>
+<span id="75">75</span>
+<span id="76">76</span>
+<span id="77">77</span>
+<span id="78">78</span>
+<span id="79">79</span>
+<span id="80">80</span>
+<span id="81">81</span>
+<span id="82">82</span>
+<span id="83">83</span>
+<span id="84">84</span>
+<span id="85">85</span>
+<span id="86">86</span>
+<span id="87">87</span>
+<span id="88">88</span>
+<span id="89">89</span>
+<span id="90">90</span>
+<span id="91">91</span>
+<span id="92">92</span>
+<span id="93">93</span>
+<span id="94">94</span>
+<span id="95">95</span>
+<span id="96">96</span>
+<span id="97">97</span>
+<span id="98">98</span>
+<span id="99">99</span>
+<span id="100">100</span>
+<span id="101">101</span>
+<span id="102">102</span>
+<span id="103">103</span>
+<span id="104">104</span>
+<span id="105">105</span>
+<span id="106">106</span>
+<span id="107">107</span>
+<span id="108">108</span>
+<span id="109">109</span>
+<span id="110">110</span>
+<span id="111">111</span>
+<span id="112">112</span>
+<span id="113">113</span>
+<span id="114">114</span>
+<span id="115">115</span>
+<span id="116">116</span>
+<span id="117">117</span>
+<span id="118">118</span>
+<span id="119">119</span>
+<span id="120">120</span>
+<span id="121">121</span>
+<span id="122">122</span>
+<span id="123">123</span>
+<span id="124">124</span>
+<span id="125">125</span>
+<span id="126">126</span>
+<span id="127">127</span>
+</pre><pre class="rust"><code><span class="comment">// Copyright (c) 2015, Mikhail Vorotilov
+// All rights reserved.
+//
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are met:
+//
+// * Redistributions of source code must retain the above copyright notice, this
+//   list of conditions and the following disclaimer.
+//
+// * Redistributions in binary form must reproduce the above copyright notice,
+//   this list of conditions and the following disclaimer in the documentation
+//   and/or other materials provided with the distribution.
+//
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS &quot;AS IS&quot;
+// AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+// IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+// DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+// FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+// DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+// SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+// CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+// OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+// OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+</span><span class="kw">use </span><span class="kw">super</span>::<span class="kw">super</span>::FloatType;
+<span class="kw">use </span><span class="kw">super</span>::<span class="kw">super</span>::Roots;
+
+<span class="doccomment">/// Solves a depressed quartic equation x^4 + a2*x^2 + a1*x + a0 = 0.
+///
+/// Returned roots are ordered. Precision is about 1e-14 for f64.
+///
+/// # Examples
+///
+/// ```
+/// use roots::find_roots_quartic_depressed;
+///
+/// let one_root = find_roots_quartic_depressed(1f64, 0f64, 0f64);
+/// // Returns Roots::One([0f64]) as &#39;x^4 = 0&#39; has one root 0
+///
+/// let two_roots = find_roots_quartic_depressed(1f32, 0f32, -1f32);
+/// // Returns Roots::Two([-1f32, 1f32]) as &#39;x^4 - 1 = 0&#39; has roots -1 and 1
+/// ```
+</span><span class="kw">pub fn </span>find_roots_quartic_depressed&lt;F: FloatType&gt;(a2: F, a1: F, a0: F) -&gt; Roots&lt;F&gt; {
+    <span class="comment">// Handle non-standard cases
+    </span><span class="kw">if </span>a1 == F::zero() {
+        <span class="comment">// a1 = 0; x^4 + a2*x^2 + a0 = 0; solve biquadratic equation
+        </span><span class="kw">super</span>::biquadratic::find_roots_biquadratic(F::one(), a2, a0)
+    } <span class="kw">else if </span>a0 == F::zero() {
+        <span class="comment">// a0 = 0; x^4 + a2*x^2 + a1*x = 0; reduce to normalized cubic and add zero root
+        </span><span class="kw">super</span>::cubic_normalized::find_roots_cubic_normalized(F::zero(), a2, a1).add_new_root(F::zero())
+    } <span class="kw">else </span>{
+        <span class="kw">let </span>_2 = F::from(<span class="number">2i16</span>);
+        <span class="kw">let </span>_5 = F::from(<span class="number">5i16</span>);
+
+        <span class="comment">// Solve the auxiliary equation y^3 + (5/2)*a2*y^2 + (2*a2^2-a0)*y + (a2^3/2 - a2*a0/2 - a1^2/8) = 0
+        </span><span class="kw">let </span>a2_pow_2 = a2 * a2;
+        <span class="kw">let </span>a1_div_2 = a1 / _2;
+        <span class="kw">let </span>b2 = a2 * _5 / _2;
+        <span class="kw">let </span>b1 = _2 * a2_pow_2 - a0;
+        <span class="kw">let </span>b0 = (a2_pow_2 * a2 - a2 * a0 - a1_div_2 * a1_div_2) / _2;
+
+        <span class="comment">// At least one root always exists. The last root is the maximal one.
+        </span><span class="kw">let </span>resolvent_roots = <span class="macro">dbg!</span>(<span class="kw">super</span>::cubic_normalized::find_roots_cubic_normalized(
+            <span class="macro">dbg!</span>(b2),
+            <span class="macro">dbg!</span>(b1),
+            <span class="macro">dbg!</span>(b0)
+        ));
+        <span class="kw">let </span>y = resolvent_roots.as_ref().iter().last().unwrap();
+
+        <span class="kw">let </span>_a2_plus_2y = a2 + _2 * <span class="kw-2">*</span>y;
+        <span class="kw">if </span>_a2_plus_2y &gt; F::zero() {
+            <span class="kw">let </span>sqrt_a2_plus_2y = _a2_plus_2y.sqrt();
+            <span class="kw">let </span>q0a = a2 + <span class="kw-2">*</span>y - a1_div_2 / sqrt_a2_plus_2y;
+            <span class="kw">let </span>q0b = a2 + <span class="kw-2">*</span>y + a1_div_2 / sqrt_a2_plus_2y;
+
+            <span class="kw">let </span><span class="kw-2">mut </span>roots = <span class="kw">super</span>::quadratic::find_roots_quadratic(F::one(), sqrt_a2_plus_2y, q0a);
+            <span class="kw">for </span>x <span class="kw">in </span><span class="kw">super</span>::quadratic::find_roots_quadratic(F::one(), -sqrt_a2_plus_2y, q0b)
+                .as_ref()
+                .iter()
+            {
+                roots = roots.add_new_root(<span class="kw-2">*</span>x);
+            }
+            roots
+        } <span class="kw">else </span>{
+            Roots::No([])
+        }
+    }
+}
+
+<span class="attribute">#[cfg(test)]
+</span><span class="kw">mod </span>test {
+    <span class="kw">use </span><span class="kw">super</span>::<span class="kw">super</span>::<span class="kw">super</span>::<span class="kw-2">*</span>;
+
+    <span class="attribute">#[test]
+    </span><span class="kw">fn </span>test_find_roots_quartic_depressed() {
+        <span class="macro">assert_eq!</span>(find_roots_quartic_depressed(<span class="number">0f32</span>, <span class="number">0f32</span>, <span class="number">0f32</span>), Roots::One([<span class="number">0f32</span>]));
+        <span class="macro">assert_eq!</span>(find_roots_quartic_depressed(<span class="number">1f32</span>, <span class="number">1f32</span>, <span class="number">1f32</span>), Roots::No([]));
+
+        <span class="comment">// Thanks WolframAlpha for the test data
+        </span><span class="kw">match </span>find_roots_quartic_depressed(<span class="number">1f64</span>, <span class="number">1f64</span>, -<span class="number">1f64</span>) {
+            Roots::Two(x) =&gt; {
+                <span class="macro">assert_float_array_eq!</span>(<span class="number">1e-15</span>, x, [-<span class="number">1f64</span>, <span class="number">0.5698402909980532659114f64</span>]);
+            }
+            <span class="kw">_ </span>=&gt; {
+                <span class="macro">assert!</span>(<span class="bool-val">false</span>);
+            }
+        }
+
+        <span class="kw">match </span>find_roots_quartic_depressed(-<span class="number">10f64</span>, <span class="number">5f64</span>, <span class="number">1f64</span>) {
+            Roots::Four(x) =&gt; {
+                <span class="macro">assert_float_array_eq!</span>(
+                    <span class="number">1e-15</span>,
+                    x,
+                    [
+                        -<span class="number">3.3754294311910698f64</span>,
+                        -<span class="number">0.1531811728532153f64</span>,
+                        <span class="number">0.67861075799846644f64</span>,
+                        <span class="number">2.84999984604581877f64
+                    </span>]
+                );
+            }
+            <span class="kw">_ </span>=&gt; {
+                <span class="macro">assert!</span>(<span class="bool-val">false</span>);
+            }
+        }
+    }
+}
+</code></pre></div>
+</section></div></main><div id="rustdoc-vars" data-root-path="../../../" data-current-crate="roots" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.65.0 (897e37553 2022-11-02)" ></div></body></html>

@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"struct":[["IntoIter","Forest’s owning iterator."]]};

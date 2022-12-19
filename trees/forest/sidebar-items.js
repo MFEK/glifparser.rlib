@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"struct":[["Forest","List of `Node`s as its children."]]};

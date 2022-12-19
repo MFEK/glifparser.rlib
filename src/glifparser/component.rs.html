@@ -1,102 +1,102 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src&#x2F;component.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>component.rs - source</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled ><script id="default-settings" ></script><script src="../../storage.js"></script><script src="../../crates.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../glifparser/index.html'><div class='logo-container rust-logo'><img src='../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="18" height="18" alt="Pick another theme!" src="../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../settings.html" title="settings"><img width="18" height="18" alt="Change settings" src="../../wheel.svg"></a></div></form></nav><section id="main" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">  1</span>
-<span id="2">  2</span>
-<span id="3">  3</span>
-<span id="4">  4</span>
-<span id="5">  5</span>
-<span id="6">  6</span>
-<span id="7">  7</span>
-<span id="8">  8</span>
-<span id="9">  9</span>
-<span id="10"> 10</span>
-<span id="11"> 11</span>
-<span id="12"> 12</span>
-<span id="13"> 13</span>
-<span id="14"> 14</span>
-<span id="15"> 15</span>
-<span id="16"> 16</span>
-<span id="17"> 17</span>
-<span id="18"> 18</span>
-<span id="19"> 19</span>
-<span id="20"> 20</span>
-<span id="21"> 21</span>
-<span id="22"> 22</span>
-<span id="23"> 23</span>
-<span id="24"> 24</span>
-<span id="25"> 25</span>
-<span id="26"> 26</span>
-<span id="27"> 27</span>
-<span id="28"> 28</span>
-<span id="29"> 29</span>
-<span id="30"> 30</span>
-<span id="31"> 31</span>
-<span id="32"> 32</span>
-<span id="33"> 33</span>
-<span id="34"> 34</span>
-<span id="35"> 35</span>
-<span id="36"> 36</span>
-<span id="37"> 37</span>
-<span id="38"> 38</span>
-<span id="39"> 39</span>
-<span id="40"> 40</span>
-<span id="41"> 41</span>
-<span id="42"> 42</span>
-<span id="43"> 43</span>
-<span id="44"> 44</span>
-<span id="45"> 45</span>
-<span id="46"> 46</span>
-<span id="47"> 47</span>
-<span id="48"> 48</span>
-<span id="49"> 49</span>
-<span id="50"> 50</span>
-<span id="51"> 51</span>
-<span id="52"> 52</span>
-<span id="53"> 53</span>
-<span id="54"> 54</span>
-<span id="55"> 55</span>
-<span id="56"> 56</span>
-<span id="57"> 57</span>
-<span id="58"> 58</span>
-<span id="59"> 59</span>
-<span id="60"> 60</span>
-<span id="61"> 61</span>
-<span id="62"> 62</span>
-<span id="63"> 63</span>
-<span id="64"> 64</span>
-<span id="65"> 65</span>
-<span id="66"> 66</span>
-<span id="67"> 67</span>
-<span id="68"> 68</span>
-<span id="69"> 69</span>
-<span id="70"> 70</span>
-<span id="71"> 71</span>
-<span id="72"> 72</span>
-<span id="73"> 73</span>
-<span id="74"> 74</span>
-<span id="75"> 75</span>
-<span id="76"> 76</span>
-<span id="77"> 77</span>
-<span id="78"> 78</span>
-<span id="79"> 79</span>
-<span id="80"> 80</span>
-<span id="81"> 81</span>
-<span id="82"> 82</span>
-<span id="83"> 83</span>
-<span id="84"> 84</span>
-<span id="85"> 85</span>
-<span id="86"> 86</span>
-<span id="87"> 87</span>
-<span id="88"> 88</span>
-<span id="89"> 89</span>
-<span id="90"> 90</span>
-<span id="91"> 91</span>
-<span id="92"> 92</span>
-<span id="93"> 93</span>
-<span id="94"> 94</span>
-<span id="95"> 95</span>
-<span id="96"> 96</span>
-<span id="97"> 97</span>
-<span id="98"> 98</span>
-<span id="99"> 99</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/component.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>component.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" href="../../normalize.css"><link rel="stylesheet" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" href="../../ayu.css" disabled><link rel="stylesheet" href="../../dark.css" disabled><link rel="stylesheet" href="../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../storage.js"></script><script defer src="../../source-script.js"></script><script defer src="../../source-files.js"></script><script defer src="../../main.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../glifparser/index.html"><div class="logo-container"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></div></a><h2 class="location"></h2></nav><nav class="sidebar"><a class="sidebar-logo" href="../../glifparser/index.html"><div class="logo-container"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></div></a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../glifparser/index.html"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></a><nav class="sub"><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><button type="button">?</button></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../wheel.svg"></a></div></div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">1</span>
+<span id="2">2</span>
+<span id="3">3</span>
+<span id="4">4</span>
+<span id="5">5</span>
+<span id="6">6</span>
+<span id="7">7</span>
+<span id="8">8</span>
+<span id="9">9</span>
+<span id="10">10</span>
+<span id="11">11</span>
+<span id="12">12</span>
+<span id="13">13</span>
+<span id="14">14</span>
+<span id="15">15</span>
+<span id="16">16</span>
+<span id="17">17</span>
+<span id="18">18</span>
+<span id="19">19</span>
+<span id="20">20</span>
+<span id="21">21</span>
+<span id="22">22</span>
+<span id="23">23</span>
+<span id="24">24</span>
+<span id="25">25</span>
+<span id="26">26</span>
+<span id="27">27</span>
+<span id="28">28</span>
+<span id="29">29</span>
+<span id="30">30</span>
+<span id="31">31</span>
+<span id="32">32</span>
+<span id="33">33</span>
+<span id="34">34</span>
+<span id="35">35</span>
+<span id="36">36</span>
+<span id="37">37</span>
+<span id="38">38</span>
+<span id="39">39</span>
+<span id="40">40</span>
+<span id="41">41</span>
+<span id="42">42</span>
+<span id="43">43</span>
+<span id="44">44</span>
+<span id="45">45</span>
+<span id="46">46</span>
+<span id="47">47</span>
+<span id="48">48</span>
+<span id="49">49</span>
+<span id="50">50</span>
+<span id="51">51</span>
+<span id="52">52</span>
+<span id="53">53</span>
+<span id="54">54</span>
+<span id="55">55</span>
+<span id="56">56</span>
+<span id="57">57</span>
+<span id="58">58</span>
+<span id="59">59</span>
+<span id="60">60</span>
+<span id="61">61</span>
+<span id="62">62</span>
+<span id="63">63</span>
+<span id="64">64</span>
+<span id="65">65</span>
+<span id="66">66</span>
+<span id="67">67</span>
+<span id="68">68</span>
+<span id="69">69</span>
+<span id="70">70</span>
+<span id="71">71</span>
+<span id="72">72</span>
+<span id="73">73</span>
+<span id="74">74</span>
+<span id="75">75</span>
+<span id="76">76</span>
+<span id="77">77</span>
+<span id="78">78</span>
+<span id="79">79</span>
+<span id="80">80</span>
+<span id="81">81</span>
+<span id="82">82</span>
+<span id="83">83</span>
+<span id="84">84</span>
+<span id="85">85</span>
+<span id="86">86</span>
+<span id="87">87</span>
+<span id="88">88</span>
+<span id="89">89</span>
+<span id="90">90</span>
+<span id="91">91</span>
+<span id="92">92</span>
+<span id="93">93</span>
+<span id="94">94</span>
+<span id="95">95</span>
+<span id="96">96</span>
+<span id="97">97</span>
+<span id="98">98</span>
+<span id="99">99</span>
 <span id="100">100</span>
 <span id="101">101</span>
 <span id="102">102</span>
@@ -296,305 +296,303 @@
 <span id="296">296</span>
 <span id="297">297</span>
 <span id="298">298</span>
-</pre><pre class="rust"><code><span class="doccomment">//! .glif `&lt;component&gt;`</span>
+</pre><pre class="rust"><code><span class="doccomment">//! .glif `&lt;component&gt;`
 
-<span class="kw">mod</span> <span class="ident">xml</span>;
+</span><span class="kw">mod </span>xml;
 
-<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::error::GlifParserError</span>;
-<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::glif</span>::{<span class="self">self</span>, <span class="ident">Glif</span>};
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;mfek&quot;</span>)]</span>
-<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::glif::mfek::MFEKGlif</span>;
-<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::matrix::GlifMatrix</span>;
-<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::point::PointData</span>;
-<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::outline::Outline</span>;
+<span class="kw">use </span><span class="kw">crate</span>::error::GlifParserError;
+<span class="kw">use </span><span class="kw">crate</span>::glif::{<span class="self">self</span>, Glif};
+<span class="attribute">#[cfg(feature = <span class="string">&quot;mfek&quot;</span>)]
+</span><span class="kw">use </span><span class="kw">crate</span>::glif::mfek::MFEKGlif;
+<span class="kw">use </span><span class="kw">crate</span>::matrix::GlifMatrix;
+<span class="kw">use </span><span class="kw">crate</span>::point::PointData;
+<span class="kw">use </span><span class="kw">crate</span>::outline::Outline;
 
-<span class="kw">use</span> <span class="ident">integer_or_float::IntegerOrFloat</span>;
-<span class="kw">use</span> <span class="ident">IntegerOrFloat::Float</span>;
-<span class="kw">use</span> <span class="ident">kurbo::Affine</span>;
-<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">trees</span>::{<span class="ident">Forest</span>, <span class="ident">Tree</span>, <span class="ident">Node</span>};
+<span class="kw">use </span>integer_or_float::IntegerOrFloat;
+<span class="kw">use </span>IntegerOrFloat::Float;
+<span class="kw">use </span>kurbo::Affine;
+<span class="kw">pub use </span>trees::{Forest, Tree, Node};
 
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;glifserde&quot;</span>)]</span>
-<span class="kw">use</span> <span class="ident">serde</span>::{<span class="ident">Serialize</span>, <span class="ident">Deserialize</span>};
+<span class="attribute">#[cfg(feature = <span class="string">&quot;glifserde&quot;</span>)]
+</span><span class="kw">use </span>serde::{Serialize, Deserialize};
 
-<span class="kw">use</span> <span class="ident">std::path</span>::{<span class="ident">Path</span>, <span class="ident">PathBuf</span>};
+<span class="kw">use </span>std::path::{Path, PathBuf};
 
-<span class="attribute">#[<span class="ident">allow</span>(<span class="ident">non_snake_case</span>)]</span> <span class="comment">// to match UFO spec https://unifiedfontobject.org/versions/ufo3/glyphs/glif/#component</span>
-<span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;glifserde&quot;</span>, <span class="ident">derive</span>(<span class="ident">Serialize</span>, <span class="ident">Deserialize</span>))]</span>
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>, <span class="ident">Debug</span>, <span class="ident">Default</span>, <span class="ident">Hash</span>, <span class="ident">PartialEq</span>)]</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">GlifComponent</span> {
-    <span class="kw">pub</span> <span class="ident">base</span>: <span class="ident">String</span>,
-    <span class="kw">pub</span> <span class="ident">filename</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">PathBuf</span><span class="op">&gt;</span>,
-    <span class="kw">pub</span> <span class="ident">xScale</span>: <span class="ident">IntegerOrFloat</span>,
-    <span class="kw">pub</span> <span class="ident">xyScale</span>: <span class="ident">IntegerOrFloat</span>,
-    <span class="kw">pub</span> <span class="ident">yxScale</span>: <span class="ident">IntegerOrFloat</span>,
-    <span class="kw">pub</span> <span class="ident">yScale</span>: <span class="ident">IntegerOrFloat</span>,
-    <span class="kw">pub</span> <span class="ident">xOffset</span>: <span class="ident">IntegerOrFloat</span>,
-    <span class="kw">pub</span> <span class="ident">yOffset</span>: <span class="ident">IntegerOrFloat</span>,
-    <span class="kw">pub</span> <span class="ident">identifier</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span>
+<span class="attribute">#[allow(non_snake_case)] </span><span class="comment">// to match UFO spec https://unifiedfontobject.org/versions/ufo3/glyphs/glif/#component
+</span><span class="attribute">#[cfg_attr(feature = <span class="string">&quot;glifserde&quot;</span>, derive(Serialize, Deserialize))]
+#[derive(Clone, Debug, Default, Hash, PartialEq)]
+</span><span class="kw">pub struct </span>GlifComponent {
+    <span class="kw">pub </span>base: String,
+    <span class="kw">pub </span>filename: <span class="prelude-ty">Option</span>&lt;PathBuf&gt;,
+    <span class="kw">pub </span>xScale: IntegerOrFloat,
+    <span class="kw">pub </span>xyScale: IntegerOrFloat,
+    <span class="kw">pub </span>yxScale: IntegerOrFloat,
+    <span class="kw">pub </span>yScale: IntegerOrFloat,
+    <span class="kw">pub </span>xOffset: IntegerOrFloat,
+    <span class="kw">pub </span>yOffset: IntegerOrFloat,
+    <span class="kw">pub </span>identifier: <span class="prelude-ty">Option</span>&lt;String&gt;
 }
 
-<span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;glifserde&quot;</span>, <span class="ident">derive</span>(<span class="ident">Serialize</span>, <span class="ident">Deserialize</span>))]</span>
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>, <span class="ident">Debug</span>, <span class="ident">Default</span>, <span class="ident">PartialEq</span>)]</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">GlifComponents</span> {
-    <span class="kw">pub</span> <span class="ident">root</span>: <span class="ident">String</span>,
-    <span class="kw">pub</span> <span class="ident">vec</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">GlifComponent</span><span class="op">&gt;</span>,
+<span class="attribute">#[cfg_attr(feature = <span class="string">&quot;glifserde&quot;</span>, derive(Serialize, Deserialize))]
+#[derive(Clone, Debug, Default, PartialEq)]
+</span><span class="kw">pub struct </span>GlifComponents {
+    <span class="kw">pub </span>root: String,
+    <span class="kw">pub </span>vec: Vec&lt;GlifComponent&gt;,
 }
 
-<span class="kw">impl</span> <span class="ident">GlifComponents</span> {
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>() -&gt; <span class="self">Self</span> {
-        <span class="self">Self</span> {
-            <span class="ident">root</span>: <span class="ident">String::new</span>(),
-            <span class="ident">vec</span>: <span class="macro">vec!</span>[]
+<span class="kw">impl </span>GlifComponents {
+    <span class="kw">pub fn </span>new() -&gt; <span class="self">Self </span>{
+        <span class="self">Self </span>{
+            root: String::new(),
+            vec: <span class="macro">vec!</span>[]
         }
     }
 }
 
-<span class="kw">impl</span> <span class="ident">GlifComponent</span> {
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>() -&gt; <span class="self">Self</span> {
-        <span class="self">Self</span> {
-            <span class="ident">xScale</span>: <span class="ident">Float</span>(<span class="number">1.0</span>),
-            <span class="ident">yScale</span>: <span class="ident">Float</span>(<span class="number">1.0</span>),
-            ..<span class="ident">Default::default</span>()
+<span class="kw">impl </span>GlifComponent {
+    <span class="kw">pub fn </span>new() -&gt; <span class="self">Self </span>{
+        <span class="self">Self </span>{
+            xScale: Float(<span class="number">1.0</span>),
+            yScale: Float(<span class="number">1.0</span>),
+            ..Default::default()
         }
     }
 }
 
-<span class="kw">impl</span> <span class="ident">GlifComponent</span> {
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">matrix</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">GlifMatrix</span> {
-        <span class="ident">GlifMatrix</span>(<span class="self">self</span>.<span class="ident">xScale</span>, <span class="self">self</span>.<span class="ident">xyScale</span>, <span class="self">self</span>.<span class="ident">yxScale</span>, <span class="self">self</span>.<span class="ident">yScale</span>, <span class="self">self</span>.<span class="ident">xOffset</span>, <span class="self">self</span>.<span class="ident">yOffset</span>)
+<span class="kw">impl </span>GlifComponent {
+    <span class="kw">pub fn </span>matrix(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; GlifMatrix {
+        GlifMatrix(<span class="self">self</span>.xScale, <span class="self">self</span>.xyScale, <span class="self">self</span>.yxScale, <span class="self">self</span>.yScale, <span class="self">self</span>.xOffset, <span class="self">self</span>.yOffset)
     }
 }
 
-<span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;glifserde&quot;</span>, <span class="ident">derive</span>(<span class="ident">Serialize</span>, <span class="ident">Deserialize</span>))]</span>
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>, <span class="ident">Debug</span>, <span class="ident">Default</span>, <span class="ident">PartialEq</span>)]</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Component</span><span class="op">&lt;</span><span class="ident">PD</span>: <span class="ident">PointData</span><span class="op">&gt;</span> {
-    <span class="kw">pub</span> <span class="ident">glif</span>: <span class="ident">Glif</span><span class="op">&lt;</span><span class="ident">PD</span><span class="op">&gt;</span>,
-    <span class="kw">pub</span> <span class="ident">matrix</span>: <span class="ident">Affine</span>
+<span class="attribute">#[cfg_attr(feature = <span class="string">&quot;glifserde&quot;</span>, derive(Serialize, Deserialize))]
+#[derive(Clone, Debug, Default, PartialEq)]
+</span><span class="kw">pub struct </span>Component&lt;PD: PointData&gt; {
+    <span class="kw">pub </span>glif: Glif&lt;PD&gt;,
+    <span class="kw">pub </span>matrix: Affine
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">PD</span>: <span class="ident">PointData</span><span class="op">&gt;</span> <span class="ident">Component</span><span class="op">&lt;</span><span class="ident">PD</span><span class="op">&gt;</span> {
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>() -&gt; <span class="self">Self</span> {
-        <span class="ident"><span class="self">Self</span>::default</span>()
+<span class="kw">impl</span>&lt;PD: PointData&gt; Component&lt;PD&gt; {
+    <span class="kw">pub fn </span>new() -&gt; <span class="self">Self </span>{
+        <span class="self">Self</span>::default()
     }
 }
 
-<span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;glifserde&quot;</span>, <span class="ident">derive</span>(<span class="ident">Serialize</span>, <span class="ident">Deserialize</span>))]</span>
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>, <span class="ident">Debug</span>, <span class="ident">Default</span>, <span class="ident">PartialEq</span>)]</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">ComponentRect</span> {
-    <span class="kw">pub</span> <span class="ident">minx</span>: <span class="ident">f32</span>,
-    <span class="kw">pub</span> <span class="ident">miny</span>: <span class="ident">f32</span>,
-    <span class="kw">pub</span> <span class="ident">maxx</span>: <span class="ident">f32</span>,
-    <span class="kw">pub</span> <span class="ident">maxy</span>: <span class="ident">f32</span>,
-    <span class="kw">pub</span> <span class="ident">name</span>: <span class="ident">String</span>,
+<span class="attribute">#[cfg_attr(feature = <span class="string">&quot;glifserde&quot;</span>, derive(Serialize, Deserialize))]
+#[derive(Clone, Debug, Default, PartialEq)]
+</span><span class="kw">pub struct </span>ComponentRect {
+    <span class="kw">pub </span>minx: f32,
+    <span class="kw">pub </span>miny: f32,
+    <span class="kw">pub </span>maxx: f32,
+    <span class="kw">pub </span>maxy: f32,
+    <span class="kw">pub </span>name: String,
 }
 
-<span class="kw">impl</span> <span class="ident">ComponentRect</span> {
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_rect_and_name</span>(<span class="ident">minx</span>: <span class="ident">f32</span>, <span class="ident">miny</span>: <span class="ident">f32</span>, <span class="ident">maxx</span>: <span class="ident">f32</span>, <span class="ident">maxy</span>: <span class="ident">f32</span>, <span class="ident">name</span>: <span class="ident">String</span>) -&gt; <span class="self">Self</span> {
-        <span class="self">Self</span> { <span class="ident">minx</span>, <span class="ident">miny</span>, <span class="ident">maxx</span>, <span class="ident">maxy</span>, <span class="ident">name</span> }
+<span class="kw">impl </span>ComponentRect {
+    <span class="kw">pub fn </span>from_rect_and_name(minx: f32, miny: f32, maxx: f32, maxy: f32, name: String) -&gt; <span class="self">Self </span>{
+        <span class="self">Self </span>{ minx, miny, maxx, maxy, name }
     }
 }
 
-<span class="kw">use</span> <span class="ident">std::fs</span>;
-<span class="kw">impl</span> <span class="ident">GlifComponent</span> {
-    <span class="doccomment">/// Sets the filename of a component relative to its base&#39;s filename (`gliffn`)</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">set_file_name</span><span class="op">&lt;</span><span class="ident">F</span>: <span class="ident">AsRef</span><span class="op">&lt;</span><span class="ident">Path</span><span class="op">&gt;</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">gliffn</span>: <span class="ident">F</span>) {
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">retglifname</span> <span class="op">=</span> <span class="ident">gliffn</span>.<span class="ident">as_ref</span>().<span class="ident">to_path_buf</span>();
-        <span class="ident">retglifname</span>.<span class="ident">set_file_name</span>(<span class="ident">glif::name_to_filename</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">base</span>, <span class="bool-val">true</span>));
-        <span class="self">self</span>.<span class="ident">filename</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">retglifname</span>);
+<span class="kw">use </span>std::fs;
+<span class="kw">impl </span>GlifComponent {
+    <span class="doccomment">/// Sets the filename of a component relative to its base&#39;s filename (`gliffn`)
+    </span><span class="kw">pub fn </span>set_file_name&lt;F: AsRef&lt;Path&gt;&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, gliffn: F) {
+        <span class="kw">let </span><span class="kw-2">mut </span>retglifname = gliffn.as_ref().to_path_buf();
+        retglifname.set_file_name(glif::name_to_filename(<span class="kw-2">&amp;</span><span class="self">self</span>.base, <span class="bool-val">true</span>));
+        <span class="self">self</span>.filename = <span class="prelude-val">Some</span>(retglifname);
     }
 
-    <span class="doccomment">/// Must have filename set, and that file must be readable, for this to work.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">to_component</span><span class="op">&lt;</span><span class="ident">PD</span>: <span class="ident">PointData</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Component</span><span class="op">&lt;</span><span class="ident">PD</span><span class="op">&gt;</span>, <span class="ident">GlifParserError</span><span class="op">&gt;</span> {
-        <span class="kw">let</span> <span class="ident">gliffn</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">filename</span>.<span class="ident">as_ref</span>().<span class="ident">ok_or</span>(<span class="ident">GlifParserError::GlifFilenameNotSet</span>(<span class="self">self</span>.<span class="ident">base</span>.<span class="ident">clone</span>()))<span class="question-mark">?</span>;
+    <span class="doccomment">/// Must have filename set, and that file must be readable, for this to work.
+    </span><span class="kw">pub fn </span>to_component&lt;PD: PointData&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Component&lt;PD&gt;, GlifParserError&gt; {
+        <span class="kw">let </span>gliffn = <span class="kw-2">&amp;</span><span class="self">self</span>.filename.as_ref().ok_or(GlifParserError::GlifFilenameNotSet(<span class="self">self</span>.base.clone()))<span class="question-mark">?</span>;
 
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">ret</span> <span class="op">=</span> <span class="ident">Component::new</span>();
-        <span class="ident">ret</span>.<span class="ident">matrix</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">matrix</span>().<span class="ident">into</span>();
-        <span class="ident">ret</span>.<span class="ident">glif</span>.<span class="ident">name</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">base</span>.<span class="ident">clone</span>();
-        <span class="ident">ret</span>.<span class="ident">glif</span>.<span class="ident">filename</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">filename</span>.<span class="ident">clone</span>();
-        <span class="kw">let</span> <span class="ident">component_xml</span> <span class="op">=</span> <span class="ident">fs::read_to_string</span>(<span class="kw-2">&amp;</span><span class="ident">gliffn</span>).<span class="ident">or</span>(<span class="prelude-val">Err</span>(<span class="ident">GlifParserError::GlifFilenameNotSet</span>(<span class="string">&quot;Glif filename leads to unreadable file&quot;</span>.<span class="ident">to_string</span>())))<span class="question-mark">?</span>;
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">newglif</span>: <span class="ident">Glif</span><span class="op">&lt;</span><span class="ident">PD</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">glif::read</span>(<span class="kw-2">&amp;</span><span class="ident">component_xml</span>)<span class="question-mark">?</span>;
-        <span class="kw">for</span> <span class="ident">component</span> <span class="kw">in</span> <span class="ident">newglif</span>.<span class="ident">components</span>.<span class="ident">vec</span>.<span class="ident">iter_mut</span>() {
-            <span class="ident">component</span>.<span class="ident">set_file_name</span>(<span class="kw-2">&amp;</span><span class="ident">gliffn</span>);
+        <span class="kw">let </span><span class="kw-2">mut </span>ret = Component::new();
+        ret.matrix = <span class="self">self</span>.matrix().into();
+        ret.glif.name = <span class="self">self</span>.base.clone();
+        ret.glif.filename = <span class="self">self</span>.filename.clone();
+        <span class="kw">let </span>component_xml = fs::read_to_string(<span class="kw-2">&amp;</span>gliffn).or(<span class="prelude-val">Err</span>(GlifParserError::GlifFilenameNotSet(<span class="string">&quot;Glif filename leads to unreadable file&quot;</span>.to_string())))<span class="question-mark">?</span>;
+        <span class="kw">let </span><span class="kw-2">mut </span>newglif: Glif&lt;PD&gt; = glif::read(<span class="kw-2">&amp;</span>component_xml)<span class="question-mark">?</span>;
+        <span class="kw">for </span>component <span class="kw">in </span>newglif.components.vec.iter_mut() {
+            component.set_file_name(<span class="kw-2">&amp;</span>gliffn);
         }
-        <span class="ident">ret</span>.<span class="ident">glif</span>.<span class="ident">components</span> <span class="op">=</span> <span class="ident">newglif</span>.<span class="ident">components</span>;
-        <span class="ident">ret</span>.<span class="ident">glif</span>.<span class="ident">anchors</span> <span class="op">=</span> <span class="ident">newglif</span>.<span class="ident">anchors</span>;
-        <span class="ident">ret</span>.<span class="ident">glif</span>.<span class="ident">outline</span> <span class="op">=</span> <span class="ident">newglif</span>.<span class="ident">outline</span>;
-        <span class="prelude-val">Ok</span>(<span class="ident">ret</span>)
+        ret.glif.components = newglif.components;
+        ret.glif.anchors = newglif.anchors;
+        ret.glif.outline = newglif.outline;
+        <span class="prelude-val">Ok</span>(ret)
     }
 
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">refers_to</span><span class="op">&lt;</span><span class="ident">PD</span>: <span class="ident">PointData</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">glif</span>: <span class="kw-2">&amp;</span><span class="ident">Glif</span><span class="op">&lt;</span><span class="ident">PD</span><span class="op">&gt;</span>) -&gt; <span class="ident">bool</span> {
-        <span class="self">self</span>.<span class="ident">base</span> <span class="op">==</span> <span class="ident">glif</span>.<span class="ident">name</span>
+    <span class="kw">pub fn </span>refers_to&lt;PD: PointData&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, glif: <span class="kw-2">&amp;</span>Glif&lt;PD&gt;) -&gt; bool {
+        <span class="self">self</span>.base == glif.name
     }
 }
 
-<span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">FlattenedGlif</span> <span class="kw">where</span> <span class="self">Self</span>: <span class="ident">Clone</span> {
-    <span class="doccomment">/// Check that all components in your .glif file really resolve, and if they do, get their</span>
-    <span class="doccomment">/// contours and apply their matrices. If you want bounding rectangles as this process is done</span>
-    <span class="doccomment">/// with a logical name for each rectangle you can draw, pass in `rects` as a `&amp;mut` </span>
-    <span class="kw">fn</span> <span class="ident">flattened</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">rects</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">ComponentRect</span><span class="op">&gt;</span><span class="op">&gt;</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">GlifParserError</span><span class="op">&gt;</span>;
+<span class="kw">pub trait </span>FlattenedGlif <span class="kw">where </span><span class="self">Self</span>: Clone {
+    <span class="doccomment">/// Check that all components in your .glif file really resolve, and if they do, get their
+    /// contours and apply their matrices. If you want bounding rectangles as this process is done
+    /// with a logical name for each rectangle you can draw, pass in `rects` as a `&amp;mut` 
+    </span><span class="kw">fn </span>flattened(<span class="kw-2">&amp;</span><span class="self">self</span>, rects: <span class="kw-2">&amp;mut </span><span class="prelude-ty">Option</span>&lt;Vec&lt;ComponentRect&gt;&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, GlifParserError&gt;;
 }
 
-<span class="kw">fn</span> <span class="ident">apply_component_rect</span><span class="op">&lt;</span><span class="ident">PD</span>: <span class="ident">PointData</span><span class="op">&gt;</span>(<span class="ident">last</span>: <span class="kw-2">&amp;</span><span class="ident">Node</span><span class="op">&lt;</span><span class="ident">Component</span><span class="op">&lt;</span><span class="ident">PD</span><span class="op">&gt;</span><span class="op">&gt;</span>, <span class="ident">minx</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">f32</span>, <span class="ident">miny</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">f32</span>, <span class="ident">maxx</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">f32</span>, <span class="ident">maxy</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">f32</span>, <span class="ident">final_outline</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Outline</span><span class="op">&lt;</span><span class="ident">PD</span><span class="op">&gt;</span>) {
-    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">matrices</span> <span class="op">=</span> <span class="macro">vec!</span>[];
-    <span class="ident">matrices</span>.<span class="ident">push</span>((<span class="kw-2">*</span><span class="ident">last</span>).<span class="ident">data</span>().<span class="ident">matrix</span>);
+<span class="kw">fn </span>apply_component_rect&lt;PD: PointData&gt;(last: <span class="kw-2">&amp;</span>Node&lt;Component&lt;PD&gt;&gt;, minx: <span class="kw-2">&amp;mut </span>f32, miny: <span class="kw-2">&amp;mut </span>f32, maxx: <span class="kw-2">&amp;mut </span>f32, maxy: <span class="kw-2">&amp;mut </span>f32, final_outline: <span class="kw-2">&amp;mut </span>Outline&lt;PD&gt;) {
+    <span class="kw">let </span><span class="kw-2">mut </span>matrices = <span class="macro">vec!</span>[];
+    matrices.push((<span class="kw-2">*</span>last).data().matrix);
 
-    <span class="comment">// Climb the tree, building a Vec of matrices for this component</span>
-    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">pt</span> <span class="op">=</span> <span class="ident">last</span>.<span class="ident">parent</span>();
-    <span class="kw">while</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">parent</span>) <span class="op">=</span> <span class="ident">pt</span> {
-        <span class="ident">matrices</span>.<span class="ident">push</span>(<span class="ident">parent</span>.<span class="ident">data</span>().<span class="ident">matrix</span>);
-        <span class="ident">pt</span> <span class="op">=</span> <span class="ident">parent</span>.<span class="ident">parent</span>();
+    <span class="comment">// Climb the tree, building a Vec of matrices for this component
+    </span><span class="kw">let </span><span class="kw-2">mut </span>pt = last.parent();
+    <span class="kw">while let </span><span class="prelude-val">Some</span>(parent) = pt {
+        matrices.push(parent.data().matrix);
+        pt = parent.parent();
     }
 
-    <span class="kw">match</span> (<span class="kw-2">*</span><span class="ident">last</span>).<span class="ident">data</span>().<span class="ident">glif</span>.<span class="ident">outline</span> {
-        <span class="prelude-val">Some</span>(<span class="kw-2">ref</span> <span class="ident">o</span>) =&gt; {
-            <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">to_transform</span> <span class="op">=</span> <span class="ident">o</span>.<span class="ident">clone</span>();
-            <span class="kw">for</span> <span class="ident">i</span> <span class="kw">in</span> <span class="number">0</span>..<span class="ident">to_transform</span>.<span class="ident">len</span>() {
-                <span class="kw">for</span> <span class="ident">j</span> <span class="kw">in</span> <span class="number">0</span>..<span class="ident">to_transform</span>[<span class="ident">i</span>].<span class="ident">len</span>() {
-                    <span class="kw">let</span> <span class="ident">is_first</span> <span class="op">=</span> <span class="ident">i</span> <span class="op">==</span> <span class="number">0</span> <span class="op">&amp;&amp;</span> <span class="ident">j</span> <span class="op">==</span> <span class="number">0</span>;
-                    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">p</span> <span class="op">=</span> <span class="ident">to_transform</span>[<span class="ident">i</span>][<span class="ident">j</span>].<span class="ident">clone</span>();
-                    <span class="kw">if</span> <span class="ident">p</span>.<span class="ident">x</span> <span class="op">&lt;</span> <span class="kw-2">*</span><span class="ident">minx</span> <span class="op">|</span><span class="op">|</span> <span class="ident">is_first</span> { <span class="kw-2">*</span><span class="ident">minx</span> <span class="op">=</span> <span class="ident">p</span>.<span class="ident">x</span>; }
-                    <span class="kw">if</span> <span class="ident">p</span>.<span class="ident">y</span> <span class="op">&lt;</span> <span class="kw-2">*</span><span class="ident">miny</span> <span class="op">|</span><span class="op">|</span> <span class="ident">is_first</span> { <span class="kw-2">*</span><span class="ident">miny</span> <span class="op">=</span> <span class="ident">p</span>.<span class="ident">y</span>; }
-                    <span class="kw">if</span> <span class="ident">p</span>.<span class="ident">x</span> <span class="op">&gt;</span> <span class="kw-2">*</span><span class="ident">maxx</span> <span class="op">|</span><span class="op">|</span> <span class="ident">is_first</span> { <span class="kw-2">*</span><span class="ident">maxx</span> <span class="op">=</span> <span class="ident">p</span>.<span class="ident">x</span>; }
-                    <span class="kw">if</span> <span class="ident">p</span>.<span class="ident">y</span> <span class="op">&gt;</span> <span class="kw-2">*</span><span class="ident">maxy</span> <span class="op">|</span><span class="op">|</span> <span class="ident">is_first</span> { <span class="kw-2">*</span><span class="ident">maxy</span> <span class="op">=</span> <span class="ident">p</span>.<span class="ident">y</span>; }
+    <span class="kw">match </span>(<span class="kw-2">*</span>last).data().glif.outline {
+        <span class="prelude-val">Some</span>(<span class="kw-2">ref </span>o) =&gt; {
+            <span class="kw">let </span><span class="kw-2">mut </span>to_transform = o.clone();
+            <span class="kw">for </span>i <span class="kw">in </span><span class="number">0</span>..to_transform.len() {
+                <span class="kw">for </span>j <span class="kw">in </span><span class="number">0</span>..to_transform[i].len() {
+                    <span class="kw">let </span>is_first = i == <span class="number">0 </span>&amp;&amp; j == <span class="number">0</span>;
+                    <span class="kw">let </span><span class="kw-2">mut </span>p = to_transform[i][j].clone();
+                    <span class="kw">if </span>p.x &lt; <span class="kw-2">*</span>minx || is_first { <span class="kw-2">*</span>minx = p.x; }
+                    <span class="kw">if </span>p.y &lt; <span class="kw-2">*</span>miny || is_first { <span class="kw-2">*</span>miny = p.y; }
+                    <span class="kw">if </span>p.x &gt; <span class="kw-2">*</span>maxx || is_first { <span class="kw-2">*</span>maxx = p.x; }
+                    <span class="kw">if </span>p.y &gt; <span class="kw-2">*</span>maxy || is_first { <span class="kw-2">*</span>maxy = p.y; }
 
-                    <span class="kw">for</span> <span class="ident">m</span> <span class="kw">in</span> <span class="kw-2">&amp;</span><span class="ident">matrices</span> {
-                        <span class="ident">p</span>.<span class="ident">apply_matrix</span>(<span class="kw-2">*</span><span class="ident">m</span>);
+                    <span class="kw">for </span>m <span class="kw">in </span><span class="kw-2">&amp;</span>matrices {
+                        p.apply_matrix(<span class="kw-2">*</span>m);
                     }
 
-                    <span class="ident">to_transform</span>[<span class="ident">i</span>][<span class="ident">j</span>] <span class="op">=</span> <span class="ident">p</span>;
+                    to_transform[i][j] = p;
                 }
             }
-            <span class="ident">final_outline</span>.<span class="ident">extend</span>(<span class="ident">to_transform</span>);
+            final_outline.extend(to_transform);
         },
-        <span class="prelude-val">None</span> =&gt; {}
+        <span class="prelude-val">None </span>=&gt; {}
     }
 }
 
 
-<span class="macro">macro_rules!</span> <span class="ident">impl_flattened_glif</span> {
-    (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">glifstruct</span>:<span class="ident">ident</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">outline</span>:<span class="ident">ident</span>) =&gt; { 
+<span class="macro">macro_rules! </span>impl_flattened_glif {
+    (<span class="macro-nonterminal">$glifstruct</span>:ident, <span class="macro-nonterminal">$outline</span>:ident) =&gt; { 
 
-        <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">PD</span>: <span class="ident">PointData</span><span class="op">&gt;</span> <span class="ident">FlattenedGlif</span> <span class="kw">for</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">glifstruct</span><span class="op">&lt;</span><span class="ident">PD</span><span class="op">&gt;</span> {
-            <span class="doccomment">/// Flatten a UFO .glif with components.</span>
-            <span class="doccomment">///</span>
-            <span class="doccomment">/// Can fail if the .glif&#39;s components form an infinite loop.</span>
-            <span class="comment">// How this works is we start at the bottom of the tree, take all of the Affine matrices which</span>
-            <span class="comment">// describe the transformation of the glyph&#39;s points, and continuously apply them until we run</span>
-            <span class="comment">// out of nodes of the tree. Finally, we set our outline to be the final transformed outline,</span>
-            <span class="comment">// and consider ourselves as no longer being made up of components.</span>
-            <span class="kw">fn</span> <span class="ident">flattened</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">rects</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">ComponentRect</span><span class="op">&gt;</span><span class="op">&gt;</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">GlifParserError</span><span class="op">&gt;</span> {
-                <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">ret</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">clone</span>();
-                <span class="kw">let</span> <span class="ident">components_r</span>: <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Forest</span><span class="op">&lt;</span><span class="ident">Component</span><span class="op">&lt;</span><span class="ident">PD</span><span class="op">&gt;</span><span class="op">&gt;</span>, <span class="kw">_</span><span class="op">&gt;</span> <span class="op">=</span> (<span class="kw-2">&amp;</span><span class="ident">ret</span>.<span class="ident">components</span>).<span class="ident">into</span>();
-                <span class="kw">let</span> <span class="ident">components</span> <span class="op">=</span> <span class="ident">components_r</span><span class="question-mark">?</span>;
-                <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">final_outline</span>: <span class="ident">Outline</span><span class="op">&lt;</span><span class="ident">PD</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Outline::new</span>();
-                <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">component_rects</span> <span class="op">=</span> <span class="macro">vec!</span>[];
+        <span class="kw">impl</span>&lt;PD: PointData&gt; FlattenedGlif <span class="kw">for </span><span class="macro-nonterminal">$glifstruct</span>&lt;PD&gt; {
+            <span class="doccomment">/// Flatten a UFO .glif with components.
+            ///
+            /// Can fail if the .glif&#39;s components form an infinite loop.
+            </span><span class="comment">// How this works is we start at the bottom of the tree, take all of the Affine matrices which
+            // describe the transformation of the glyph&#39;s points, and continuously apply them until we run
+            // out of nodes of the tree. Finally, we set our outline to be the final transformed outline,
+            // and consider ourselves as no longer being made up of components.
+            </span><span class="kw">fn </span>flattened(<span class="kw-2">&amp;</span><span class="self">self</span>, rects: <span class="kw-2">&amp;mut </span><span class="prelude-ty">Option</span>&lt;Vec&lt;ComponentRect&gt;&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, GlifParserError&gt; {
+                <span class="kw">let </span><span class="kw-2">mut </span>ret = <span class="self">self</span>.clone();
+                <span class="kw">let </span>components_r: <span class="prelude-ty">Result</span>&lt;Forest&lt;Component&lt;PD&gt;&gt;, <span class="kw">_</span>&gt; = (<span class="kw-2">&amp;</span>ret.components).into();
+                <span class="kw">let </span>components = components_r<span class="question-mark">?</span>;
+                <span class="kw">let </span><span class="kw-2">mut </span>final_outline: Outline&lt;PD&gt; = Outline::new();
+                <span class="kw">let </span><span class="kw-2">mut </span>component_rects = <span class="macro">vec!</span>[];
 
-                <span class="kw">for</span> <span class="kw-2">mut</span> <span class="ident">component</span> <span class="kw">in</span> <span class="ident">components</span> {
-                    <span class="kw">let</span> (<span class="kw-2">mut</span> <span class="ident">minx</span>, <span class="kw-2">mut</span> <span class="ident">miny</span>, <span class="kw-2">mut</span> <span class="ident">maxx</span>, <span class="kw-2">mut</span> <span class="ident">maxy</span>) <span class="op">=</span> (<span class="number">0.</span>, <span class="number">0.</span>, <span class="number">0.</span>, <span class="number">0.</span>);
-                    <span class="comment">// This unwrap is safe because at this point we know we haven&#39;t yet exhausted the</span>
-                    <span class="comment">// Forest&lt;Component&gt;.</span>
-                    <span class="kw">let</span> <span class="ident">component_name</span> <span class="op">=</span> <span class="ident">component</span>.<span class="ident">data</span>().<span class="ident">glif</span>.<span class="ident">name</span>.<span class="ident">clone</span>();
-                    <span class="ident">apply_component_rect</span>(<span class="kw-2">&amp;</span><span class="ident">component</span>, <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">minx</span>, <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">miny</span>, <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">maxx</span>, <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">maxy</span>, <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">final_outline</span>);
-                    <span class="kw">while</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">last</span>) <span class="op">=</span> <span class="ident">component</span>.<span class="ident">back</span>() {
-                        <span class="ident">apply_component_rect</span>(<span class="kw-2">&amp;</span><span class="ident">last</span>, <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">minx</span>, <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">miny</span>, <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">maxx</span>, <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">maxy</span>, <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">final_outline</span>);
-                        <span class="ident">component</span>.<span class="ident">pop_back</span>();
+                <span class="kw">for </span><span class="kw-2">mut </span>component <span class="kw">in </span>components {
+                    <span class="kw">let </span>(<span class="kw-2">mut </span>minx, <span class="kw-2">mut </span>miny, <span class="kw-2">mut </span>maxx, <span class="kw-2">mut </span>maxy) = (<span class="number">0.</span>, <span class="number">0.</span>, <span class="number">0.</span>, <span class="number">0.</span>);
+                    <span class="comment">// This unwrap is safe because at this point we know we haven&#39;t yet exhausted the
+                    // Forest&lt;Component&gt;.
+                    </span><span class="kw">let </span>component_name = component.data().glif.name.clone();
+                    apply_component_rect(<span class="kw-2">&amp;</span>component, <span class="kw-2">&amp;mut </span>minx, <span class="kw-2">&amp;mut </span>miny, <span class="kw-2">&amp;mut </span>maxx, <span class="kw-2">&amp;mut </span>maxy, <span class="kw-2">&amp;mut </span>final_outline);
+                    <span class="kw">while let </span><span class="prelude-val">Some</span>(last) = component.back() {
+                        apply_component_rect(<span class="kw-2">&amp;</span>last, <span class="kw-2">&amp;mut </span>minx, <span class="kw-2">&amp;mut </span>miny, <span class="kw-2">&amp;mut </span>maxx, <span class="kw-2">&amp;mut </span>maxy, <span class="kw-2">&amp;mut </span>final_outline);
+                        component.pop_back();
                     }
-                    <span class="ident">component_rects</span>.<span class="ident">push</span>(<span class="ident">ComponentRect</span> { <span class="ident">minx</span>, <span class="ident">maxx</span>, <span class="ident">miny</span>, <span class="ident">maxy</span>, <span class="ident">name</span>: <span class="ident">component_name</span> });
+                    component_rects.push(ComponentRect { minx, maxx, miny, maxy, name: component_name });
                 }
 
-                <span class="ident">ret</span>.<span class="macro-nonterminal">$</span><span class="macro-nonterminal">outline</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">final_outline</span>);
+                ret.<span class="macro-nonterminal">$outline </span>= <span class="prelude-val">Some</span>(final_outline);
 
-                <span class="comment">// If we were to leave this here, then API consumers would potentially draw component outlines on top of components.</span>
-                <span class="ident">ret</span>.<span class="ident">components</span> <span class="op">=</span> <span class="ident">GlifComponents::new</span>();
+                <span class="comment">// If we were to leave this here, then API consumers would potentially draw component outlines on top of components.
+                </span>ret.components = GlifComponents::new();
 
-                <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">ptr</span>) <span class="op">=</span> <span class="ident">rects</span> {
-                    <span class="kw-2">*</span><span class="ident">ptr</span> <span class="op">=</span> <span class="ident">component_rects</span>;
+                <span class="kw">if let </span><span class="prelude-val">Some</span>(ptr) = rects {
+                    <span class="kw-2">*</span>ptr = component_rects;
                 }
 
-                <span class="prelude-val">Ok</span>(<span class="ident">ret</span>)
+                <span class="prelude-val">Ok</span>(ret)
             }
         }
 
     }
 }
-<span class="macro">impl_flattened_glif!</span>(<span class="ident">Glif</span>, <span class="ident">outline</span>);
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;mfek&quot;</span>)]</span>
-<span class="macro">impl_flattened_glif!</span>(<span class="ident">MFEKGlif</span>, <span class="ident">flattened</span>);
+<span class="macro">impl_flattened_glif!</span>(Glif, outline);
+<span class="attribute">#[cfg(feature = <span class="string">&quot;mfek&quot;</span>)]
+</span><span class="macro">impl_flattened_glif!</span>(MFEKGlif, flattened);
 
-<span class="comment">// This impl builds up a forest of trees for a glyph&#39;s components. Imagine a hungarumlaut (˝).</span>
-<span class="comment">//</span>
-<span class="comment">// This character may be built of glyph components, as such:</span>
-<span class="comment">//</span>
-<span class="comment">// hungarumlaut</span>
-<span class="comment">//    /    \</span>
-<span class="comment">//   /      \</span>
-<span class="comment">// grave  grave</span>
-<span class="comment">//   |      | </span>
-<span class="comment">// acute  acute</span>
-<span class="comment">//</span>
-<span class="comment">// This function will give you a Forest of both of the sub-trees. (Forest&lt;Component&gt;). The elements</span>
-<span class="comment">// of a Forest are Tree&lt;Component&gt;. For safety reasons, this function cannot always return a</span>
-<span class="comment">// Forest, however. Sometimes, .glif files can be malformed, containing components which refer to</span>
-<span class="comment">// themselves, or to components higher up the tree. Therefore, the inner recursive function</span>
-<span class="comment">// `component_to_tree` receives a Tree of `uniques`, calculated for each sub-tree, and also a global</span>
-<span class="comment">// mutable `unique_found` flag, for the entire Forest.</span>
-<span class="comment">//</span>
-<span class="comment">// If a loop is found in the tree (for example, grave refers to grave), `unique_found` is set,</span>
-<span class="comment">// poisoning the function, returning an error. unique_found is (String, String) for error formatting;</span>
-<span class="comment">// however, should be considered basically equivalent to a boolean.</span>
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">PD</span>: <span class="ident">PointData</span><span class="op">&gt;</span> <span class="ident">From</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">GlifComponents</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Forest</span><span class="op">&lt;</span><span class="ident">Component</span><span class="op">&lt;</span><span class="ident">PD</span><span class="op">&gt;</span><span class="op">&gt;</span>, <span class="ident">GlifParserError</span><span class="op">&gt;</span> {
-    <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">glifcs</span>: <span class="kw-2">&amp;</span><span class="ident">GlifComponents</span>) -&gt; <span class="self">Self</span> {
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">unique_found</span> <span class="op">=</span> <span class="prelude-val">None</span>;
+<span class="comment">// This impl builds up a forest of trees for a glyph&#39;s components. Imagine a hungarumlaut (˝).
+//
+// This character may be built of glyph components, as such:
+//
+// hungarumlaut
+//    /    \
+//   /      \
+// grave  grave
+//   |      | 
+// acute  acute
+//
+// This function will give you a Forest of both of the sub-trees. (Forest&lt;Component&gt;). The elements
+// of a Forest are Tree&lt;Component&gt;. For safety reasons, this function cannot always return a
+// Forest, however. Sometimes, .glif files can be malformed, containing components which refer to
+// themselves, or to components higher up the tree. Therefore, the inner recursive function
+// `component_to_tree` receives a Tree of `uniques`, calculated for each sub-tree, and also a global
+// mutable `unique_found` flag, for the entire Forest.
+//
+// If a loop is found in the tree (for example, grave refers to grave), `unique_found` is set,
+// poisoning the function, returning an error. unique_found is (String, String) for error formatting;
+// however, should be considered basically equivalent to a boolean.
+</span><span class="kw">impl</span>&lt;PD: PointData&gt; From&lt;<span class="kw-2">&amp;</span>GlifComponents&gt; <span class="kw">for </span><span class="prelude-ty">Result</span>&lt;Forest&lt;Component&lt;PD&gt;&gt;, GlifParserError&gt; {
+    <span class="kw">fn </span>from(glifcs: <span class="kw-2">&amp;</span>GlifComponents) -&gt; <span class="self">Self </span>{
+        <span class="kw">let </span><span class="kw-2">mut </span>unique_found = <span class="prelude-val">None</span>;
 
-        <span class="kw">fn</span> <span class="ident">component_to_tree</span><span class="op">&lt;</span><span class="ident">PD</span>: <span class="ident">PointData</span><span class="op">&gt;</span>(<span class="ident">component</span>: <span class="ident">Component</span><span class="op">&lt;</span><span class="ident">PD</span><span class="op">&gt;</span>, <span class="ident">uniques</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Tree</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span>, <span class="ident">unique_found</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span>(<span class="ident">String</span>, <span class="ident">String</span>)<span class="op">&gt;</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Tree</span><span class="op">&lt;</span><span class="ident">Component</span><span class="op">&lt;</span><span class="ident">PD</span><span class="op">&gt;</span><span class="op">&gt;</span>, <span class="ident">GlifParserError</span><span class="op">&gt;</span> {
-            <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">tree</span> <span class="op">=</span> <span class="ident">Tree::new</span>(<span class="ident">component</span>.<span class="ident">clone</span>());
-            <span class="kw">for</span> <span class="ident">gc</span> <span class="kw">in</span> <span class="ident">component</span>.<span class="ident">glif</span>.<span class="ident">components</span>.<span class="ident">vec</span>.<span class="ident">iter</span>() {
-                <span class="kw">let</span> <span class="ident">component_inner</span> <span class="op">=</span> <span class="ident">gc</span>.<span class="ident">to_component</span>()<span class="question-mark">?</span>;
-                <span class="ident">uniques</span>.<span class="ident">back_mut</span>().<span class="ident">unwrap</span>().<span class="ident">push_back</span>(<span class="ident">Tree::new</span>(<span class="ident">gc</span>.<span class="ident">base</span>.<span class="ident">clone</span>()));
-                <span class="comment">// Generate a list of parents for the backmost node</span>
-                <span class="kw">let</span> <span class="ident">parents</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">uniques</span>.<span class="ident">back</span>() {
-                    <span class="prelude-val">Some</span>(<span class="kw-2">mut</span> <span class="ident">node</span>) =&gt; {
-                        <span class="kw">while</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">nn</span>) <span class="op">=</span> <span class="ident">node</span>.<span class="ident">back</span>() {
-                            <span class="ident">node</span> <span class="op">=</span> <span class="ident">nn</span>;
+        <span class="kw">fn </span>component_to_tree&lt;PD: PointData&gt;(component: Component&lt;PD&gt;, uniques: <span class="kw-2">&amp;mut </span>Tree&lt;String&gt;, unique_found: <span class="kw-2">&amp;mut </span><span class="prelude-ty">Option</span>&lt;(String, String)&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;Tree&lt;Component&lt;PD&gt;&gt;, GlifParserError&gt; {
+            <span class="kw">let </span><span class="kw-2">mut </span>tree = Tree::new(component.clone());
+            <span class="kw">for </span>gc <span class="kw">in </span>component.glif.components.vec.iter() {
+                <span class="kw">let </span>component_inner = gc.to_component()<span class="question-mark">?</span>;
+                uniques.back_mut().unwrap().push_back(Tree::new(gc.base.clone()));
+                <span class="comment">// Generate a list of parents for the backmost node
+                </span><span class="kw">let </span>parents = <span class="kw">match </span>uniques.back() {
+                    <span class="prelude-val">Some</span>(<span class="kw-2">mut </span>node) =&gt; {
+                        <span class="kw">while let </span><span class="prelude-val">Some</span>(nn) = node.back() {
+                            node = nn;
                         };
-                        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">parents</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span> <span class="op">=</span> <span class="macro">vec!</span>[];
-                        <span class="kw">while</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">p</span>) <span class="op">=</span> <span class="ident">node</span>.<span class="ident">parent</span>() {
-                            <span class="ident">parents</span>.<span class="ident">push</span>(<span class="ident">p</span>.<span class="ident">data</span>().<span class="ident">clone</span>());
-                            <span class="ident">node</span> <span class="op">=</span> <span class="ident">p</span>;
+                        <span class="kw">let </span><span class="kw-2">mut </span>parents: Vec&lt;String&gt; = <span class="macro">vec!</span>[];
+                        <span class="kw">while let </span><span class="prelude-val">Some</span>(p) = node.parent() {
+                            parents.push(p.data().clone());
+                            node = p;
                         }
-                        <span class="ident">parents</span>
+                        parents
                     },
-                    <span class="prelude-val">None</span> =&gt; <span class="macro">vec!</span>[]
+                    <span class="prelude-val">None </span>=&gt; <span class="macro">vec!</span>[]
                 };
-                <span class="kw">if</span> <span class="ident">parents</span>.<span class="ident">contains</span>(<span class="kw-2">&amp;</span><span class="ident">gc</span>.<span class="ident">base</span>) <span class="op">|</span><span class="op">|</span> <span class="ident">gc</span>.<span class="ident">base</span> <span class="op">==</span> <span class="ident">component</span>.<span class="ident">glif</span>.<span class="ident">name</span> {
-                    <span class="kw">return</span> {
-                        <span class="kw-2">*</span><span class="ident">unique_found</span> <span class="op">=</span> <span class="prelude-val">Some</span>((<span class="ident">component</span>.<span class="ident">glif</span>.<span class="ident">name</span>.<span class="ident">clone</span>(), <span class="ident">gc</span>.<span class="ident">base</span>.<span class="ident">clone</span>()));
-                        <span class="prelude-val">Ok</span>(<span class="ident">tree</span>)
+                <span class="kw">if </span>parents.contains(<span class="kw-2">&amp;</span>gc.base) || gc.base == component.glif.name {
+                    <span class="kw">return </span>{
+                        <span class="kw-2">*</span>unique_found = <span class="prelude-val">Some</span>((component.glif.name.clone(), gc.base.clone()));
+                        <span class="prelude-val">Ok</span>(tree)
                     }
                 }
-                <span class="ident">tree</span>.<span class="ident">push_back</span>(<span class="ident">component_to_tree</span>(<span class="ident">component_inner</span>, <span class="ident">uniques</span>, <span class="ident">unique_found</span>)<span class="question-mark">?</span>);
+                tree.push_back(component_to_tree(component_inner, uniques, unique_found)<span class="question-mark">?</span>);
             }
-            <span class="prelude-val">Ok</span>(<span class="ident">tree</span>)
+            <span class="prelude-val">Ok</span>(tree)
         }
 
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">forest</span> <span class="op">=</span> <span class="ident">Forest::new</span>();
-        <span class="kw">let</span> <span class="ident">cs</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">glifcs</span>.<span class="ident">vec</span>.<span class="ident">iter</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">gc</span><span class="op">|</span> {
-            <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">uniques</span>: <span class="ident">Tree</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Tree::new</span>(<span class="ident">glifcs</span>.<span class="ident">root</span>.<span class="ident">clone</span>());
-            <span class="ident">uniques</span>.<span class="ident">push_back</span>(<span class="ident">Tree::new</span>(<span class="ident">gc</span>.<span class="ident">base</span>.<span class="ident">clone</span>()));
-            <span class="ident">component_to_tree</span>(<span class="ident">gc</span>.<span class="ident">to_component</span>()<span class="question-mark">?</span>, <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">uniques</span>, <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">unique_found</span>)
-        }).<span class="ident">collect</span>();
+        <span class="kw">let </span><span class="kw-2">mut </span>forest = Forest::new();
+        <span class="kw">let </span>cs: Vec&lt;<span class="kw">_</span>&gt; = glifcs.vec.iter().map(|gc| {
+            <span class="kw">let </span><span class="kw-2">mut </span>uniques: Tree&lt;String&gt; = Tree::new(glifcs.root.clone());
+            uniques.push_back(Tree::new(gc.base.clone()));
+            component_to_tree(gc.to_component()<span class="question-mark">?</span>, <span class="kw-2">&amp;mut </span>uniques, <span class="kw-2">&amp;mut </span>unique_found)
+        }).collect();
 
-        <span class="kw">for</span> <span class="ident">c</span> <span class="kw">in</span> <span class="ident">cs</span> {
-            <span class="ident">forest</span>.<span class="ident">push_back</span>(<span class="ident">c</span><span class="question-mark">?</span>);
+        <span class="kw">for </span>c <span class="kw">in </span>cs {
+            forest.push_back(c<span class="question-mark">?</span>);
         }
 
-        <span class="kw">match</span> <span class="ident">unique_found</span> {
-            <span class="prelude-val">Some</span>((<span class="ident">base</span>, <span class="ident">unique</span>)) =&gt; {<span class="prelude-val">Err</span>(<span class="ident">GlifParserError::GlifComponentsCyclical</span>(<span class="macro">format!</span>(<span class="string">&quot;in glif {}, {} refers to {}&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">glifcs</span>.<span class="ident">root</span>, <span class="ident">base</span>, <span class="ident">unique</span>)))},
-            <span class="prelude-val">None</span> =&gt; <span class="prelude-val">Ok</span>(<span class="ident">forest</span>)
+        <span class="kw">match </span>unique_found {
+            <span class="prelude-val">Some</span>((base, unique)) =&gt; {<span class="prelude-val">Err</span>(GlifParserError::GlifComponentsCyclical(<span class="macro">format!</span>(<span class="string">&quot;in glif {}, {} refers to {}&quot;</span>, <span class="kw-2">&amp;</span>glifcs.root, base, unique)))},
+            <span class="prelude-val">None </span>=&gt; <span class="prelude-val">Ok</span>(forest)
         }
     }
 }
 </code></pre></div>
-</section><section id="search" class="content hidden"></section><div id="rustdoc-vars" data-root-path="../../" data-current-crate="glifparser" data-search-index-js="../../search-index.js" data-search-js="../../search.js"></div>
-    <script src="../../main.js"></script><script src="../../source-script.js"></script><script src="../../source-files.js"></script>
-</body></html>
+</section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="glifparser" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.65.0 (897e37553 2022-11-02)" ></div></body></html>

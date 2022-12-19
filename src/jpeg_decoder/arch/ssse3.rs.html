@@ -1,0 +1,578 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/fred/.cargo/registry/src/github.com-1ecc6299db9ec823/jpeg-decoder-0.3.0/src/arch/ssse3.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>ssse3.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" href="../../../normalize.css"><link rel="stylesheet" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" href="../../../ayu.css" disabled><link rel="stylesheet" href="../../../dark.css" disabled><link rel="stylesheet" href="../../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../../storage.js"></script><script defer src="../../../source-script.js"></script><script defer src="../../../source-files.js"></script><script defer src="../../../main.js"></script><noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../../jpeg_decoder/index.html"><div class="logo-container"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></div></a><h2 class="location"></h2></nav><nav class="sidebar"><a class="sidebar-logo" href="../../../jpeg_decoder/index.html"><div class="logo-container"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></div></a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../../jpeg_decoder/index.html"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></a><nav class="sub"><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><button type="button">?</button></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../wheel.svg"></a></div></div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">1</span>
+<span id="2">2</span>
+<span id="3">3</span>
+<span id="4">4</span>
+<span id="5">5</span>
+<span id="6">6</span>
+<span id="7">7</span>
+<span id="8">8</span>
+<span id="9">9</span>
+<span id="10">10</span>
+<span id="11">11</span>
+<span id="12">12</span>
+<span id="13">13</span>
+<span id="14">14</span>
+<span id="15">15</span>
+<span id="16">16</span>
+<span id="17">17</span>
+<span id="18">18</span>
+<span id="19">19</span>
+<span id="20">20</span>
+<span id="21">21</span>
+<span id="22">22</span>
+<span id="23">23</span>
+<span id="24">24</span>
+<span id="25">25</span>
+<span id="26">26</span>
+<span id="27">27</span>
+<span id="28">28</span>
+<span id="29">29</span>
+<span id="30">30</span>
+<span id="31">31</span>
+<span id="32">32</span>
+<span id="33">33</span>
+<span id="34">34</span>
+<span id="35">35</span>
+<span id="36">36</span>
+<span id="37">37</span>
+<span id="38">38</span>
+<span id="39">39</span>
+<span id="40">40</span>
+<span id="41">41</span>
+<span id="42">42</span>
+<span id="43">43</span>
+<span id="44">44</span>
+<span id="45">45</span>
+<span id="46">46</span>
+<span id="47">47</span>
+<span id="48">48</span>
+<span id="49">49</span>
+<span id="50">50</span>
+<span id="51">51</span>
+<span id="52">52</span>
+<span id="53">53</span>
+<span id="54">54</span>
+<span id="55">55</span>
+<span id="56">56</span>
+<span id="57">57</span>
+<span id="58">58</span>
+<span id="59">59</span>
+<span id="60">60</span>
+<span id="61">61</span>
+<span id="62">62</span>
+<span id="63">63</span>
+<span id="64">64</span>
+<span id="65">65</span>
+<span id="66">66</span>
+<span id="67">67</span>
+<span id="68">68</span>
+<span id="69">69</span>
+<span id="70">70</span>
+<span id="71">71</span>
+<span id="72">72</span>
+<span id="73">73</span>
+<span id="74">74</span>
+<span id="75">75</span>
+<span id="76">76</span>
+<span id="77">77</span>
+<span id="78">78</span>
+<span id="79">79</span>
+<span id="80">80</span>
+<span id="81">81</span>
+<span id="82">82</span>
+<span id="83">83</span>
+<span id="84">84</span>
+<span id="85">85</span>
+<span id="86">86</span>
+<span id="87">87</span>
+<span id="88">88</span>
+<span id="89">89</span>
+<span id="90">90</span>
+<span id="91">91</span>
+<span id="92">92</span>
+<span id="93">93</span>
+<span id="94">94</span>
+<span id="95">95</span>
+<span id="96">96</span>
+<span id="97">97</span>
+<span id="98">98</span>
+<span id="99">99</span>
+<span id="100">100</span>
+<span id="101">101</span>
+<span id="102">102</span>
+<span id="103">103</span>
+<span id="104">104</span>
+<span id="105">105</span>
+<span id="106">106</span>
+<span id="107">107</span>
+<span id="108">108</span>
+<span id="109">109</span>
+<span id="110">110</span>
+<span id="111">111</span>
+<span id="112">112</span>
+<span id="113">113</span>
+<span id="114">114</span>
+<span id="115">115</span>
+<span id="116">116</span>
+<span id="117">117</span>
+<span id="118">118</span>
+<span id="119">119</span>
+<span id="120">120</span>
+<span id="121">121</span>
+<span id="122">122</span>
+<span id="123">123</span>
+<span id="124">124</span>
+<span id="125">125</span>
+<span id="126">126</span>
+<span id="127">127</span>
+<span id="128">128</span>
+<span id="129">129</span>
+<span id="130">130</span>
+<span id="131">131</span>
+<span id="132">132</span>
+<span id="133">133</span>
+<span id="134">134</span>
+<span id="135">135</span>
+<span id="136">136</span>
+<span id="137">137</span>
+<span id="138">138</span>
+<span id="139">139</span>
+<span id="140">140</span>
+<span id="141">141</span>
+<span id="142">142</span>
+<span id="143">143</span>
+<span id="144">144</span>
+<span id="145">145</span>
+<span id="146">146</span>
+<span id="147">147</span>
+<span id="148">148</span>
+<span id="149">149</span>
+<span id="150">150</span>
+<span id="151">151</span>
+<span id="152">152</span>
+<span id="153">153</span>
+<span id="154">154</span>
+<span id="155">155</span>
+<span id="156">156</span>
+<span id="157">157</span>
+<span id="158">158</span>
+<span id="159">159</span>
+<span id="160">160</span>
+<span id="161">161</span>
+<span id="162">162</span>
+<span id="163">163</span>
+<span id="164">164</span>
+<span id="165">165</span>
+<span id="166">166</span>
+<span id="167">167</span>
+<span id="168">168</span>
+<span id="169">169</span>
+<span id="170">170</span>
+<span id="171">171</span>
+<span id="172">172</span>
+<span id="173">173</span>
+<span id="174">174</span>
+<span id="175">175</span>
+<span id="176">176</span>
+<span id="177">177</span>
+<span id="178">178</span>
+<span id="179">179</span>
+<span id="180">180</span>
+<span id="181">181</span>
+<span id="182">182</span>
+<span id="183">183</span>
+<span id="184">184</span>
+<span id="185">185</span>
+<span id="186">186</span>
+<span id="187">187</span>
+<span id="188">188</span>
+<span id="189">189</span>
+<span id="190">190</span>
+<span id="191">191</span>
+<span id="192">192</span>
+<span id="193">193</span>
+<span id="194">194</span>
+<span id="195">195</span>
+<span id="196">196</span>
+<span id="197">197</span>
+<span id="198">198</span>
+<span id="199">199</span>
+<span id="200">200</span>
+<span id="201">201</span>
+<span id="202">202</span>
+<span id="203">203</span>
+<span id="204">204</span>
+<span id="205">205</span>
+<span id="206">206</span>
+<span id="207">207</span>
+<span id="208">208</span>
+<span id="209">209</span>
+<span id="210">210</span>
+<span id="211">211</span>
+<span id="212">212</span>
+<span id="213">213</span>
+<span id="214">214</span>
+<span id="215">215</span>
+<span id="216">216</span>
+<span id="217">217</span>
+<span id="218">218</span>
+<span id="219">219</span>
+<span id="220">220</span>
+<span id="221">221</span>
+<span id="222">222</span>
+<span id="223">223</span>
+<span id="224">224</span>
+<span id="225">225</span>
+<span id="226">226</span>
+<span id="227">227</span>
+<span id="228">228</span>
+<span id="229">229</span>
+<span id="230">230</span>
+<span id="231">231</span>
+<span id="232">232</span>
+<span id="233">233</span>
+<span id="234">234</span>
+<span id="235">235</span>
+<span id="236">236</span>
+<span id="237">237</span>
+<span id="238">238</span>
+<span id="239">239</span>
+<span id="240">240</span>
+<span id="241">241</span>
+<span id="242">242</span>
+<span id="243">243</span>
+<span id="244">244</span>
+<span id="245">245</span>
+<span id="246">246</span>
+<span id="247">247</span>
+<span id="248">248</span>
+<span id="249">249</span>
+<span id="250">250</span>
+<span id="251">251</span>
+<span id="252">252</span>
+<span id="253">253</span>
+<span id="254">254</span>
+<span id="255">255</span>
+<span id="256">256</span>
+<span id="257">257</span>
+<span id="258">258</span>
+<span id="259">259</span>
+<span id="260">260</span>
+<span id="261">261</span>
+<span id="262">262</span>
+<span id="263">263</span>
+<span id="264">264</span>
+<span id="265">265</span>
+<span id="266">266</span>
+<span id="267">267</span>
+<span id="268">268</span>
+<span id="269">269</span>
+<span id="270">270</span>
+<span id="271">271</span>
+<span id="272">272</span>
+<span id="273">273</span>
+<span id="274">274</span>
+<span id="275">275</span>
+<span id="276">276</span>
+<span id="277">277</span>
+<span id="278">278</span>
+<span id="279">279</span>
+<span id="280">280</span>
+<span id="281">281</span>
+<span id="282">282</span>
+<span id="283">283</span>
+<span id="284">284</span>
+<span id="285">285</span>
+<span id="286">286</span>
+<span id="287">287</span>
+<span id="288">288</span>
+</pre><pre class="rust"><code><span class="attribute">#[cfg(target_arch = <span class="string">&quot;x86&quot;</span>)]
+</span><span class="kw">use </span>std::arch::x86::<span class="kw-2">*</span>;
+<span class="attribute">#[cfg(target_arch = <span class="string">&quot;x86_64&quot;</span>)]
+</span><span class="kw">use </span>std::arch::x86_64::<span class="kw-2">*</span>;
+
+<span class="attribute">#[cfg(any(target_arch = <span class="string">&quot;x86&quot;</span>, target_arch = <span class="string">&quot;x86_64&quot;</span>))]
+#[target_feature(enable = <span class="string">&quot;ssse3&quot;</span>)]
+</span><span class="kw">unsafe fn </span>idct8(data: <span class="kw-2">&amp;mut </span>[__m128i; <span class="number">8</span>]) {
+    <span class="comment">// The fixed-point constants here are obtained by taking the fractional part of the constants
+    // from the non-SIMD implementation and scaling them up by 1&lt;&lt;15. This is because
+    // _mm_mulhrs_epi16(a, b) is effectively equivalent to (a*b)&gt;&gt;15 (except for possibly some
+    // slight differences in rounding).
+
+    // The code here is effectively equivalent to the calls to &quot;kernel&quot; in idct.rs, except that it
+    // doesn&#39;t apply any further scaling and fixed point constants have a different precision.
+
+    </span><span class="kw">let </span>p2 = data[<span class="number">2</span>];
+    <span class="kw">let </span>p3 = data[<span class="number">6</span>];
+    <span class="kw">let </span>p1 = _mm_mulhrs_epi16(_mm_adds_epi16(p2, p3), _mm_set1_epi16(<span class="number">17734</span>)); <span class="comment">// 0.5411961
+    </span><span class="kw">let </span>t2 = _mm_subs_epi16(
+        _mm_subs_epi16(p1, p3),
+        _mm_mulhrs_epi16(p3, _mm_set1_epi16(<span class="number">27779</span>)), <span class="comment">// 0.847759065
+    </span>);
+    <span class="kw">let </span>t3 = _mm_adds_epi16(p1, _mm_mulhrs_epi16(p2, _mm_set1_epi16(<span class="number">25079</span>))); <span class="comment">// 0.765366865
+
+    </span><span class="kw">let </span>p2 = data[<span class="number">0</span>];
+    <span class="kw">let </span>p3 = data[<span class="number">4</span>];
+    <span class="kw">let </span>t0 = _mm_adds_epi16(p2, p3);
+    <span class="kw">let </span>t1 = _mm_subs_epi16(p2, p3);
+
+    <span class="kw">let </span>x0 = _mm_adds_epi16(t0, t3);
+    <span class="kw">let </span>x3 = _mm_subs_epi16(t0, t3);
+    <span class="kw">let </span>x1 = _mm_adds_epi16(t1, t2);
+    <span class="kw">let </span>x2 = _mm_subs_epi16(t1, t2);
+
+    <span class="kw">let </span>t0 = data[<span class="number">7</span>];
+    <span class="kw">let </span>t1 = data[<span class="number">5</span>];
+    <span class="kw">let </span>t2 = data[<span class="number">3</span>];
+    <span class="kw">let </span>t3 = data[<span class="number">1</span>];
+
+    <span class="kw">let </span>p3 = _mm_adds_epi16(t0, t2);
+    <span class="kw">let </span>p4 = _mm_adds_epi16(t1, t3);
+    <span class="kw">let </span>p1 = _mm_adds_epi16(t0, t3);
+    <span class="kw">let </span>p2 = _mm_adds_epi16(t1, t2);
+    <span class="kw">let </span>p5 = _mm_adds_epi16(p3, p4);
+    <span class="kw">let </span>p5 = _mm_adds_epi16(p5, _mm_mulhrs_epi16(p5, _mm_set1_epi16(<span class="number">5763</span>))); <span class="comment">// 0.175875602
+
+    </span><span class="kw">let </span>t0 = _mm_mulhrs_epi16(t0, _mm_set1_epi16(<span class="number">9786</span>)); <span class="comment">// 0.298631336
+    </span><span class="kw">let </span>t1 = _mm_adds_epi16(
+        _mm_adds_epi16(t1, t1),
+        _mm_mulhrs_epi16(t1, _mm_set1_epi16(<span class="number">1741</span>)), <span class="comment">// 0.053119869
+    </span>);
+    <span class="kw">let </span>t2 = _mm_adds_epi16(
+        _mm_adds_epi16(t2, _mm_adds_epi16(t2, t2)),
+        _mm_mulhrs_epi16(t2, _mm_set1_epi16(<span class="number">2383</span>)), <span class="comment">// 0.072711026
+    </span>);
+    <span class="kw">let </span>t3 = _mm_adds_epi16(t3, _mm_mulhrs_epi16(t3, _mm_set1_epi16(<span class="number">16427</span>))); <span class="comment">// 0.501321110
+
+    </span><span class="kw">let </span>p1 = _mm_subs_epi16(p5, _mm_mulhrs_epi16(p1, _mm_set1_epi16(<span class="number">29490</span>))); <span class="comment">// 0.899976223
+    </span><span class="kw">let </span>p2 = _mm_subs_epi16(
+        _mm_subs_epi16(_mm_subs_epi16(p5, p2), p2),
+        _mm_mulhrs_epi16(p2, _mm_set1_epi16(<span class="number">18446</span>)), <span class="comment">// 0.562915447
+    </span>);
+
+    <span class="kw">let </span>p3 = _mm_subs_epi16(
+        _mm_mulhrs_epi16(p3, _mm_set1_epi16(-<span class="number">31509</span>)), <span class="comment">// -0.961570560
+        </span>p3,
+    );
+    <span class="kw">let </span>p4 = _mm_mulhrs_epi16(p4, _mm_set1_epi16(-<span class="number">12785</span>)); <span class="comment">// -0.390180644
+
+    </span><span class="kw">let </span>t3 = _mm_adds_epi16(_mm_adds_epi16(p1, p4), t3);
+    <span class="kw">let </span>t2 = _mm_adds_epi16(_mm_adds_epi16(p2, p3), t2);
+    <span class="kw">let </span>t1 = _mm_adds_epi16(_mm_adds_epi16(p2, p4), t1);
+    <span class="kw">let </span>t0 = _mm_adds_epi16(_mm_adds_epi16(p1, p3), t0);
+
+    data[<span class="number">0</span>] = _mm_adds_epi16(x0, t3);
+    data[<span class="number">7</span>] = _mm_subs_epi16(x0, t3);
+    data[<span class="number">1</span>] = _mm_adds_epi16(x1, t2);
+    data[<span class="number">6</span>] = _mm_subs_epi16(x1, t2);
+    data[<span class="number">2</span>] = _mm_adds_epi16(x2, t1);
+    data[<span class="number">5</span>] = _mm_subs_epi16(x2, t1);
+    data[<span class="number">3</span>] = _mm_adds_epi16(x3, t0);
+    data[<span class="number">4</span>] = _mm_subs_epi16(x3, t0);
+}
+
+<span class="attribute">#[cfg(any(target_arch = <span class="string">&quot;x86&quot;</span>, target_arch = <span class="string">&quot;x86_64&quot;</span>))]
+#[target_feature(enable = <span class="string">&quot;ssse3&quot;</span>)]
+</span><span class="kw">unsafe fn </span>transpose8(data: <span class="kw-2">&amp;mut </span>[__m128i; <span class="number">8</span>]) {
+    <span class="comment">// Transpose a 8x8 matrix with a sequence of interleaving operations.
+    // Naming: dABl contains elements from the *l*ower halves of vectors A and B, interleaved, i.e.
+    // A0 B0 A1 B1 ...
+    // dABCDll contains elements from the lower quarter (ll) of vectors A, B, C, D, interleaved -
+    // A0 B0 C0 D0 A1 B1 C1 D1 ...
+    </span><span class="kw">let </span>d01l = _mm_unpacklo_epi16(data[<span class="number">0</span>], data[<span class="number">1</span>]);
+    <span class="kw">let </span>d23l = _mm_unpacklo_epi16(data[<span class="number">2</span>], data[<span class="number">3</span>]);
+    <span class="kw">let </span>d45l = _mm_unpacklo_epi16(data[<span class="number">4</span>], data[<span class="number">5</span>]);
+    <span class="kw">let </span>d67l = _mm_unpacklo_epi16(data[<span class="number">6</span>], data[<span class="number">7</span>]);
+    <span class="kw">let </span>d01h = _mm_unpackhi_epi16(data[<span class="number">0</span>], data[<span class="number">1</span>]);
+    <span class="kw">let </span>d23h = _mm_unpackhi_epi16(data[<span class="number">2</span>], data[<span class="number">3</span>]);
+    <span class="kw">let </span>d45h = _mm_unpackhi_epi16(data[<span class="number">4</span>], data[<span class="number">5</span>]);
+    <span class="kw">let </span>d67h = _mm_unpackhi_epi16(data[<span class="number">6</span>], data[<span class="number">7</span>]);
+    <span class="comment">// Operating on 32-bits will interleave *consecutive pairs* of 16-bit integers.
+    </span><span class="kw">let </span>d0123ll = _mm_unpacklo_epi32(d01l, d23l);
+    <span class="kw">let </span>d0123lh = _mm_unpackhi_epi32(d01l, d23l);
+    <span class="kw">let </span>d4567ll = _mm_unpacklo_epi32(d45l, d67l);
+    <span class="kw">let </span>d4567lh = _mm_unpackhi_epi32(d45l, d67l);
+    <span class="kw">let </span>d0123hl = _mm_unpacklo_epi32(d01h, d23h);
+    <span class="kw">let </span>d0123hh = _mm_unpackhi_epi32(d01h, d23h);
+    <span class="kw">let </span>d4567hl = _mm_unpacklo_epi32(d45h, d67h);
+    <span class="kw">let </span>d4567hh = _mm_unpackhi_epi32(d45h, d67h);
+    <span class="comment">// Operating on 64-bits will interleave *consecutive quadruples* of 16-bit integers.
+    </span>data[<span class="number">0</span>] = _mm_unpacklo_epi64(d0123ll, d4567ll);
+    data[<span class="number">1</span>] = _mm_unpackhi_epi64(d0123ll, d4567ll);
+    data[<span class="number">2</span>] = _mm_unpacklo_epi64(d0123lh, d4567lh);
+    data[<span class="number">3</span>] = _mm_unpackhi_epi64(d0123lh, d4567lh);
+    data[<span class="number">4</span>] = _mm_unpacklo_epi64(d0123hl, d4567hl);
+    data[<span class="number">5</span>] = _mm_unpackhi_epi64(d0123hl, d4567hl);
+    data[<span class="number">6</span>] = _mm_unpacklo_epi64(d0123hh, d4567hh);
+    data[<span class="number">7</span>] = _mm_unpackhi_epi64(d0123hh, d4567hh);
+}
+
+<span class="attribute">#[cfg(any(target_arch = <span class="string">&quot;x86&quot;</span>, target_arch = <span class="string">&quot;x86_64&quot;</span>))]
+#[target_feature(enable = <span class="string">&quot;ssse3&quot;</span>)]
+</span><span class="kw">pub unsafe fn </span>dequantize_and_idct_block_8x8(
+    coefficients: <span class="kw-2">&amp;</span>[i16; <span class="number">64</span>],
+    quantization_table: <span class="kw-2">&amp;</span>[u16; <span class="number">64</span>],
+    output_linestride: usize,
+    output: <span class="kw-2">&amp;mut </span>[u8],
+) {
+    <span class="comment">// The loop below will write to positions [output_linestride * i, output_linestride * i + 8)
+    // for 0&lt;=i&lt;8. Thus, the last accessed position is at an offset of output_linestrade * 7 + 7,
+    // and if that position is in-bounds, so are all other accesses.
+    </span><span class="macro">assert!</span>(
+        output.len()
+            &gt; output_linestride
+                .checked_mul(<span class="number">7</span>)
+                .unwrap()
+                .checked_add(<span class="number">7</span>)
+                .unwrap()
+    );
+
+    <span class="attribute">#[cfg(target_arch = <span class="string">&quot;x86&quot;</span>)]
+    </span><span class="kw">use </span>std::arch::x86::<span class="kw-2">*</span>;
+    <span class="attribute">#[cfg(target_arch = <span class="string">&quot;x86_64&quot;</span>)]
+    </span><span class="kw">use </span>std::arch::x86_64::<span class="kw-2">*</span>;
+
+    <span class="kw">const </span>SHIFT: i32 = <span class="number">3</span>;
+
+    <span class="comment">// Read the DCT coefficients, scale them up and dequantize them.
+    </span><span class="kw">let </span><span class="kw-2">mut </span>data = [_mm_setzero_si128(); <span class="number">8</span>];
+    <span class="kw">for </span>i <span class="kw">in </span><span class="number">0</span>..<span class="number">8 </span>{
+        data[i] = _mm_slli_epi16(
+            _mm_mullo_epi16(
+                _mm_loadu_si128(coefficients.as_ptr().wrapping_add(i * <span class="number">8</span>) <span class="kw">as </span><span class="kw-2">*const </span><span class="kw">_</span>),
+                _mm_loadu_si128(quantization_table.as_ptr().wrapping_add(i * <span class="number">8</span>) <span class="kw">as </span><span class="kw-2">*const </span><span class="kw">_</span>),
+            ),
+            SHIFT,
+        );
+    }
+
+    <span class="comment">// Usual column IDCT - transpose - column IDCT - transpose approach.
+    </span>idct8(<span class="kw-2">&amp;mut </span>data);
+    transpose8(<span class="kw-2">&amp;mut </span>data);
+    idct8(<span class="kw-2">&amp;mut </span>data);
+    transpose8(<span class="kw-2">&amp;mut </span>data);
+
+    <span class="kw">for </span>i <span class="kw">in </span><span class="number">0</span>..<span class="number">8 </span>{
+        <span class="kw">let </span><span class="kw-2">mut </span>buf = [<span class="number">0u8</span>; <span class="number">16</span>];
+        <span class="comment">// The two passes of the IDCT algorithm give us a factor of 8, so the shift here is
+        // increased by 3.
+        // As values will be stored in a u8, they need to be 128-centered and not 0-centered.
+        // We add 128 with the appropriate shift for that purpose.
+        </span><span class="kw">const </span>OFFSET: i16 = <span class="number">128 </span>&lt;&lt; (SHIFT + <span class="number">3</span>);
+        <span class="comment">// We want rounding right shift, so we should add (1/2) &lt;&lt; (SHIFT+3) before shifting.
+        </span><span class="kw">const </span>ROUNDING_BIAS: i16 = (<span class="number">1 </span>&lt;&lt; (SHIFT + <span class="number">3</span>)) &gt;&gt; <span class="number">1</span>;
+
+        <span class="kw">let </span>data_with_offset = _mm_adds_epi16(data[i], _mm_set1_epi16(OFFSET + ROUNDING_BIAS));
+
+        _mm_storeu_si128(
+            buf.as_mut_ptr() <span class="kw">as </span><span class="kw-2">*mut </span><span class="kw">_</span>,
+            _mm_packus_epi16(
+                _mm_srai_epi16(data_with_offset, SHIFT + <span class="number">3</span>),
+                _mm_setzero_si128(),
+            ),
+        );
+        std::ptr::copy_nonoverlapping::&lt;u8&gt;(
+            buf.as_ptr(),
+            output.as_mut_ptr().wrapping_add(output_linestride * i) <span class="kw">as </span><span class="kw-2">*mut </span><span class="kw">_</span>,
+            <span class="number">8</span>,
+        );
+    }
+}
+
+<span class="attribute">#[cfg(any(target_arch = <span class="string">&quot;x86&quot;</span>, target_arch = <span class="string">&quot;x86_64&quot;</span>))]
+#[target_feature(enable = <span class="string">&quot;ssse3&quot;</span>)]
+</span><span class="kw">pub unsafe fn </span>color_convert_line_ycbcr(y: <span class="kw-2">&amp;</span>[u8], cb: <span class="kw-2">&amp;</span>[u8], cr: <span class="kw-2">&amp;</span>[u8], output: <span class="kw-2">&amp;mut </span>[u8]) -&gt; usize {
+    <span class="macro">assert!</span>(output.len() % <span class="number">3 </span>== <span class="number">0</span>);
+    <span class="kw">let </span>num = output.len() / <span class="number">3</span>;
+    <span class="macro">assert!</span>(num &lt;= y.len());
+    <span class="macro">assert!</span>(num &lt;= cb.len());
+    <span class="macro">assert!</span>(num &lt;= cr.len());
+    <span class="comment">// _mm_loadu_si64 generates incorrect code for Rust &lt;1.58. To circumvent this, we use a full
+    // 128-bit load, but that requires leaving an extra vector of border to the scalar code.
+    // From Rust 1.58 on, the _mm_loadu_si128 can be replaced with _mm_loadu_si64 and this
+    // .saturating_sub() can be removed.
+    </span><span class="kw">let </span>num_vecs = (num / <span class="number">8</span>).saturating_sub(<span class="number">1</span>);
+
+    <span class="kw">for </span>i <span class="kw">in </span><span class="number">0</span>..num_vecs {
+        <span class="kw">const </span>SHIFT: i32 = <span class="number">6</span>;
+        <span class="comment">// Load.
+        </span><span class="kw">let </span>y = _mm_loadu_si128(y.as_ptr().wrapping_add(i * <span class="number">8</span>) <span class="kw">as </span><span class="kw-2">*const </span><span class="kw">_</span>);
+        <span class="kw">let </span>cb = _mm_loadu_si128(cb.as_ptr().wrapping_add(i * <span class="number">8</span>) <span class="kw">as </span><span class="kw-2">*const </span><span class="kw">_</span>);
+        <span class="kw">let </span>cr = _mm_loadu_si128(cr.as_ptr().wrapping_add(i * <span class="number">8</span>) <span class="kw">as </span><span class="kw-2">*const </span><span class="kw">_</span>);
+
+        <span class="comment">// Convert to 16 bit.
+        </span><span class="kw">let </span>shuf16 = _mm_setr_epi8(
+            <span class="number">0</span>, -<span class="number">0x7F</span>, <span class="number">1</span>, -<span class="number">0x7F</span>, <span class="number">2</span>, -<span class="number">0x7F</span>, <span class="number">3</span>, -<span class="number">0x7F</span>, <span class="number">4</span>, -<span class="number">0x7F</span>, <span class="number">5</span>, -<span class="number">0x7F</span>, <span class="number">6</span>, -<span class="number">0x7F</span>, <span class="number">7</span>, -<span class="number">0x7F</span>,
+        );
+        <span class="kw">let </span>y = _mm_slli_epi16(_mm_shuffle_epi8(y, shuf16), SHIFT);
+        <span class="kw">let </span>cb = _mm_slli_epi16(_mm_shuffle_epi8(cb, shuf16), SHIFT);
+        <span class="kw">let </span>cr = _mm_slli_epi16(_mm_shuffle_epi8(cr, shuf16), SHIFT);
+
+        <span class="comment">// Add offsets
+        </span><span class="kw">let </span>c128 = _mm_set1_epi16(<span class="number">128 </span>&lt;&lt; SHIFT);
+        <span class="kw">let </span>y = _mm_adds_epi16(y, _mm_set1_epi16((<span class="number">1 </span>&lt;&lt; SHIFT) &gt;&gt; <span class="number">1</span>));
+        <span class="kw">let </span>cb = _mm_subs_epi16(cb, c128);
+        <span class="kw">let </span>cr = _mm_subs_epi16(cr, c128);
+
+        <span class="comment">// Compute cr * 1.402, cb * 0.34414, cr * 0.71414, cb * 1.772
+        </span><span class="kw">let </span>cr_140200 = _mm_adds_epi16(_mm_mulhrs_epi16(cr, _mm_set1_epi16(<span class="number">13173</span>)), cr);
+        <span class="kw">let </span>cb_034414 = _mm_mulhrs_epi16(cb, _mm_set1_epi16(<span class="number">11276</span>));
+        <span class="kw">let </span>cr_071414 = _mm_mulhrs_epi16(cr, _mm_set1_epi16(<span class="number">23401</span>));
+        <span class="kw">let </span>cb_177200 = _mm_adds_epi16(_mm_mulhrs_epi16(cb, _mm_set1_epi16(<span class="number">25297</span>)), cb);
+
+        <span class="comment">// Last conversion step.
+        </span><span class="kw">let </span>r = _mm_adds_epi16(y, cr_140200);
+        <span class="kw">let </span>g = _mm_subs_epi16(y, _mm_adds_epi16(cb_034414, cr_071414));
+        <span class="kw">let </span>b = _mm_adds_epi16(y, cb_177200);
+
+        <span class="comment">// Shift back and convert to u8.
+        </span><span class="kw">let </span>zero = _mm_setzero_si128();
+        <span class="kw">let </span>r = _mm_packus_epi16(_mm_srai_epi16(r, SHIFT), zero);
+        <span class="kw">let </span>g = _mm_packus_epi16(_mm_srai_epi16(g, SHIFT), zero);
+        <span class="kw">let </span>b = _mm_packus_epi16(_mm_srai_epi16(b, SHIFT), zero);
+
+        <span class="comment">// Shuffle rrrrrrrrggggggggbbbbbbbb to rgbrgbrgb...
+
+        // Control vectors for _mm_shuffle_epi8. -0x7F is selected so that the resulting position
+        // after _mm_shuffle_epi8 will be filled with 0, so that the r, g, and b vectors can then
+        // be OR-ed together.
+        </span><span class="kw">let </span>shufr = _mm_setr_epi8(
+            <span class="number">0</span>, -<span class="number">0x7F</span>, -<span class="number">0x7F</span>, <span class="number">1</span>, -<span class="number">0x7F</span>, -<span class="number">0x7F</span>, <span class="number">2</span>, -<span class="number">0x7F</span>, -<span class="number">0x7F</span>, <span class="number">3</span>, -<span class="number">0x7F</span>, -<span class="number">0x7F</span>, <span class="number">4</span>, -<span class="number">0x7F</span>, -<span class="number">0x7F</span>, <span class="number">5</span>,
+        );
+        <span class="kw">let </span>shufg = _mm_setr_epi8(
+            -<span class="number">0x7F</span>, <span class="number">0</span>, -<span class="number">0x7F</span>, -<span class="number">0x7F</span>, <span class="number">1</span>, -<span class="number">0x7F</span>, -<span class="number">0x7F</span>, <span class="number">2</span>, -<span class="number">0x7F</span>, -<span class="number">0x7F</span>, <span class="number">3</span>, -<span class="number">0x7F</span>, -<span class="number">0x7F</span>, <span class="number">4</span>, -<span class="number">0x7F</span>,
+            -<span class="number">0x7F</span>,
+        );
+        <span class="kw">let </span>shufb = _mm_alignr_epi8(shufg, shufg, <span class="number">15</span>);
+
+        <span class="kw">let </span>rgb_low = _mm_or_si128(
+            _mm_shuffle_epi8(r, shufr),
+            _mm_or_si128(_mm_shuffle_epi8(g, shufg), _mm_shuffle_epi8(b, shufb)),
+        );
+
+        <span class="comment">// For the next part of the rgb vectors, we need to select R values from 6 up, G and B from
+        // 5 up. The highest bit of -0x7F + 6 is still set, so the corresponding location will
+        // still be 0.
+        </span><span class="kw">let </span>shufr1 = _mm_add_epi8(shufb, _mm_set1_epi8(<span class="number">6</span>));
+        <span class="kw">let </span>shufg1 = _mm_add_epi8(shufr, _mm_set1_epi8(<span class="number">5</span>));
+        <span class="kw">let </span>shufb1 = _mm_add_epi8(shufg, _mm_set1_epi8(<span class="number">5</span>));
+
+        <span class="kw">let </span>rgb_hi = _mm_or_si128(
+            _mm_shuffle_epi8(r, shufr1),
+            _mm_or_si128(_mm_shuffle_epi8(g, shufg1), _mm_shuffle_epi8(b, shufb1)),
+        );
+
+        <span class="kw">let </span><span class="kw-2">mut </span>data = [<span class="number">0u8</span>; <span class="number">32</span>];
+        _mm_storeu_si128(data.as_mut_ptr() <span class="kw">as </span><span class="kw-2">*mut </span><span class="kw">_</span>, rgb_low);
+        _mm_storeu_si128(data.as_mut_ptr().wrapping_add(<span class="number">16</span>) <span class="kw">as </span><span class="kw-2">*mut </span><span class="kw">_</span>, rgb_hi);
+        std::ptr::copy_nonoverlapping::&lt;u8&gt;(
+            data.as_ptr(),
+            output.as_mut_ptr().wrapping_add(<span class="number">24 </span>* i),
+            <span class="number">24</span>,
+        );
+    }
+
+    num_vecs * <span class="number">8
+</span>}
+</code></pre></div>
+</section></div></main><div id="rustdoc-vars" data-root-path="../../../" data-current-crate="jpeg_decoder" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.65.0 (897e37553 2022-11-02)" ></div></body></html>

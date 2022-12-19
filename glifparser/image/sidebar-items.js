@@ -1,1 +1,1 @@
-initSidebarItems({"enum":[["DataLoadState",""],["DataOrBitmap",""],["ImageCodec",""]],"struct":[["GlifImage",""],["Image",""],["ImageData",""]]});
+window.SIDEBAR_ITEMS = {"enum":[["DataLoadState",""],["DataOrBitmap",""],["ImageCodec",""]],"struct":[["GlifImage",""],["Image",""],["ImageData",""]]};

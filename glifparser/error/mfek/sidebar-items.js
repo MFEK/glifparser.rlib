@@ -1,1 +1,1 @@
-initSidebarItems({"enum":[["UpgradeContourOpsError",""]]});
+window.SIDEBAR_ITEMS = {"enum":[["UpgradeContourOpsError",""]]};

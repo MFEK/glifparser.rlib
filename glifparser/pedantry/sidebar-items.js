@@ -1,1 +1,1 @@
-initSidebarItems({"enum":[["FloatClass",""],["Level",""],["Mend",""]],"struct":[["Pedantry",""]]});
+window.SIDEBAR_ITEMS = {"enum":[["FloatClass",""],["Level",""],["Mend",""]],"struct":[["Pedantry",""]]};

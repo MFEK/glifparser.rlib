@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"fn":[["bezier_path_to_rust_definition","Writes out a path as a Rust simple bezier path definition"],["graph_path_svg_string","Writes out the graph path as an SVG string"]]};

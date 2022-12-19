@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"struct":[["IterRc","An iterator over the child `Node`s of `RcNode` with shared ownership."]]};

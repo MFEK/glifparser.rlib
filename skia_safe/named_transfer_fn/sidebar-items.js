@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"constant":[["DOT22",""],["HLG",""],["LINEAR",""],["PQ",""],["REC2020",""],["SRGB",""]]};

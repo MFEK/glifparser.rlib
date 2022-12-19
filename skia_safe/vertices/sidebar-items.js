@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"enum":[["VertexMode",""]],"struct":[["Bone",""],["BuilderFlags",""]],"type":[["BoneIndices",""],["BoneWeights",""],["Builder",""],["Vertices",""]]};

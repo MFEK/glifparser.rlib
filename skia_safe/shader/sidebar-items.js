@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"enum":[["GradientType",""],["GradientTypeInternal",""]],"mod":[["shaders",""]],"struct":[["GradientInfo",""]],"type":[["Shader",""]]};

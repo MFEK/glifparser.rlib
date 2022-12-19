@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"struct":[["Circle","Represents a circle in 2 dimensions"],["CircularArc","Represents an arc of a circle in 2 dimensions"]]};

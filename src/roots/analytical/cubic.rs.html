@@ -1,0 +1,332 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/fred/.cargo/registry/src/github.com-1ecc6299db9ec823/roots-0.0.7/src/analytical/cubic.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>cubic.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" href="../../../normalize.css"><link rel="stylesheet" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" href="../../../ayu.css" disabled><link rel="stylesheet" href="../../../dark.css" disabled><link rel="stylesheet" href="../../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../../storage.js"></script><script defer src="../../../source-script.js"></script><script defer src="../../../source-files.js"></script><script defer src="../../../main.js"></script><noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../../roots/index.html"><div class="logo-container"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></div></a><h2 class="location"></h2></nav><nav class="sidebar"><a class="sidebar-logo" href="../../../roots/index.html"><div class="logo-container"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></div></a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../../roots/index.html"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></a><nav class="sub"><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><button type="button">?</button></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../wheel.svg"></a></div></div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">1</span>
+<span id="2">2</span>
+<span id="3">3</span>
+<span id="4">4</span>
+<span id="5">5</span>
+<span id="6">6</span>
+<span id="7">7</span>
+<span id="8">8</span>
+<span id="9">9</span>
+<span id="10">10</span>
+<span id="11">11</span>
+<span id="12">12</span>
+<span id="13">13</span>
+<span id="14">14</span>
+<span id="15">15</span>
+<span id="16">16</span>
+<span id="17">17</span>
+<span id="18">18</span>
+<span id="19">19</span>
+<span id="20">20</span>
+<span id="21">21</span>
+<span id="22">22</span>
+<span id="23">23</span>
+<span id="24">24</span>
+<span id="25">25</span>
+<span id="26">26</span>
+<span id="27">27</span>
+<span id="28">28</span>
+<span id="29">29</span>
+<span id="30">30</span>
+<span id="31">31</span>
+<span id="32">32</span>
+<span id="33">33</span>
+<span id="34">34</span>
+<span id="35">35</span>
+<span id="36">36</span>
+<span id="37">37</span>
+<span id="38">38</span>
+<span id="39">39</span>
+<span id="40">40</span>
+<span id="41">41</span>
+<span id="42">42</span>
+<span id="43">43</span>
+<span id="44">44</span>
+<span id="45">45</span>
+<span id="46">46</span>
+<span id="47">47</span>
+<span id="48">48</span>
+<span id="49">49</span>
+<span id="50">50</span>
+<span id="51">51</span>
+<span id="52">52</span>
+<span id="53">53</span>
+<span id="54">54</span>
+<span id="55">55</span>
+<span id="56">56</span>
+<span id="57">57</span>
+<span id="58">58</span>
+<span id="59">59</span>
+<span id="60">60</span>
+<span id="61">61</span>
+<span id="62">62</span>
+<span id="63">63</span>
+<span id="64">64</span>
+<span id="65">65</span>
+<span id="66">66</span>
+<span id="67">67</span>
+<span id="68">68</span>
+<span id="69">69</span>
+<span id="70">70</span>
+<span id="71">71</span>
+<span id="72">72</span>
+<span id="73">73</span>
+<span id="74">74</span>
+<span id="75">75</span>
+<span id="76">76</span>
+<span id="77">77</span>
+<span id="78">78</span>
+<span id="79">79</span>
+<span id="80">80</span>
+<span id="81">81</span>
+<span id="82">82</span>
+<span id="83">83</span>
+<span id="84">84</span>
+<span id="85">85</span>
+<span id="86">86</span>
+<span id="87">87</span>
+<span id="88">88</span>
+<span id="89">89</span>
+<span id="90">90</span>
+<span id="91">91</span>
+<span id="92">92</span>
+<span id="93">93</span>
+<span id="94">94</span>
+<span id="95">95</span>
+<span id="96">96</span>
+<span id="97">97</span>
+<span id="98">98</span>
+<span id="99">99</span>
+<span id="100">100</span>
+<span id="101">101</span>
+<span id="102">102</span>
+<span id="103">103</span>
+<span id="104">104</span>
+<span id="105">105</span>
+<span id="106">106</span>
+<span id="107">107</span>
+<span id="108">108</span>
+<span id="109">109</span>
+<span id="110">110</span>
+<span id="111">111</span>
+<span id="112">112</span>
+<span id="113">113</span>
+<span id="114">114</span>
+<span id="115">115</span>
+<span id="116">116</span>
+<span id="117">117</span>
+<span id="118">118</span>
+<span id="119">119</span>
+<span id="120">120</span>
+<span id="121">121</span>
+<span id="122">122</span>
+<span id="123">123</span>
+<span id="124">124</span>
+<span id="125">125</span>
+<span id="126">126</span>
+<span id="127">127</span>
+<span id="128">128</span>
+<span id="129">129</span>
+<span id="130">130</span>
+<span id="131">131</span>
+<span id="132">132</span>
+<span id="133">133</span>
+<span id="134">134</span>
+<span id="135">135</span>
+<span id="136">136</span>
+<span id="137">137</span>
+<span id="138">138</span>
+<span id="139">139</span>
+<span id="140">140</span>
+<span id="141">141</span>
+<span id="142">142</span>
+<span id="143">143</span>
+<span id="144">144</span>
+<span id="145">145</span>
+<span id="146">146</span>
+<span id="147">147</span>
+<span id="148">148</span>
+<span id="149">149</span>
+<span id="150">150</span>
+<span id="151">151</span>
+<span id="152">152</span>
+<span id="153">153</span>
+<span id="154">154</span>
+<span id="155">155</span>
+<span id="156">156</span>
+<span id="157">157</span>
+<span id="158">158</span>
+<span id="159">159</span>
+<span id="160">160</span>
+<span id="161">161</span>
+<span id="162">162</span>
+<span id="163">163</span>
+<span id="164">164</span>
+<span id="165">165</span>
+</pre><pre class="rust"><code><span class="comment">// Copyright (c) 2015, Mikhail Vorotilov
+// All rights reserved.
+//
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are met:
+//
+// * Redistributions of source code must retain the above copyright notice, this
+//   list of conditions and the following disclaimer.
+//
+// * Redistributions in binary form must reproduce the above copyright notice,
+//   this list of conditions and the following disclaimer in the documentation
+//   and/or other materials provided with the distribution.
+//
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS &quot;AS IS&quot;
+// AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+// IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+// DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+// FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+// DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+// SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+// CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+// OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+// OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+</span><span class="kw">use </span><span class="kw">super</span>::<span class="kw">super</span>::FloatType;
+<span class="kw">use </span><span class="kw">super</span>::<span class="kw">super</span>::Roots;
+
+<span class="doccomment">/// Solves a cubic equation a3*x^3 + a2*x^2 + a1*x + a0 = 0.
+///
+/// General formula (complex numbers) is implemented for three roots.
+///
+/// Note that very small values of a3 (comparing to other coefficients) will cause the loss of precision.
+///
+/// In case more than one roots are present, they are returned in the increasing order.
+///
+/// # Examples
+///
+/// ```
+/// use roots::Roots;
+/// use roots::find_roots_cubic;
+///
+/// let no_roots = find_roots_cubic(0f32, 1f32, 0f32, 1f32);
+/// // Returns Roots::No([]) as &#39;x^2 + 1 = 0&#39; has no roots
+///
+/// let one_root = find_roots_cubic(1f64, 0f64, 0f64, 0f64);
+/// // Returns Roots::One([0f64]) as &#39;x^3 = 0&#39; has one root 0
+///
+/// let three_roots = find_roots_cubic(1f32, 0f32, -1f32, 0f32);
+/// // Returns Roots::Three([-1f32, 0f32, 1f32]) as &#39;x^3 - x = 0&#39; has roots -1, 0, and 1
+///
+/// let three_roots_less_precision = find_roots_cubic(
+///            -0.000000000000000040410628481035f64,
+///            0.0126298310280606f64,
+///            -0.100896606408756f64,
+///            0.0689539597036461f64);
+/// // Returns Roots::Three([0.7583841816097057f64, 7.233267996296344f64, 312537357195212.9f64])
+/// // while online math expects 0.7547108770537f64, 7.23404258961f64, 312537357195213f64
+/// ```
+</span><span class="kw">pub fn </span>find_roots_cubic&lt;F: FloatType&gt;(a3: F, a2: F, a1: F, a0: F) -&gt; Roots&lt;F&gt; {
+    <span class="comment">// Handle non-standard cases
+    </span><span class="kw">if </span>a3 == F::zero() {
+        <span class="comment">// a3 = 0; a2*x^2+a1*x+a0=0; solve quadratic equation
+        </span><span class="kw">super</span>::quadratic::find_roots_quadratic(a2, a1, a0)
+    } <span class="kw">else if </span>a2 == F::zero() {
+        <span class="comment">// a2 = 0; a3*x^3+a1*x+a0=0; solve depressed cubic equation
+        </span><span class="kw">super</span>::cubic_depressed::find_roots_cubic_depressed(a1 / a3, a0 / a3)
+    } <span class="kw">else if </span>a3 == F::one() {
+        <span class="comment">// solve normalized cubic expression
+        </span><span class="kw">super</span>::cubic_normalized::find_roots_cubic_normalized(a2, a1, a0)
+    } <span class="kw">else </span>{
+        <span class="kw">let </span>_2 = F::from(<span class="number">2i16</span>);
+        <span class="kw">let </span>_3 = F::from(<span class="number">3i16</span>);
+        <span class="kw">let </span>_4 = F::from(<span class="number">4i16</span>);
+        <span class="kw">let </span>_9 = F::from(<span class="number">9i16</span>);
+        <span class="kw">let </span>_18 = F::from(<span class="number">18i16</span>);
+        <span class="kw">let </span>_27 = F::from(<span class="number">27i16</span>);
+
+        <span class="comment">// standard case
+        </span><span class="kw">let </span>d = _18 * a3 * a2 * a1 * a0 - _4 * a2 * a2 * a2 * a0 + a2 * a2 * a1 * a1
+            - _4 * a3 * a1 * a1 * a1
+            - _27 * a3 * a3 * a0 * a0;
+        <span class="kw">let </span>d0 = a2 * a2 - _3 * a3 * a1;
+        <span class="kw">let </span>d1 = _2 * a2 * a2 * a2 - _9 * a3 * a2 * a1 + _27 * a3 * a3 * a0;
+        <span class="kw">if </span>d &lt; F::zero() {
+            <span class="comment">// one real root
+            </span><span class="kw">let </span>sqrt = (-_27 * a3 * a3 * d).sqrt();
+            <span class="kw">let </span>c = F::cbrt(<span class="kw">if </span>d1 &lt; F::zero() { d1 - sqrt } <span class="kw">else </span>{ d1 + sqrt } / _2);
+            <span class="kw">let </span>x = -(a2 + c + d0 / c) / (_3 * a3);
+            Roots::One([x])
+        } <span class="kw">else if </span>d == F::zero() {
+            <span class="comment">// multiple roots
+            </span><span class="kw">if </span>d0 == F::zero() {
+                <span class="comment">// triple root
+                </span>Roots::One([-a2 / (a3 * _3)])
+            } <span class="kw">else </span>{
+                <span class="comment">// single root and double root
+                </span>Roots::One([(_9 * a3 * a0 - a2 * a1) / (d0 * _2)])
+                    .add_new_root((_4 * a3 * a2 * a1 - _9 * a3 * a3 * a0 - a2 * a2 * a2) / (a3 * d0))
+            }
+        } <span class="kw">else </span>{
+            <span class="comment">// three real roots
+            </span><span class="kw">let </span>c3_img = F::sqrt(_27 * a3 * a3 * d) / _2;
+            <span class="kw">let </span>c3_real = d1 / _2;
+            <span class="kw">let </span>c3_module = F::sqrt(c3_img * c3_img + c3_real * c3_real);
+            <span class="kw">let </span>c3_phase = _2 * F::atan(c3_img / (c3_real + c3_module));
+            <span class="kw">let </span>c_module = F::cbrt(c3_module);
+            <span class="kw">let </span>c_phase = c3_phase / _3;
+            <span class="kw">let </span>c_real = c_module * F::cos(c_phase);
+            <span class="kw">let </span>c_img = c_module * F::sin(c_phase);
+            <span class="kw">let </span>x0_real = -(a2 + c_real + (d0 * c_real) / (c_module * c_module)) / (_3 * a3);
+
+            <span class="kw">let </span>e_real = -F::one() / _2;
+            <span class="kw">let </span>e_img = F::sqrt(_3) / _2;
+            <span class="kw">let </span>c1_real = c_real * e_real - c_img * e_img;
+            <span class="kw">let </span>c1_img = c_real * e_img + c_img * e_real;
+            <span class="kw">let </span>x1_real = -(a2 + c1_real + (d0 * c1_real) / (c1_real * c1_real + c1_img * c1_img)) / (_3 * a3);
+
+            <span class="kw">let </span>c2_real = c1_real * e_real - c1_img * e_img;
+            <span class="kw">let </span>c2_img = c1_real * e_img + c1_img * e_real;
+            <span class="kw">let </span>x2_real = -(a2 + c2_real + (d0 * c2_real) / (c2_real * c2_real + c2_img * c2_img)) / (_3 * a3);
+
+            Roots::One([x0_real]).add_new_root(x1_real).add_new_root(x2_real)
+        }
+    }
+}
+
+<span class="attribute">#[cfg(test)]
+</span><span class="kw">mod </span>test {
+    <span class="kw">use </span><span class="kw">super</span>::<span class="kw">super</span>::<span class="kw">super</span>::<span class="kw-2">*</span>;
+
+    <span class="attribute">#[test]
+    </span><span class="kw">fn </span>test_find_roots_cubic() {
+        <span class="macro">assert_eq!</span>(find_roots_cubic(<span class="number">1f32</span>, <span class="number">0f32</span>, <span class="number">0f32</span>, <span class="number">0f32</span>), Roots::One([<span class="number">0f32</span>]));
+
+        <span class="kw">match </span>find_roots_cubic(<span class="number">1f64</span>, <span class="number">0f64</span>, -<span class="number">1f64</span>, <span class="number">0f64</span>) {
+            Roots::Three(x) =&gt; {
+                <span class="macro">assert_float_array_eq!</span>(<span class="number">1e-15</span>, x, [-<span class="number">1f64</span>, <span class="number">0f64</span>, <span class="number">1f64</span>]);
+            }
+            <span class="kw">_ </span>=&gt; {
+                <span class="macro">assert!</span>(<span class="bool-val">false</span>);
+            }
+        }
+    }
+
+    <span class="attribute">#[test]
+    </span><span class="kw">fn </span>test_find_roots_cubic_small_discriminant() {
+        <span class="comment">// Try to find roots of the cubic polynomial where the highest coefficient is very small
+        // (as reported by Andrew Hunter in July 2019)
+        </span><span class="kw">match </span>find_roots_cubic(
+            -<span class="number">0.000000000000000040410628481035f64</span>,
+            <span class="number">0.0126298310280606f64</span>,
+            -<span class="number">0.100896606408756f64</span>,
+            <span class="number">0.0689539597036461f64</span>,
+        ) {
+            Roots::Three(x) =&gt; {
+                <span class="comment">// (According to Wolfram Alpha, roots must be 0.7547108770537f64, 7.23404258961f64, 312537357195213f64)
+                // Actual result differ a little due to the limited precision of calculations.
+                </span><span class="macro">assert_float_array_eq!</span>(<span class="number">1e-8</span>, x, [<span class="number">0.7583841816097057f64</span>, <span class="number">7.233267996296344f64</span>, <span class="number">312537357195212.9f64</span>]);
+            }
+            <span class="kw">_ </span>=&gt; {
+                <span class="macro">assert!</span>(<span class="bool-val">false</span>);
+            }
+        }
+    }
+}
+</code></pre></div>
+</section></div></main><div id="rustdoc-vars" data-root-path="../../../" data-current-crate="roots" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.65.0 (897e37553 2022-11-02)" ></div></body></html>

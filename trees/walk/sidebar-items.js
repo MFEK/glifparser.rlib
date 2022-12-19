@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"enum":[["Visit","Distinguish between visiting a leaf node and (begin/end of) visiting a branched node."]],"struct":[["ForestWalk","Depth first search in forest."],["TreeWalk","Depth first search in tree."]]};

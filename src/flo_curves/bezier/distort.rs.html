@@ -1,0 +1,170 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/fred/.cargo/registry/src/github.com-1ecc6299db9ec823/flo_curves-0.6.1/src/bezier/distort.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>distort.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" href="../../../normalize.css"><link rel="stylesheet" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" href="../../../ayu.css" disabled><link rel="stylesheet" href="../../../dark.css" disabled><link rel="stylesheet" href="../../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../../storage.js"></script><script defer src="../../../source-script.js"></script><script defer src="../../../source-files.js"></script><script defer src="../../../main.js"></script><noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../../flo_curves/index.html"><div class="logo-container"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></div></a><h2 class="location"></h2></nav><nav class="sidebar"><a class="sidebar-logo" href="../../../flo_curves/index.html"><div class="logo-container"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></div></a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../../flo_curves/index.html"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></a><nav class="sub"><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><button type="button">?</button></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../wheel.svg"></a></div></div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">1</span>
+<span id="2">2</span>
+<span id="3">3</span>
+<span id="4">4</span>
+<span id="5">5</span>
+<span id="6">6</span>
+<span id="7">7</span>
+<span id="8">8</span>
+<span id="9">9</span>
+<span id="10">10</span>
+<span id="11">11</span>
+<span id="12">12</span>
+<span id="13">13</span>
+<span id="14">14</span>
+<span id="15">15</span>
+<span id="16">16</span>
+<span id="17">17</span>
+<span id="18">18</span>
+<span id="19">19</span>
+<span id="20">20</span>
+<span id="21">21</span>
+<span id="22">22</span>
+<span id="23">23</span>
+<span id="24">24</span>
+<span id="25">25</span>
+<span id="26">26</span>
+<span id="27">27</span>
+<span id="28">28</span>
+<span id="29">29</span>
+<span id="30">30</span>
+<span id="31">31</span>
+<span id="32">32</span>
+<span id="33">33</span>
+<span id="34">34</span>
+<span id="35">35</span>
+<span id="36">36</span>
+<span id="37">37</span>
+<span id="38">38</span>
+<span id="39">39</span>
+<span id="40">40</span>
+<span id="41">41</span>
+<span id="42">42</span>
+<span id="43">43</span>
+<span id="44">44</span>
+<span id="45">45</span>
+<span id="46">46</span>
+<span id="47">47</span>
+<span id="48">48</span>
+<span id="49">49</span>
+<span id="50">50</span>
+<span id="51">51</span>
+<span id="52">52</span>
+<span id="53">53</span>
+<span id="54">54</span>
+<span id="55">55</span>
+<span id="56">56</span>
+<span id="57">57</span>
+<span id="58">58</span>
+<span id="59">59</span>
+<span id="60">60</span>
+<span id="61">61</span>
+<span id="62">62</span>
+<span id="63">63</span>
+<span id="64">64</span>
+<span id="65">65</span>
+<span id="66">66</span>
+<span id="67">67</span>
+<span id="68">68</span>
+<span id="69">69</span>
+<span id="70">70</span>
+<span id="71">71</span>
+<span id="72">72</span>
+<span id="73">73</span>
+<span id="74">74</span>
+<span id="75">75</span>
+<span id="76">76</span>
+<span id="77">77</span>
+<span id="78">78</span>
+<span id="79">79</span>
+<span id="80">80</span>
+<span id="81">81</span>
+<span id="82">82</span>
+<span id="83">83</span>
+<span id="84">84</span>
+</pre><pre class="rust"><code><span class="kw">use </span><span class="kw">super</span>::fit::<span class="kw-2">*</span>;
+<span class="kw">use </span><span class="kw">super</span>::walk::<span class="kw-2">*</span>;
+<span class="kw">use </span><span class="kw">super</span>::path::<span class="kw-2">*</span>;
+<span class="kw">use </span><span class="kw">super</span>::curve::<span class="kw-2">*</span>;
+<span class="kw">use </span><span class="kw">super</span>::normal::<span class="kw-2">*</span>;
+<span class="kw">use </span><span class="kw">crate</span>::geo::<span class="kw-2">*</span>;
+
+<span class="kw">use </span>std::iter;
+
+<span class="doccomment">///
+/// Distorts a curve using an arbitrary function
+///
+</span><span class="kw">pub fn </span>distort_curve&lt;CurveIn, DistortFn, CurveOut&gt;(curve: <span class="kw-2">&amp;</span>CurveIn, distort_fn: DistortFn, step_len: f64, max_error: f64) -&gt; <span class="prelude-ty">Option</span>&lt;Vec&lt;CurveOut&gt;&gt;
+<span class="kw">where
+</span>CurveIn:        BezierCurve,
+CurveIn::Point: Normalize+Coordinate2D,
+CurveOut:       BezierCurveFactory&lt;Point=CurveIn::Point&gt;,
+DistortFn:      Fn(CurveIn::Point, f64) -&gt; CurveOut::Point {
+    <span class="comment">// Walk the curve at roughly step_len increments
+    </span><span class="kw">let </span>sections    = walk_curve_evenly(curve, step_len, step_len / <span class="number">4.0</span>);
+
+    <span class="comment">// Generate the points to fit to using the distortion function
+    </span><span class="kw">let </span>fit_points  = sections.map(|section| {
+            <span class="kw">let </span>(t, <span class="kw">_</span>)  = section.original_curve_t_values();
+            <span class="kw">let </span>pos     = curve.point_at_pos(t);
+
+            (pos, t)
+        })
+        .chain(iter::once((curve.point_at_pos(<span class="number">1.0</span>), <span class="number">1.0</span>)))
+        .map(|(point, t)| distort_fn(point, t))
+        .collect::&lt;Vec&lt;<span class="kw">_</span>&gt;&gt;();
+
+    <span class="comment">// Fit the points to generate the final curve
+    </span>fit_curve(<span class="kw-2">&amp;</span>fit_points, max_error)
+}
+
+<span class="doccomment">///
+/// Distorts a path using an arbitrary function
+///
+</span><span class="kw">pub fn </span>distort_path&lt;PathIn, DistortFn, PathOut&gt;(path: <span class="kw-2">&amp;</span>PathIn, distort_fn: DistortFn, step_len: f64, max_error: f64) -&gt; <span class="prelude-ty">Option</span>&lt;PathOut&gt; 
+<span class="kw">where
+</span>PathIn:     BezierPath,
+PathOut:    BezierPathFactory&lt;Point=PathIn::Point&gt;,
+DistortFn:  Fn(PathIn::Point, <span class="kw-2">&amp;</span>Curve&lt;PathIn::Point&gt;, f64) -&gt; PathOut::Point {
+    <span class="comment">// The initial point is derived from the first curve
+    </span><span class="kw">let </span>start_point         = path.start_point();
+    <span class="kw">let </span><span class="kw-2">mut </span>path_points     = path.points();
+    <span class="kw">let </span><span class="kw-2">mut </span>current_point   = path_points.next()<span class="question-mark">?</span>;
+    <span class="kw">let </span><span class="kw-2">mut </span>current_curve   = Curve::from_points(start_point, (current_point.<span class="number">0</span>, current_point.<span class="number">1</span>), current_point.<span class="number">2</span>);
+    <span class="kw">let </span>start_point         = distort_fn(start_point, <span class="kw-2">&amp;</span>current_curve, <span class="number">0.0</span>);
+
+    <span class="comment">// Process the remaining points to generate the new path
+    </span><span class="kw">let </span><span class="kw-2">mut </span>new_points      = <span class="macro">vec!</span>[];
+
+    <span class="kw">loop </span>{
+        <span class="comment">// Distort the current curve
+        </span><span class="kw">let </span>sections    = walk_curve_evenly(<span class="kw-2">&amp;</span>current_curve, step_len, step_len / <span class="number">4.0</span>);
+
+        <span class="kw">let </span>fit_points  = sections.map(|section| {
+                <span class="kw">let </span>(t, <span class="kw">_</span>)  = section.original_curve_t_values();
+                <span class="kw">let </span>pos     = current_curve.point_at_pos(t);
+
+                (pos, t)
+            })
+            .chain(iter::once((current_curve.point_at_pos(<span class="number">1.0</span>), <span class="number">1.0</span>)))
+            .map(|(point, t)| distort_fn(point, <span class="kw-2">&amp;</span>current_curve, t))
+            .collect::&lt;Vec&lt;<span class="kw">_</span>&gt;&gt;();
+
+        <span class="comment">// Fit the points to generate the new curves
+        </span><span class="kw">let </span>new_curves      = fit_curve::&lt;Curve&lt;<span class="kw">_</span>&gt;&gt;(<span class="kw-2">&amp;</span>fit_points, max_error)<span class="question-mark">?</span>;
+        new_points.extend(new_curves.into_iter().map(|curve| {
+            <span class="kw">let </span>(cp1, cp2) = curve.control_points();
+            (cp1, cp2, curve.end_point())
+        }));
+
+        <span class="comment">// Move to the next curve (stopping once we reach the end of the list of the points)
+        </span><span class="kw">let </span>next_start_point    = current_curve.end_point();
+        current_point           = <span class="kw">if let </span><span class="prelude-val">Some</span>(point) = path_points.next() { point } <span class="kw">else </span>{ <span class="kw">break</span>; };
+        current_curve           = Curve::from_points(next_start_point, (current_point.<span class="number">0</span>, current_point.<span class="number">1</span>), current_point.<span class="number">2</span>);
+    }
+
+    <span class="comment">// Create the new path from the result
+    </span><span class="prelude-val">Some</span>(PathOut::from_points(start_point, new_points))
+}
+</code></pre></div>
+</section></div></main><div id="rustdoc-vars" data-root-path="../../../" data-current-crate="flo_curves" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.65.0 (897e37553 2022-11-02)" ></div></body></html>

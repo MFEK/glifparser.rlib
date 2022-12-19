@@ -1,1 +1,1 @@
-initSidebarItems({"struct":[["GlifString",""],["GlifStringLenOne",""]],"trait":[["ToGlifString",""]]});
+window.SIDEBAR_ITEMS = {"struct":[["GlifString",""],["GlifStringLenOne",""]],"trait":[["ToGlifString",""]]};

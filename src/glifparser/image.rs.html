@@ -1,102 +1,102 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src&#x2F;image.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>image.rs - source</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled ><script id="default-settings" ></script><script src="../../storage.js"></script><script src="../../crates.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../glifparser/index.html'><div class='logo-container rust-logo'><img src='../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="18" height="18" alt="Pick another theme!" src="../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../settings.html" title="settings"><img width="18" height="18" alt="Change settings" src="../../wheel.svg"></a></div></form></nav><section id="main" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">  1</span>
-<span id="2">  2</span>
-<span id="3">  3</span>
-<span id="4">  4</span>
-<span id="5">  5</span>
-<span id="6">  6</span>
-<span id="7">  7</span>
-<span id="8">  8</span>
-<span id="9">  9</span>
-<span id="10"> 10</span>
-<span id="11"> 11</span>
-<span id="12"> 12</span>
-<span id="13"> 13</span>
-<span id="14"> 14</span>
-<span id="15"> 15</span>
-<span id="16"> 16</span>
-<span id="17"> 17</span>
-<span id="18"> 18</span>
-<span id="19"> 19</span>
-<span id="20"> 20</span>
-<span id="21"> 21</span>
-<span id="22"> 22</span>
-<span id="23"> 23</span>
-<span id="24"> 24</span>
-<span id="25"> 25</span>
-<span id="26"> 26</span>
-<span id="27"> 27</span>
-<span id="28"> 28</span>
-<span id="29"> 29</span>
-<span id="30"> 30</span>
-<span id="31"> 31</span>
-<span id="32"> 32</span>
-<span id="33"> 33</span>
-<span id="34"> 34</span>
-<span id="35"> 35</span>
-<span id="36"> 36</span>
-<span id="37"> 37</span>
-<span id="38"> 38</span>
-<span id="39"> 39</span>
-<span id="40"> 40</span>
-<span id="41"> 41</span>
-<span id="42"> 42</span>
-<span id="43"> 43</span>
-<span id="44"> 44</span>
-<span id="45"> 45</span>
-<span id="46"> 46</span>
-<span id="47"> 47</span>
-<span id="48"> 48</span>
-<span id="49"> 49</span>
-<span id="50"> 50</span>
-<span id="51"> 51</span>
-<span id="52"> 52</span>
-<span id="53"> 53</span>
-<span id="54"> 54</span>
-<span id="55"> 55</span>
-<span id="56"> 56</span>
-<span id="57"> 57</span>
-<span id="58"> 58</span>
-<span id="59"> 59</span>
-<span id="60"> 60</span>
-<span id="61"> 61</span>
-<span id="62"> 62</span>
-<span id="63"> 63</span>
-<span id="64"> 64</span>
-<span id="65"> 65</span>
-<span id="66"> 66</span>
-<span id="67"> 67</span>
-<span id="68"> 68</span>
-<span id="69"> 69</span>
-<span id="70"> 70</span>
-<span id="71"> 71</span>
-<span id="72"> 72</span>
-<span id="73"> 73</span>
-<span id="74"> 74</span>
-<span id="75"> 75</span>
-<span id="76"> 76</span>
-<span id="77"> 77</span>
-<span id="78"> 78</span>
-<span id="79"> 79</span>
-<span id="80"> 80</span>
-<span id="81"> 81</span>
-<span id="82"> 82</span>
-<span id="83"> 83</span>
-<span id="84"> 84</span>
-<span id="85"> 85</span>
-<span id="86"> 86</span>
-<span id="87"> 87</span>
-<span id="88"> 88</span>
-<span id="89"> 89</span>
-<span id="90"> 90</span>
-<span id="91"> 91</span>
-<span id="92"> 92</span>
-<span id="93"> 93</span>
-<span id="94"> 94</span>
-<span id="95"> 95</span>
-<span id="96"> 96</span>
-<span id="97"> 97</span>
-<span id="98"> 98</span>
-<span id="99"> 99</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/image.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>image.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" href="../../normalize.css"><link rel="stylesheet" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" href="../../ayu.css" disabled><link rel="stylesheet" href="../../dark.css" disabled><link rel="stylesheet" href="../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../storage.js"></script><script defer src="../../source-script.js"></script><script defer src="../../source-files.js"></script><script defer src="../../main.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../glifparser/index.html"><div class="logo-container"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></div></a><h2 class="location"></h2></nav><nav class="sidebar"><a class="sidebar-logo" href="../../glifparser/index.html"><div class="logo-container"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></div></a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../glifparser/index.html"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></a><nav class="sub"><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><button type="button">?</button></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../wheel.svg"></a></div></div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">1</span>
+<span id="2">2</span>
+<span id="3">3</span>
+<span id="4">4</span>
+<span id="5">5</span>
+<span id="6">6</span>
+<span id="7">7</span>
+<span id="8">8</span>
+<span id="9">9</span>
+<span id="10">10</span>
+<span id="11">11</span>
+<span id="12">12</span>
+<span id="13">13</span>
+<span id="14">14</span>
+<span id="15">15</span>
+<span id="16">16</span>
+<span id="17">17</span>
+<span id="18">18</span>
+<span id="19">19</span>
+<span id="20">20</span>
+<span id="21">21</span>
+<span id="22">22</span>
+<span id="23">23</span>
+<span id="24">24</span>
+<span id="25">25</span>
+<span id="26">26</span>
+<span id="27">27</span>
+<span id="28">28</span>
+<span id="29">29</span>
+<span id="30">30</span>
+<span id="31">31</span>
+<span id="32">32</span>
+<span id="33">33</span>
+<span id="34">34</span>
+<span id="35">35</span>
+<span id="36">36</span>
+<span id="37">37</span>
+<span id="38">38</span>
+<span id="39">39</span>
+<span id="40">40</span>
+<span id="41">41</span>
+<span id="42">42</span>
+<span id="43">43</span>
+<span id="44">44</span>
+<span id="45">45</span>
+<span id="46">46</span>
+<span id="47">47</span>
+<span id="48">48</span>
+<span id="49">49</span>
+<span id="50">50</span>
+<span id="51">51</span>
+<span id="52">52</span>
+<span id="53">53</span>
+<span id="54">54</span>
+<span id="55">55</span>
+<span id="56">56</span>
+<span id="57">57</span>
+<span id="58">58</span>
+<span id="59">59</span>
+<span id="60">60</span>
+<span id="61">61</span>
+<span id="62">62</span>
+<span id="63">63</span>
+<span id="64">64</span>
+<span id="65">65</span>
+<span id="66">66</span>
+<span id="67">67</span>
+<span id="68">68</span>
+<span id="69">69</span>
+<span id="70">70</span>
+<span id="71">71</span>
+<span id="72">72</span>
+<span id="73">73</span>
+<span id="74">74</span>
+<span id="75">75</span>
+<span id="76">76</span>
+<span id="77">77</span>
+<span id="78">78</span>
+<span id="79">79</span>
+<span id="80">80</span>
+<span id="81">81</span>
+<span id="82">82</span>
+<span id="83">83</span>
+<span id="84">84</span>
+<span id="85">85</span>
+<span id="86">86</span>
+<span id="87">87</span>
+<span id="88">88</span>
+<span id="89">89</span>
+<span id="90">90</span>
+<span id="91">91</span>
+<span id="92">92</span>
+<span id="93">93</span>
+<span id="94">94</span>
+<span id="95">95</span>
+<span id="96">96</span>
+<span id="97">97</span>
+<span id="98">98</span>
+<span id="99">99</span>
 <span id="100">100</span>
 <span id="101">101</span>
 <span id="102">102</span>
@@ -242,251 +242,249 @@
 <span id="242">242</span>
 <span id="243">243</span>
 <span id="244">244</span>
-</pre><pre class="rust"><code><span class="doccomment">//! .glif `&lt;image&gt;` w/ability to read to a bitmap if filename valid</span>
+</pre><pre class="rust"><code><span class="doccomment">//! .glif `&lt;image&gt;` w/ability to read to a bitmap if filename valid
 
-<span class="kw">mod</span> <span class="ident">xml</span>;
+</span><span class="kw">mod </span>xml;
 
-<span class="kw">use</span> <span class="ident">std::io</span>;
-<span class="kw">use</span> <span class="ident">std::fs</span>;
-<span class="kw">use</span> <span class="ident">std::path</span>;
-<span class="kw">use</span> <span class="ident">std::rc::Rc</span>;
+<span class="kw">use </span>std::io;
+<span class="kw">use </span>std::fs;
+<span class="kw">use </span>std::path;
+<span class="kw">use </span>std::rc::Rc;
 
-<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::color::Color</span>;
-<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::error::GlifParserError</span>;
-<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::glif::GlifLike</span>;
-<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::matrix::GlifMatrix</span>;
+<span class="kw">use </span><span class="kw">crate</span>::color::Color;
+<span class="kw">use </span><span class="kw">crate</span>::error::GlifParserError;
+<span class="kw">use </span><span class="kw">crate</span>::glif::GlifLike;
+<span class="kw">use </span><span class="kw">crate</span>::matrix::GlifMatrix;
 
-<span class="kw">use</span> <span class="ident">serde</span>::{<span class="ident">Serialize</span>, <span class="ident">Deserialize</span>};
-<span class="kw">use</span> <span class="ident">integer_or_float::IntegerOrFloat</span>;
-<span class="kw">use</span> <span class="ident">kurbo::Affine</span>;
-<span class="kw">use</span> <span class="ident">log::warn</span>;
-<span class="kw">use</span> <span class="ident">image</span>::{<span class="self">self</span>, <span class="ident">DynamicImage</span>, <span class="ident">io::Reader</span>};
+<span class="kw">use </span>serde::{Serialize, Deserialize};
+<span class="kw">use </span>integer_or_float::IntegerOrFloat;
+<span class="kw">use </span>kurbo::Affine;
+<span class="kw">use </span>log::warn;
+<span class="kw">use </span>image::{<span class="self">self</span>, DynamicImage, io::Reader};
 
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">Clone</span>, <span class="ident">PartialEq</span>)]</span>
-<span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">DataLoadState</span> {
-    <span class="doccomment">/// Image loading hasn&#39;t even been attempted yet</span>
-    <span class="ident">NotTried</span>,
-    <span class="doccomment">/// Image loading tried, but failed to read from disk</span>
-    <span class="ident">TriedAndFailed</span>,
-    <span class="doccomment">/// Image loaded from disk to data, but not yet decoded</span>
-    <span class="ident">Loaded</span>,
-    <span class="doccomment">/// Image loaded, but decoding it to a bitmap failed</span>
-    <span class="ident">LoadedDecodeFailed</span>,
-    <span class="doccomment">/// Image has been loaded and decoded to a bitmap</span>
-    <span class="ident">Decoded</span>,
+<span class="attribute">#[derive(Debug, Clone, PartialEq)]
+</span><span class="kw">pub enum </span>DataLoadState {
+    <span class="doccomment">/// Image loading hasn&#39;t even been attempted yet
+    </span>NotTried,
+    <span class="doccomment">/// Image loading tried, but failed to read from disk
+    </span>TriedAndFailed,
+    <span class="doccomment">/// Image loaded from disk to data, but not yet decoded
+    </span>Loaded,
+    <span class="doccomment">/// Image loaded, but decoding it to a bitmap failed
+    </span>LoadedDecodeFailed,
+    <span class="doccomment">/// Image has been loaded and decoded to a bitmap
+    </span>Decoded,
 }
 
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">Clone</span>, <span class="ident">PartialEq</span>)]</span>
-<span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">DataOrBitmap</span> {
-    <span class="ident">Data</span>(<span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>),
-    <span class="doccomment">/// `pixels` always RGBA8888</span>
-    <span class="ident">Bitmap</span>{<span class="ident">pixels</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>, <span class="ident">width</span>: <span class="ident">u32</span>, <span class="ident">height</span>: <span class="ident">u32</span>}
+<span class="attribute">#[derive(Debug, Clone, PartialEq)]
+</span><span class="kw">pub enum </span>DataOrBitmap {
+    Data(Vec&lt;u8&gt;),
+    <span class="doccomment">/// `pixels` always RGBA8888
+    </span>Bitmap{pixels: Vec&lt;u8&gt;, width: u32, height: u32}
 }
 
-<span class="kw">impl</span> <span class="ident">DataOrBitmap</span> {
-    <span class="kw">fn</span> <span class="ident">unwrap_data</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span> {
-        <span class="kw">match</span> <span class="self">self</span> {
-            <span class="ident">DataOrBitmap::Data</span>(<span class="ident">v</span>) =&gt; <span class="kw-2">&amp;</span><span class="ident">v</span>,
-            <span class="ident">DataOrBitmap::Bitmap</span>{..} =&gt; <span class="macro">panic!</span>(<span class="string">&quot;Unwrapped data of bitmap variant&quot;</span>)
+<span class="kw">impl </span>DataOrBitmap {
+    <span class="kw">fn </span>unwrap_data(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>Vec&lt;u8&gt; {
+        <span class="kw">match </span><span class="self">self </span>{
+            DataOrBitmap::Data(v) =&gt; <span class="kw-2">&amp;</span>v,
+            DataOrBitmap::Bitmap{..} =&gt; <span class="macro">panic!</span>(<span class="string">&quot;Unwrapped data of bitmap variant&quot;</span>)
         }
     }
 }
 
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">Clone</span>, <span class="ident">PartialEq</span>)]</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">ImageData</span> {
-    <span class="kw">pub</span> <span class="ident">data</span>: <span class="ident">DataOrBitmap</span>,
-    <span class="kw">pub</span> <span class="ident">state</span>: <span class="ident">DataLoadState</span>
+<span class="attribute">#[derive(Debug, Clone, PartialEq)]
+</span><span class="kw">pub struct </span>ImageData {
+    <span class="kw">pub </span>data: DataOrBitmap,
+    <span class="kw">pub </span>state: DataLoadState
 }
 
-<span class="kw">impl</span> <span class="ident">ImageData</span> {
-    <span class="kw">fn</span> <span class="ident">new</span>() -&gt; <span class="self">Self</span> {
-        <span class="self">Self</span> {
-            <span class="ident">data</span>: <span class="ident">DataOrBitmap::Data</span>(<span class="macro">vec!</span>[]),
-            <span class="ident">state</span>: <span class="ident">DataLoadState::NotTried</span>
+<span class="kw">impl </span>ImageData {
+    <span class="kw">fn </span>new() -&gt; <span class="self">Self </span>{
+        <span class="self">Self </span>{
+            data: DataOrBitmap::Data(<span class="macro">vec!</span>[]),
+            state: DataLoadState::NotTried
         }
     }
 
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">guess_codec</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">ImageCodec</span> {
-        <span class="kw">let</span> <span class="ident">codec</span> <span class="op">=</span> <span class="kw">match</span> <span class="self">self</span>.<span class="ident">data</span>.<span class="ident">unwrap_data</span>().<span class="ident">chunks</span>(<span class="number">12</span>).<span class="ident">next</span>() {
-            <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span>[<span class="number">0x42</span>, <span class="number">0x4D</span>, <span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>]) =&gt; <span class="ident">ImageCodec::BMP</span>,
-            <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span>[<span class="number">0xFF</span>, <span class="number">0xD8</span>, <span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>]) =&gt; <span class="ident">ImageCodec::JPEG</span>,
-            <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span>[<span class="number">0x89</span>, <span class="number">0x50</span>, <span class="number">0x4E</span>, <span class="number">0x47</span>, <span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>]) =&gt; <span class="ident">ImageCodec::PNG</span>,
-            <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span>[<span class="number">0x47</span>, <span class="number">0x49</span>, <span class="number">0x46</span>, <span class="number">0x38</span>, <span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>]) =&gt; <span class="ident">ImageCodec::GIF</span>,
-            <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span>[<span class="number">0x49</span>, <span class="number">0x49</span>, <span class="number">0x2A</span>, <span class="number">0x00</span>, <span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>]) =&gt; <span class="ident">ImageCodec::TIFF</span>,
-            <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span>[<span class="number">0x4D</span>, <span class="number">0x4D</span>, <span class="number">0x00</span>, <span class="number">0x2A</span>, <span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>]) =&gt; <span class="ident">ImageCodec::TIFF</span>,
-            <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span>[<span class="number">0x52</span>, <span class="number">0x49</span>, <span class="number">0x46</span>, <span class="number">0x46</span>, <span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>, <span class="number">0x57</span>, <span class="number">0x45</span>, <span class="number">0x42</span>, <span class="number">0x50</span>]) =&gt; <span class="ident">ImageCodec::WebP</span>,
-            <span class="kw">_</span> =&gt; <span class="ident">ImageCodec::Unknown</span>
+    <span class="kw">pub fn </span>guess_codec(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; ImageCodec {
+        <span class="kw">let </span>codec = <span class="kw">match </span><span class="self">self</span>.data.unwrap_data().chunks(<span class="number">12</span>).next() {
+            <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span>[<span class="number">0x42</span>, <span class="number">0x4D</span>, <span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>]) =&gt; ImageCodec::BMP,
+            <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span>[<span class="number">0xFF</span>, <span class="number">0xD8</span>, <span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>]) =&gt; ImageCodec::JPEG,
+            <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span>[<span class="number">0x89</span>, <span class="number">0x50</span>, <span class="number">0x4E</span>, <span class="number">0x47</span>, <span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>]) =&gt; ImageCodec::PNG,
+            <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span>[<span class="number">0x47</span>, <span class="number">0x49</span>, <span class="number">0x46</span>, <span class="number">0x38</span>, <span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>]) =&gt; ImageCodec::GIF,
+            <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span>[<span class="number">0x49</span>, <span class="number">0x49</span>, <span class="number">0x2A</span>, <span class="number">0x00</span>, <span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>]) =&gt; ImageCodec::TIFF,
+            <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span>[<span class="number">0x4D</span>, <span class="number">0x4D</span>, <span class="number">0x00</span>, <span class="number">0x2A</span>, <span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>]) =&gt; ImageCodec::TIFF,
+            <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span>[<span class="number">0x52</span>, <span class="number">0x49</span>, <span class="number">0x46</span>, <span class="number">0x46</span>, <span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>, <span class="number">0x57</span>, <span class="number">0x45</span>, <span class="number">0x42</span>, <span class="number">0x50</span>]) =&gt; ImageCodec::WebP,
+            <span class="kw">_ </span>=&gt; ImageCodec::Unknown
         };
 
-        <span class="kw">if</span> <span class="ident">codec</span> <span class="op">!</span><span class="op">=</span> <span class="ident">ImageCodec::PNG</span> {
+        <span class="kw">if </span>codec != ImageCodec::PNG {
             <span class="macro">warn!</span>(<span class="string">&quot;Image not PNG! `fontmake` and other UFO spec conformant progams will refuse to embed the bitmap. MFEKglif may still be able to display it, however, so only use it for proofing, not output.&quot;</span>);
         }
 
-        <span class="ident">codec</span>
+        codec
     }
 }
 
-<span class="attribute">#[<span class="ident">allow</span>(<span class="ident">non_snake_case</span>)]</span> <span class="comment">// to match UFO spec https://unifiedfontobject.org/versions/ufo3/glyphs/glif/#image</span>
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">Clone</span>, <span class="ident">PartialEq</span>, <span class="ident">Serialize</span>, <span class="ident">Deserialize</span>)]</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">GlifImage</span> {
-    <span class="kw">pub</span> <span class="ident">filename</span>: <span class="ident">path::PathBuf</span>,
-    <span class="kw">pub</span> <span class="ident">xScale</span>: <span class="ident">IntegerOrFloat</span>,
-    <span class="kw">pub</span> <span class="ident">xyScale</span>: <span class="ident">IntegerOrFloat</span>,
-    <span class="kw">pub</span> <span class="ident">yxScale</span>: <span class="ident">IntegerOrFloat</span>,
-    <span class="kw">pub</span> <span class="ident">yScale</span>: <span class="ident">IntegerOrFloat</span>,
-    <span class="kw">pub</span> <span class="ident">xOffset</span>: <span class="ident">IntegerOrFloat</span>,
-    <span class="kw">pub</span> <span class="ident">yOffset</span>: <span class="ident">IntegerOrFloat</span>,
-    <span class="kw">pub</span> <span class="ident">identifier</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span>,
-    <span class="kw">pub</span> <span class="ident">color</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Color</span><span class="op">&gt;</span>,
+<span class="attribute">#[allow(non_snake_case)] </span><span class="comment">// to match UFO spec https://unifiedfontobject.org/versions/ufo3/glyphs/glif/#image
+</span><span class="attribute">#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+</span><span class="kw">pub struct </span>GlifImage {
+    <span class="kw">pub </span>filename: path::PathBuf,
+    <span class="kw">pub </span>xScale: IntegerOrFloat,
+    <span class="kw">pub </span>xyScale: IntegerOrFloat,
+    <span class="kw">pub </span>yxScale: IntegerOrFloat,
+    <span class="kw">pub </span>yScale: IntegerOrFloat,
+    <span class="kw">pub </span>xOffset: IntegerOrFloat,
+    <span class="kw">pub </span>yOffset: IntegerOrFloat,
+    <span class="kw">pub </span>identifier: <span class="prelude-ty">Option</span>&lt;String&gt;,
+    <span class="kw">pub </span>color: <span class="prelude-ty">Option</span>&lt;Color&gt;,
 }
 
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">Clone</span>, <span class="ident">PartialEq</span>)]</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Image</span> {
-    <span class="kw">pub</span> <span class="ident">filename</span>: <span class="ident">path::PathBuf</span>,
-    <span class="kw">pub</span> <span class="ident">data</span>: <span class="ident">ImageData</span>,
-    <span class="kw">pub</span> <span class="ident">codec</span>: <span class="ident">ImageCodec</span>,
-    <span class="kw">pub</span> <span class="ident">matrix</span>: <span class="ident">Affine</span>,
-    <span class="kw">pub</span> <span class="ident">color</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Color</span><span class="op">&gt;</span>,
+<span class="attribute">#[derive(Debug, Clone, PartialEq)]
+</span><span class="kw">pub struct </span>Image {
+    <span class="kw">pub </span>filename: path::PathBuf,
+    <span class="kw">pub </span>data: ImageData,
+    <span class="kw">pub </span>codec: ImageCodec,
+    <span class="kw">pub </span>matrix: Affine,
+    <span class="kw">pub </span>color: <span class="prelude-ty">Option</span>&lt;Color&gt;,
 }
 
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">Clone</span>, <span class="ident">PartialEq</span>)]</span>
-<span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">ImageCodec</span> {
-    <span class="ident">Unknown</span>,
-    <span class="ident">PNG</span>,
-    <span class="ident">JPEG</span>,
-    <span class="ident">TIFF</span>,
-    <span class="ident">GIF</span>,
-    <span class="ident">WebP</span>,
-    <span class="ident">BMP</span>,
+<span class="attribute">#[derive(Debug, Clone, PartialEq)]
+</span><span class="kw">pub enum </span>ImageCodec {
+    Unknown,
+    PNG,
+    JPEG,
+    TIFF,
+    GIF,
+    WebP,
+    BMP,
 }
 
-<span class="kw">impl</span> <span class="ident">GlifImage</span> {
-    <span class="kw">fn</span> <span class="ident">new</span>() -&gt; <span class="self">Self</span> {
-        <span class="self">Self</span> {
-            <span class="ident">filename</span>: <span class="ident">path::PathBuf::new</span>(),
-            <span class="ident">xScale</span>: <span class="ident">IntegerOrFloat::Integer</span>(<span class="number">1</span>),
-            <span class="ident">xyScale</span>: <span class="ident">IntegerOrFloat::Integer</span>(<span class="number">0</span>),
-            <span class="ident">yxScale</span>: <span class="ident">IntegerOrFloat::Integer</span>(<span class="number">0</span>),
-            <span class="ident">yScale</span>: <span class="ident">IntegerOrFloat::Integer</span>(<span class="number">1</span>),
-            <span class="ident">xOffset</span>: <span class="ident">IntegerOrFloat::Integer</span>(<span class="number">0</span>),
-            <span class="ident">yOffset</span>: <span class="ident">IntegerOrFloat::Integer</span>(<span class="number">0</span>),
-            <span class="ident">identifier</span>: <span class="prelude-val">None</span>,
-            <span class="ident">color</span>: <span class="prelude-val">None</span>,
+<span class="kw">impl </span>GlifImage {
+    <span class="kw">fn </span>new() -&gt; <span class="self">Self </span>{
+        <span class="self">Self </span>{
+            filename: path::PathBuf::new(),
+            xScale: IntegerOrFloat::Integer(<span class="number">1</span>),
+            xyScale: IntegerOrFloat::Integer(<span class="number">0</span>),
+            yxScale: IntegerOrFloat::Integer(<span class="number">0</span>),
+            yScale: IntegerOrFloat::Integer(<span class="number">1</span>),
+            xOffset: IntegerOrFloat::Integer(<span class="number">0</span>),
+            yOffset: IntegerOrFloat::Integer(<span class="number">0</span>),
+            identifier: <span class="prelude-val">None</span>,
+            color: <span class="prelude-val">None</span>,
         }
     }
 
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_filename</span><span class="op">&lt;</span><span class="ident">P</span>: <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">path::PathBuf</span><span class="op">&gt;</span><span class="op">&gt;</span>(<span class="ident">p</span>: <span class="ident">P</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">GlifParserError</span><span class="op">&gt;</span> {
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">ret</span> <span class="op">=</span> <span class="ident"><span class="self">Self</span>::new</span>();
-        <span class="ident">ret</span>.<span class="ident">filename</span> <span class="op">=</span> <span class="ident">p</span>.<span class="ident">into</span>();
-        <span class="prelude-val">Ok</span>(<span class="ident">ret</span>)
+    <span class="kw">pub fn </span>from_filename&lt;P: Into&lt;path::PathBuf&gt;&gt;(p: P) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, GlifParserError&gt; {
+        <span class="kw">let </span><span class="kw-2">mut </span>ret = <span class="self">Self</span>::new();
+        ret.filename = p.into();
+        <span class="prelude-val">Ok</span>(ret)
     }
 }
 
-<span class="kw">impl</span> <span class="ident">GlifImage</span> {
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">matrix</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">GlifMatrix</span> {
-        <span class="ident">GlifMatrix</span>(<span class="self">self</span>.<span class="ident">xScale</span>, <span class="self">self</span>.<span class="ident">xyScale</span>, <span class="self">self</span>.<span class="ident">yxScale</span>, <span class="self">self</span>.<span class="ident">yScale</span>, <span class="self">self</span>.<span class="ident">xOffset</span>, <span class="self">self</span>.<span class="ident">yOffset</span>)
+<span class="kw">impl </span>GlifImage {
+    <span class="kw">pub fn </span>matrix(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; GlifMatrix {
+        GlifMatrix(<span class="self">self</span>.xScale, <span class="self">self</span>.xyScale, <span class="self">self</span>.yxScale, <span class="self">self</span>.yScale, <span class="self">self</span>.xOffset, <span class="self">self</span>.yOffset)
     }
 
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">set_matrix</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">matrix</span>: <span class="kw">impl</span> <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">Affine</span><span class="op">&gt;</span>) {
-        <span class="kw">let</span> <span class="ident">coeffs</span> <span class="op">=</span> <span class="ident">matrix</span>.<span class="ident">into</span>().<span class="ident">as_coeffs</span>();
-        <span class="self">self</span>.<span class="ident">xScale</span> <span class="op">=</span> <span class="ident">coeffs</span>[<span class="number">0</span>].<span class="ident">into</span>();
-        <span class="self">self</span>.<span class="ident">xyScale</span> <span class="op">=</span> <span class="ident">coeffs</span>[<span class="number">1</span>].<span class="ident">into</span>();
-        <span class="self">self</span>.<span class="ident">yxScale</span> <span class="op">=</span> <span class="ident">coeffs</span>[<span class="number">2</span>].<span class="ident">into</span>();
-        <span class="self">self</span>.<span class="ident">yScale</span> <span class="op">=</span> <span class="ident">coeffs</span>[<span class="number">3</span>].<span class="ident">into</span>();
-        <span class="self">self</span>.<span class="ident">xOffset</span> <span class="op">=</span> <span class="ident">coeffs</span>[<span class="number">4</span>].<span class="ident">into</span>();
-        <span class="self">self</span>.<span class="ident">yOffset</span> <span class="op">=</span> <span class="ident">coeffs</span>[<span class="number">5</span>].<span class="ident">into</span>();
-    }
-}
-
-<span class="kw">impl</span> <span class="ident">GlifImage</span> {
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">to_image_of</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">glif</span>: <span class="kw-2">&amp;</span><span class="kw">dyn</span> <span class="ident">GlifLike</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Image</span>, <span class="ident">GlifParserError</span><span class="op">&gt;</span> {
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">ret</span> <span class="op">=</span> <span class="ident">Image::new</span>();
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">filename</span> <span class="op">=</span> <span class="ident">glif</span>.<span class="ident">filename</span>().<span class="ident">as_ref</span>().<span class="ident">ok_or</span>(<span class="ident">GlifParserError::GlifFilenameNotSet</span>(<span class="ident">glif</span>.<span class="ident">name</span>().<span class="ident">clone</span>()))<span class="question-mark">?</span>.<span class="ident">clone</span>().<span class="ident">parent</span>().<span class="ident">ok_or</span>(<span class="ident">GlifParserError::GlifFilenameInsane</span>(<span class="string">&quot;Failed to parent&quot;</span>.<span class="ident">to_string</span>()))<span class="question-mark">?</span>.<span class="ident">to_path_buf</span>();
-        <span class="ident">filename</span>.<span class="ident">push</span>(<span class="string">&quot;..&quot;</span>);
-        <span class="ident">filename</span>.<span class="ident">push</span>(<span class="string">&quot;images&quot;</span>);
-        <span class="ident">filename</span>.<span class="ident">push</span>(<span class="self">self</span>.<span class="ident">filename</span>.<span class="ident">clone</span>());
-        <span class="ident">ret</span>.<span class="ident">filename</span> <span class="op">=</span> <span class="ident">filename</span>;
-        <span class="ident">ret</span>.<span class="ident">load</span>()<span class="question-mark">?</span>;
-        <span class="ident">ret</span>.<span class="ident">matrix</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">matrix</span>().<span class="ident">into</span>();
-        <span class="ident">ret</span>.<span class="ident">color</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">color</span>;
-        <span class="prelude-val">Ok</span>(<span class="ident">ret</span>)
+    <span class="kw">pub fn </span>set_matrix(<span class="kw-2">&amp;mut </span><span class="self">self</span>, matrix: <span class="kw">impl </span>Into&lt;Affine&gt;) {
+        <span class="kw">let </span>coeffs = matrix.into().as_coeffs();
+        <span class="self">self</span>.xScale = coeffs[<span class="number">0</span>].into();
+        <span class="self">self</span>.xyScale = coeffs[<span class="number">1</span>].into();
+        <span class="self">self</span>.yxScale = coeffs[<span class="number">2</span>].into();
+        <span class="self">self</span>.yScale = coeffs[<span class="number">3</span>].into();
+        <span class="self">self</span>.xOffset = coeffs[<span class="number">4</span>].into();
+        <span class="self">self</span>.yOffset = coeffs[<span class="number">5</span>].into();
     }
 }
 
-<span class="kw">impl</span> <span class="ident">Image</span> {
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_filename</span><span class="op">&lt;</span><span class="ident">P</span>: <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">path::PathBuf</span><span class="op">&gt;</span><span class="op">&gt;</span>(<span class="ident">p</span>: <span class="ident">P</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">GlifParserError</span><span class="op">&gt;</span> {
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">ret</span> <span class="op">=</span> <span class="ident"><span class="self">Self</span>::new</span>();
-        <span class="ident">ret</span>.<span class="ident">filename</span> <span class="op">=</span> <span class="ident">p</span>.<span class="ident">into</span>();
-        <span class="ident">ret</span>.<span class="ident">load</span>()<span class="question-mark">?</span>;
-        <span class="prelude-val">Ok</span>(<span class="ident">ret</span>)
+<span class="kw">impl </span>GlifImage {
+    <span class="kw">pub fn </span>to_image_of(<span class="kw-2">&amp;</span><span class="self">self</span>, glif: <span class="kw-2">&amp;</span><span class="kw">dyn </span>GlifLike) -&gt; <span class="prelude-ty">Result</span>&lt;Image, GlifParserError&gt; {
+        <span class="kw">let </span><span class="kw-2">mut </span>ret = Image::new();
+        <span class="kw">let </span><span class="kw-2">mut </span>filename = glif.filename().as_ref().ok_or(GlifParserError::GlifFilenameNotSet(glif.name().clone()))<span class="question-mark">?</span>.clone().parent().ok_or(GlifParserError::GlifFilenameInsane(<span class="string">&quot;Failed to parent&quot;</span>.to_string()))<span class="question-mark">?</span>.to_path_buf();
+        filename.push(<span class="string">&quot;..&quot;</span>);
+        filename.push(<span class="string">&quot;images&quot;</span>);
+        filename.push(<span class="self">self</span>.filename.clone());
+        ret.filename = filename;
+        ret.load()<span class="question-mark">?</span>;
+        ret.matrix = <span class="self">self</span>.matrix().into();
+        ret.color = <span class="self">self</span>.color;
+        <span class="prelude-val">Ok</span>(ret)
+    }
+}
+
+<span class="kw">impl </span>Image {
+    <span class="kw">pub fn </span>from_filename&lt;P: Into&lt;path::PathBuf&gt;&gt;(p: P) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, GlifParserError&gt; {
+        <span class="kw">let </span><span class="kw-2">mut </span>ret = <span class="self">Self</span>::new();
+        ret.filename = p.into();
+        ret.load()<span class="question-mark">?</span>;
+        <span class="prelude-val">Ok</span>(ret)
     }
 
-    <span class="kw">fn</span> <span class="ident">new</span>() -&gt; <span class="self">Self</span> {
-        <span class="self">Self</span> {
-            <span class="ident">filename</span>: <span class="ident">path::PathBuf::new</span>(),
-            <span class="ident">data</span>: <span class="ident">ImageData::new</span>(),
-            <span class="ident">codec</span>: <span class="ident">ImageCodec::Unknown</span>,
-            <span class="ident">matrix</span>: <span class="ident">Affine::IDENTITY</span>,
-            <span class="ident">color</span>: <span class="prelude-val">None</span>,
+    <span class="kw">fn </span>new() -&gt; <span class="self">Self </span>{
+        <span class="self">Self </span>{
+            filename: path::PathBuf::new(),
+            data: ImageData::new(),
+            codec: ImageCodec::Unknown,
+            matrix: Affine::IDENTITY,
+            color: <span class="prelude-val">None</span>,
         }
     }
 
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">load</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">GlifParserError</span><span class="op">&gt;</span> {
-        <span class="self">self</span>.<span class="ident">data</span>.<span class="ident">data</span> <span class="op">=</span> <span class="ident">DataOrBitmap::Data</span>(<span class="ident">fs::read</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">filename</span>).<span class="ident">or_else</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> {
-            <span class="self">self</span>.<span class="ident">data</span>.<span class="ident">state</span> <span class="op">=</span> <span class="ident">DataLoadState::TriedAndFailed</span>;
-            <span class="prelude-val">Err</span>(<span class="ident">GlifParserError::ImageIoError</span>(<span class="prelude-val">Some</span>(<span class="ident">Rc::new</span>(<span class="ident">e</span>))))
+    <span class="kw">pub fn </span>load(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;(), GlifParserError&gt; {
+        <span class="self">self</span>.data.data = DataOrBitmap::Data(fs::read(<span class="kw-2">&amp;</span><span class="self">self</span>.filename).or_else(|e| {
+            <span class="self">self</span>.data.state = DataLoadState::TriedAndFailed;
+            <span class="prelude-val">Err</span>(GlifParserError::ImageIoError(<span class="prelude-val">Some</span>(Rc::new(e))))
         })<span class="question-mark">?</span>);
-        <span class="self">self</span>.<span class="ident">codec</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">data</span>.<span class="ident">guess_codec</span>();
-        <span class="self">self</span>.<span class="ident">data</span>.<span class="ident">state</span> <span class="op">=</span> <span class="ident">DataLoadState::Loaded</span>;
+        <span class="self">self</span>.codec = <span class="self">self</span>.data.guess_codec();
+        <span class="self">self</span>.data.state = DataLoadState::Loaded;
         <span class="prelude-val">Ok</span>(())
     }
 
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">data</span>(<span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>, <span class="ident">GlifParserError</span><span class="op">&gt;</span> {
-        <span class="kw">match</span> <span class="self">self</span>.<span class="ident">data</span>.<span class="ident">state</span> {
-            <span class="ident">DataLoadState::NotTried</span> =&gt; <span class="prelude-val">Err</span>(<span class="ident">GlifParserError::ImageNotLoaded</span>),
-            <span class="ident">DataLoadState::TriedAndFailed</span> =&gt; <span class="prelude-val">Err</span>(<span class="ident">GlifParserError::ImageIoError</span>(<span class="prelude-val">None</span>)),
-            <span class="ident">DataLoadState::Loaded</span> =&gt; <span class="prelude-val">Ok</span>(<span class="self">self</span>.<span class="ident">data</span>.<span class="ident">data</span>.<span class="ident">unwrap_data</span>().<span class="ident">clone</span>()),
-            <span class="kw">_</span> =&gt; <span class="macro">unimplemented!</span>()
+    <span class="kw">pub fn </span>data(<span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;u8&gt;, GlifParserError&gt; {
+        <span class="kw">match </span><span class="self">self</span>.data.state {
+            DataLoadState::NotTried =&gt; <span class="prelude-val">Err</span>(GlifParserError::ImageNotLoaded),
+            DataLoadState::TriedAndFailed =&gt; <span class="prelude-val">Err</span>(GlifParserError::ImageIoError(<span class="prelude-val">None</span>)),
+            DataLoadState::Loaded =&gt; <span class="prelude-val">Ok</span>(<span class="self">self</span>.data.data.unwrap_data().clone()),
+            <span class="kw">_ </span>=&gt; <span class="macro">unimplemented!</span>()
         }
     }
 
-    <span class="doccomment">/// bitmap is guaranteed to always be in RGBA8888 format. Meaning, for each pixel, there&#39;s a</span>
-    <span class="doccomment">/// [u8; 4]. So a 3x1 image may look like [3, 3, 3, 255, 3, 3, 3, 255, 3, 3, 3, 255].to_vec().</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">decode</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">GlifParserError</span><span class="op">&gt;</span> {
-        <span class="kw">let</span> <span class="ident">raw_data</span> <span class="op">=</span> <span class="kw">match</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">data</span>.<span class="ident">data</span> {
-            <span class="ident">DataOrBitmap::Data</span>(<span class="ident">d</span>) =&gt; <span class="ident">d</span>,
-            <span class="ident">DataOrBitmap::Bitmap</span> { .. } =&gt; <span class="prelude-val">Err</span>(<span class="ident">GlifParserError::ImageIoError</span>(<span class="prelude-val">None</span>))<span class="question-mark">?</span>
-        };
-        <span class="kw">let</span> <span class="ident">reader</span> <span class="op">=</span> <span class="ident">Reader::new</span>(<span class="ident">io::Cursor::new</span>(<span class="ident">raw_data</span>)).<span class="ident">with_guessed_format</span>().<span class="ident">or_else</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span><span class="prelude-val">Err</span>(<span class="ident">GlifParserError::ImageIoError</span>(<span class="prelude-val">Some</span>(<span class="ident">Rc::new</span>(<span class="ident">e</span>)))))<span class="question-mark">?</span>;
-        <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">not</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;more-image-formats&quot;</span>))]</span>
-        <span class="kw">if</span> <span class="op">!</span>(<span class="ident">reader</span>.<span class="ident">format</span>() <span class="op">==</span> <span class="prelude-val">Some</span>(<span class="ident">image::ImageFormat::Png</span>)) {
-            <span class="self">self</span>.<span class="ident">data</span>.<span class="ident">state</span> <span class="op">=</span> <span class="ident">DataLoadState::LoadedDecodeFailed</span>;
-            <span class="prelude-val">Err</span>(<span class="ident">GlifParserError::ImageNotPNG</span>)<span class="question-mark">?</span>
-        }
-        <span class="kw">let</span> <span class="ident">bitmap</span> <span class="op">=</span> <span class="ident">reader</span>.<span class="ident">decode</span>().<span class="ident">or_else</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> {
-            <span class="self">self</span>.<span class="ident">data</span>.<span class="ident">state</span> <span class="op">=</span> <span class="ident">DataLoadState::LoadedDecodeFailed</span>;
-            <span class="prelude-val">Err</span>(<span class="ident">GlifParserError::ImageNotDecodable</span>)
+    <span class="doccomment">/// bitmap is guaranteed to always be in RGBA8888 format. Meaning, for each pixel, there&#39;s a
+    /// [u8; 4]. So a 3x1 image may look like [3, 3, 3, 255, 3, 3, 3, 255, 3, 3, 3, 255].to_vec().
+    </span><span class="kw">pub fn </span>decode(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;(), GlifParserError&gt; {
+        <span class="kw">let </span>raw_data = <span class="kw">match </span><span class="kw-2">&amp;</span><span class="self">self</span>.data.data {
+            DataOrBitmap::Data(d) =&gt; d,
+            DataOrBitmap::Bitmap { .. } =&gt; <span class="prelude-val">Err</span>(GlifParserError::ImageIoError(<span class="prelude-val">None</span>))<span class="question-mark">?
+        </span>};
+        <span class="kw">let </span>reader = Reader::new(io::Cursor::new(raw_data)).with_guessed_format().or_else(|e|<span class="prelude-val">Err</span>(GlifParserError::ImageIoError(<span class="prelude-val">Some</span>(Rc::new(e)))))<span class="question-mark">?</span>;
+        <span class="attribute">#[cfg(not(feature = <span class="string">&quot;more-image-formats&quot;</span>))]
+        </span><span class="kw">if </span>!(reader.format() == <span class="prelude-val">Some</span>(image::ImageFormat::Png)) {
+            <span class="self">self</span>.data.state = DataLoadState::LoadedDecodeFailed;
+            <span class="prelude-val">Err</span>(GlifParserError::ImageNotPNG)<span class="question-mark">?
+        </span>}
+        <span class="kw">let </span>bitmap = reader.decode().or_else(|<span class="kw">_</span>| {
+            <span class="self">self</span>.data.state = DataLoadState::LoadedDecodeFailed;
+            <span class="prelude-val">Err</span>(GlifParserError::ImageNotDecodable)
         })<span class="question-mark">?</span>;
 
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">pixels</span>;
-        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">color</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">color</span> {
-            <span class="ident">pixels</span> <span class="op">=</span> <span class="ident">DynamicImage::ImageLuma8</span>(<span class="ident">bitmap</span>.<span class="ident">to_luma8</span>()).<span class="ident">to_rgba8</span>();
-            <span class="kw">for</span> <span class="ident">pixel</span> <span class="kw">in</span> <span class="ident">pixels</span>.<span class="ident">chunks_mut</span>(<span class="number">4</span>) {
-                <span class="ident">pixel</span>[<span class="number">0</span>] <span class="op">=</span> (<span class="ident">pixel</span>[<span class="number">0</span>] <span class="op">*</span> <span class="ident">color</span>.<span class="ident">r</span>).<span class="ident">into</span>();
-                <span class="ident">pixel</span>[<span class="number">1</span>] <span class="op">=</span> (<span class="ident">pixel</span>[<span class="number">1</span>] <span class="op">*</span> <span class="ident">color</span>.<span class="ident">g</span>).<span class="ident">into</span>();
-                <span class="ident">pixel</span>[<span class="number">2</span>] <span class="op">=</span> (<span class="ident">pixel</span>[<span class="number">2</span>] <span class="op">*</span> <span class="ident">color</span>.<span class="ident">b</span>).<span class="ident">into</span>();
-                <span class="ident">pixel</span>[<span class="number">3</span>] <span class="op">=</span> (<span class="ident">pixel</span>[<span class="number">3</span>] <span class="op">*</span> <span class="ident">color</span>.<span class="ident">a</span>).<span class="ident">into</span>();
+        <span class="kw">let </span><span class="kw-2">mut </span>pixels;
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(color) = <span class="self">self</span>.color {
+            pixels = DynamicImage::ImageLuma8(bitmap.to_luma8()).to_rgba8();
+            <span class="kw">for </span>pixel <span class="kw">in </span>pixels.chunks_mut(<span class="number">4</span>) {
+                pixel[<span class="number">0</span>] = (pixel[<span class="number">0</span>] * color.r).into();
+                pixel[<span class="number">1</span>] = (pixel[<span class="number">1</span>] * color.g).into();
+                pixel[<span class="number">2</span>] = (pixel[<span class="number">2</span>] * color.b).into();
+                pixel[<span class="number">3</span>] = (pixel[<span class="number">3</span>] * color.a).into();
             }
-        } <span class="kw">else</span> {
-            <span class="ident">pixels</span> <span class="op">=</span> <span class="ident">bitmap</span>.<span class="ident">to_rgba8</span>();
+        } <span class="kw">else </span>{
+            pixels = bitmap.to_rgba8();
         }
 
-        <span class="self">self</span>.<span class="ident">data</span>.<span class="ident">data</span> <span class="op">=</span> <span class="ident">DataOrBitmap::Bitmap</span> { <span class="ident">pixels</span>: <span class="ident">pixels</span>.<span class="ident">to_vec</span>(), <span class="ident">width</span>: <span class="ident">pixels</span>.<span class="ident">width</span>(), <span class="ident">height</span>: <span class="ident">pixels</span>.<span class="ident">height</span>() };
-        <span class="self">self</span>.<span class="ident">data</span>.<span class="ident">state</span> <span class="op">=</span> <span class="ident">DataLoadState::Decoded</span>;
+        <span class="self">self</span>.data.data = DataOrBitmap::Bitmap { pixels: pixels.to_vec(), width: pixels.width(), height: pixels.height() };
+        <span class="self">self</span>.data.state = DataLoadState::Decoded;
         <span class="prelude-val">Ok</span>(())
     }
 }
 </code></pre></div>
-</section><section id="search" class="content hidden"></section><div id="rustdoc-vars" data-root-path="../../" data-current-crate="glifparser" data-search-index-js="../../search-index.js" data-search-js="../../search.js"></div>
-    <script src="../../main.js"></script><script src="../../source-script.js"></script><script src="../../source-files.js"></script>
-</body></html>
+</section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="glifparser" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.65.0 (897e37553 2022-11-02)" ></div></body></html>

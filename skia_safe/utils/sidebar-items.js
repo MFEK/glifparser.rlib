@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"enum":[["TypefaceGlyph",""]],"fn":[["new_null_canvas",""]],"mod":[["parse_path",""],["shadow_utils",""],["text_utils",""]],"struct":[["Camera3D",""],["Patch3D",""]],"type":[["CustomTypefaceBuilder",""],["OrderedFontMgr",""],["View3D",""]]};

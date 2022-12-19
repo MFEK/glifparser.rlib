@@ -1,102 +1,102 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src&#x2F;glif&#x2F;read.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>read.rs - source</title><link rel="stylesheet" type="text/css" href="../../../normalize.css"><link rel="stylesheet" type="text/css" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../../ayu.css" disabled ><script id="default-settings" ></script><script src="../../../storage.js"></script><script src="../../../crates.js"></script><noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../../favicon.svg"><style type="text/css">#crate-search{background-image:url("../../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../../glifparser/index.html'><div class='logo-container rust-logo'><img src='../../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="18" height="18" alt="Pick another theme!" src="../../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../../settings.html" title="settings"><img width="18" height="18" alt="Change settings" src="../../../wheel.svg"></a></div></form></nav><section id="main" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">  1</span>
-<span id="2">  2</span>
-<span id="3">  3</span>
-<span id="4">  4</span>
-<span id="5">  5</span>
-<span id="6">  6</span>
-<span id="7">  7</span>
-<span id="8">  8</span>
-<span id="9">  9</span>
-<span id="10"> 10</span>
-<span id="11"> 11</span>
-<span id="12"> 12</span>
-<span id="13"> 13</span>
-<span id="14"> 14</span>
-<span id="15"> 15</span>
-<span id="16"> 16</span>
-<span id="17"> 17</span>
-<span id="18"> 18</span>
-<span id="19"> 19</span>
-<span id="20"> 20</span>
-<span id="21"> 21</span>
-<span id="22"> 22</span>
-<span id="23"> 23</span>
-<span id="24"> 24</span>
-<span id="25"> 25</span>
-<span id="26"> 26</span>
-<span id="27"> 27</span>
-<span id="28"> 28</span>
-<span id="29"> 29</span>
-<span id="30"> 30</span>
-<span id="31"> 31</span>
-<span id="32"> 32</span>
-<span id="33"> 33</span>
-<span id="34"> 34</span>
-<span id="35"> 35</span>
-<span id="36"> 36</span>
-<span id="37"> 37</span>
-<span id="38"> 38</span>
-<span id="39"> 39</span>
-<span id="40"> 40</span>
-<span id="41"> 41</span>
-<span id="42"> 42</span>
-<span id="43"> 43</span>
-<span id="44"> 44</span>
-<span id="45"> 45</span>
-<span id="46"> 46</span>
-<span id="47"> 47</span>
-<span id="48"> 48</span>
-<span id="49"> 49</span>
-<span id="50"> 50</span>
-<span id="51"> 51</span>
-<span id="52"> 52</span>
-<span id="53"> 53</span>
-<span id="54"> 54</span>
-<span id="55"> 55</span>
-<span id="56"> 56</span>
-<span id="57"> 57</span>
-<span id="58"> 58</span>
-<span id="59"> 59</span>
-<span id="60"> 60</span>
-<span id="61"> 61</span>
-<span id="62"> 62</span>
-<span id="63"> 63</span>
-<span id="64"> 64</span>
-<span id="65"> 65</span>
-<span id="66"> 66</span>
-<span id="67"> 67</span>
-<span id="68"> 68</span>
-<span id="69"> 69</span>
-<span id="70"> 70</span>
-<span id="71"> 71</span>
-<span id="72"> 72</span>
-<span id="73"> 73</span>
-<span id="74"> 74</span>
-<span id="75"> 75</span>
-<span id="76"> 76</span>
-<span id="77"> 77</span>
-<span id="78"> 78</span>
-<span id="79"> 79</span>
-<span id="80"> 80</span>
-<span id="81"> 81</span>
-<span id="82"> 82</span>
-<span id="83"> 83</span>
-<span id="84"> 84</span>
-<span id="85"> 85</span>
-<span id="86"> 86</span>
-<span id="87"> 87</span>
-<span id="88"> 88</span>
-<span id="89"> 89</span>
-<span id="90"> 90</span>
-<span id="91"> 91</span>
-<span id="92"> 92</span>
-<span id="93"> 93</span>
-<span id="94"> 94</span>
-<span id="95"> 95</span>
-<span id="96"> 96</span>
-<span id="97"> 97</span>
-<span id="98"> 98</span>
-<span id="99"> 99</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/glif/read.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>read.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" href="../../../normalize.css"><link rel="stylesheet" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" href="../../../ayu.css" disabled><link rel="stylesheet" href="../../../dark.css" disabled><link rel="stylesheet" href="../../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../../storage.js"></script><script defer src="../../../source-script.js"></script><script defer src="../../../source-files.js"></script><script defer src="../../../main.js"></script><noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../../glifparser/index.html"><div class="logo-container"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></div></a><h2 class="location"></h2></nav><nav class="sidebar"><a class="sidebar-logo" href="../../../glifparser/index.html"><div class="logo-container"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></div></a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../../glifparser/index.html"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></a><nav class="sub"><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><button type="button">?</button></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../wheel.svg"></a></div></div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">1</span>
+<span id="2">2</span>
+<span id="3">3</span>
+<span id="4">4</span>
+<span id="5">5</span>
+<span id="6">6</span>
+<span id="7">7</span>
+<span id="8">8</span>
+<span id="9">9</span>
+<span id="10">10</span>
+<span id="11">11</span>
+<span id="12">12</span>
+<span id="13">13</span>
+<span id="14">14</span>
+<span id="15">15</span>
+<span id="16">16</span>
+<span id="17">17</span>
+<span id="18">18</span>
+<span id="19">19</span>
+<span id="20">20</span>
+<span id="21">21</span>
+<span id="22">22</span>
+<span id="23">23</span>
+<span id="24">24</span>
+<span id="25">25</span>
+<span id="26">26</span>
+<span id="27">27</span>
+<span id="28">28</span>
+<span id="29">29</span>
+<span id="30">30</span>
+<span id="31">31</span>
+<span id="32">32</span>
+<span id="33">33</span>
+<span id="34">34</span>
+<span id="35">35</span>
+<span id="36">36</span>
+<span id="37">37</span>
+<span id="38">38</span>
+<span id="39">39</span>
+<span id="40">40</span>
+<span id="41">41</span>
+<span id="42">42</span>
+<span id="43">43</span>
+<span id="44">44</span>
+<span id="45">45</span>
+<span id="46">46</span>
+<span id="47">47</span>
+<span id="48">48</span>
+<span id="49">49</span>
+<span id="50">50</span>
+<span id="51">51</span>
+<span id="52">52</span>
+<span id="53">53</span>
+<span id="54">54</span>
+<span id="55">55</span>
+<span id="56">56</span>
+<span id="57">57</span>
+<span id="58">58</span>
+<span id="59">59</span>
+<span id="60">60</span>
+<span id="61">61</span>
+<span id="62">62</span>
+<span id="63">63</span>
+<span id="64">64</span>
+<span id="65">65</span>
+<span id="66">66</span>
+<span id="67">67</span>
+<span id="68">68</span>
+<span id="69">69</span>
+<span id="70">70</span>
+<span id="71">71</span>
+<span id="72">72</span>
+<span id="73">73</span>
+<span id="74">74</span>
+<span id="75">75</span>
+<span id="76">76</span>
+<span id="77">77</span>
+<span id="78">78</span>
+<span id="79">79</span>
+<span id="80">80</span>
+<span id="81">81</span>
+<span id="82">82</span>
+<span id="83">83</span>
+<span id="84">84</span>
+<span id="85">85</span>
+<span id="86">86</span>
+<span id="87">87</span>
+<span id="88">88</span>
+<span id="89">89</span>
+<span id="90">90</span>
+<span id="91">91</span>
+<span id="92">92</span>
+<span id="93">93</span>
+<span id="94">94</span>
+<span id="95">95</span>
+<span id="96">96</span>
+<span id="97">97</span>
+<span id="98">98</span>
+<span id="99">99</span>
 <span id="100">100</span>
 <span id="101">101</span>
 <span id="102">102</span>
@@ -304,313 +304,339 @@
 <span id="304">304</span>
 <span id="305">305</span>
 <span id="306">306</span>
-</pre><pre class="rust"><code><span class="kw">mod</span> <span class="ident">xml</span>;
-<span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="self">self</span>::xml::FromXML</span>;
+<span id="307">307</span>
+<span id="308">308</span>
+<span id="309">309</span>
+<span id="310">310</span>
+<span id="311">311</span>
+<span id="312">312</span>
+<span id="313">313</span>
+<span id="314">314</span>
+<span id="315">315</span>
+<span id="316">316</span>
+<span id="317">317</span>
+<span id="318">318</span>
+<span id="319">319</span>
+<span id="320">320</span>
+</pre><pre class="rust"><code><span class="kw">mod </span>xml;
+<span class="kw">pub use </span><span class="self">self</span>::xml::FromXML;
 
-<span class="kw">use</span> <span class="ident">std::convert::TryInto</span>;
-<span class="kw">use</span> <span class="ident">std::path</span>;
-<span class="kw">use</span> <span class="ident">std::rc::Rc</span>;
+<span class="kw">use </span>std::convert::TryInto;
+<span class="kw">use </span>std::path;
+<span class="kw">use </span>std::rc::Rc;
 
-<span class="kw">use</span> <span class="ident">integer_or_float::IntegerOrFloat</span>;
+<span class="kw">use </span>integer_or_float::IntegerOrFloat;
 
-<span class="kw">use</span> <span class="ident"><span class="kw">super</span>::Glif</span>;
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;glifserde&quot;</span>)]</span>
-<span class="kw">use</span> <span class="ident"><span class="kw">super</span>::Lib</span>;
-<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::error::GlifParserError</span>::{<span class="self">self</span>, <span class="ident">GlifInputError</span>};
-<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::component::GlifComponent</span>;
-<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::guideline::Guideline</span>;
-<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::outline</span>::{<span class="ident">GlifContour</span>, <span class="ident">GlifOutline</span>, <span class="ident">Outline</span>};
-<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::pedantry::Pedantry</span>;
-<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::point</span>::{<span class="ident">GlifPoint</span>, <span class="ident">PointData</span>, <span class="ident">PointType</span>};
-<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::point::IsValid</span> <span class="kw">as</span> <span class="kw">_</span>;
-<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::string::GlifStringLenOne</span>;
-<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::anchor</span>::{<span class="ident">Anchor</span>, <span class="ident">GlifAnchor</span>};
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;glifimage&quot;</span>)]</span>
-<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::image::GlifImage</span>;
+<span class="kw">use </span><span class="kw">super</span>::Glif;
+<span class="attribute">#[cfg(feature = <span class="string">&quot;glifserde&quot;</span>)]
+</span><span class="kw">use </span><span class="kw">super</span>::Lib;
+<span class="kw">use </span><span class="kw">crate</span>::error::GlifParserError::{<span class="self">self</span>, GlifInputError};
+<span class="kw">use </span><span class="kw">crate</span>::component::GlifComponent;
+<span class="kw">use </span><span class="kw">crate</span>::guideline::Guideline;
+<span class="kw">use </span><span class="kw">crate</span>::outline::{GlifContour, GlifOutline, Outline};
+<span class="kw">use </span><span class="kw">crate</span>::pedantry::Pedantry;
+<span class="kw">use </span><span class="kw">crate</span>::point::{GlifPoint, PointData, PointType};
+<span class="kw">use </span><span class="kw">crate</span>::point::IsValid <span class="kw">as _</span>;
+<span class="kw">use </span><span class="kw">crate</span>::string::GlifStringLenOne;
+<span class="kw">use </span><span class="kw">crate</span>::anchor::{Anchor, GlifAnchor};
+<span class="attribute">#[cfg(feature = <span class="string">&quot;glifimage&quot;</span>)]
+</span><span class="kw">use </span><span class="kw">crate</span>::image::GlifImage;
 
-<span class="macro">macro_rules!</span> <span class="ident">input_error</span> {
-    (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">str</span>:<span class="ident">expr</span>) =&gt; {
-        <span class="ident">GlifInputError</span>(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">str</span>.<span class="ident">to_string</span>())
+<span class="macro">macro_rules! </span>input_error {
+    (<span class="macro-nonterminal">$str</span>:expr) =&gt; {
+        GlifInputError(<span class="macro-nonterminal">$str</span>.to_string())
     }
 }
 
-<span class="comment">// Both components and images have the same matrix/identifier values. This is DRY.</span>
-<span class="macro">macro_rules!</span> <span class="ident">load_matrix_and_identifier</span> {
-    (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">xml_el</span>:<span class="ident">ident</span>, <span class="macro-nonterminal">$</span><span class="kw">struct</span>:<span class="macro-nonterminal">ident</span>, ($(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">attr</span>:<span class="ident">ident</span>),<span class="op">+</span>)) =&gt; {
+<span class="comment">// Both components and images have the same matrix/identifier values. This is DRY.
+</span><span class="macro">macro_rules! </span>load_matrix_and_identifier {
+    (<span class="macro-nonterminal">$xml_el</span>:ident, <span class="macro-nonterminal">$</span><span class="kw">struct</span>:<span class="macro-nonterminal">ident</span>, ($(<span class="macro-nonterminal">$attr</span>:ident),+)) =&gt; {
         $(
-            <span class="kw">let</span> <span class="ident">maybe_err</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">xml_el</span>.<span class="ident">attributes</span>.<span class="ident">get</span>(<span class="macro">stringify!</span>(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">attr</span>)).<span class="ident">map</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(),<span class="ident">GlifParserError</span><span class="op">&gt;</span> { 
-                <span class="kw">let</span> <span class="ident">v</span> <span class="op">=</span> <span class="ident">e</span>.<span class="ident">as_str</span>().<span class="ident">try_into</span>().<span class="ident">or</span>(<span class="prelude-val">Err</span>(<span class="macro">input_error!</span>(<span class="macro">concat!</span>(<span class="string">&quot;Matrix member &quot;</span>, <span class="macro">stringify!</span>(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">attr</span>), <span class="string">&quot; not float&quot;</span>))))<span class="question-mark">?</span>;
-                <span class="macro-nonterminal">$</span><span class="kw">struct</span>.<span class="macro-nonterminal">$</span><span class="macro-nonterminal">attr</span> <span class="op">=</span> <span class="ident">v</span>;
+            <span class="kw">let </span>maybe_err = <span class="macro-nonterminal">$xml_el</span>.attributes.get(<span class="macro">stringify!</span>(<span class="macro-nonterminal">$attr</span>)).map(|e| -&gt; <span class="prelude-ty">Result</span>&lt;(),GlifParserError&gt; { 
+                <span class="kw">let </span>v = e.as_str().try_into().or(<span class="prelude-val">Err</span>(<span class="macro">input_error!</span>(<span class="macro">concat!</span>(<span class="string">&quot;Matrix member &quot;</span>, <span class="macro">stringify!</span>(<span class="macro-nonterminal">$attr</span>), <span class="string">&quot; not float&quot;</span>))))<span class="question-mark">?</span>;
+                <span class="macro-nonterminal">$</span><span class="kw">struct</span>.<span class="macro-nonterminal">$attr </span>= v;
                 <span class="prelude-val">Ok</span>(())
             });
-            <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="prelude-val">Err</span>(<span class="ident">e</span>)) <span class="op">=</span> <span class="ident">maybe_err</span> { <span class="prelude-val">Err</span>(<span class="ident">e</span>)<span class="question-mark">?</span>; };
-        )<span class="op">+</span>
-        <span class="macro-nonterminal">$</span><span class="macro-nonterminal">xml_el</span>.<span class="ident">attributes</span>.<span class="ident">get</span>(<span class="string">&quot;identifier&quot;</span>).<span class="ident">map</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span>{ <span class="macro-nonterminal">$</span><span class="kw">struct</span>.<span class="macro-nonterminal">identifier</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">e</span>.<span class="ident">clone</span>()); });
+            <span class="kw">if let </span><span class="prelude-val">Some</span>(<span class="prelude-val">Err</span>(e)) = maybe_err { <span class="prelude-val">Err</span>(e)<span class="question-mark">?</span>; };
+        )+
+        <span class="macro-nonterminal">$xml_el</span>.attributes.get(<span class="string">&quot;identifier&quot;</span>).map(|e|{ <span class="macro-nonterminal">$</span><span class="kw">struct</span>.<span class="macro-nonterminal">identifier </span>= <span class="prelude-val">Some</span>(e.clone()); });
     }
 }
 
-<span class="kw">use</span> <span class="ident">std::fs</span>;
-<span class="doccomment">/// If you have a known filename, it is always preferable to call this function, as it sets the</span>
-<span class="doccomment">/// filename on the Glif&lt;PD&gt; as well as on its GlifComponent&#39;s, easing their transition into</span>
-<span class="doccomment">/// Component&#39;s.</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">read_ufo_glif_from_filename</span><span class="op">&lt;</span><span class="ident">F</span>: <span class="ident">AsRef</span><span class="op">&lt;</span><span class="ident">path::Path</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Clone</span>, <span class="ident">PD</span>: <span class="ident">PointData</span><span class="op">&gt;</span>(<span class="ident">filename</span>: <span class="ident">F</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Glif</span><span class="op">&lt;</span><span class="ident">PD</span><span class="op">&gt;</span>, <span class="ident">GlifParserError</span><span class="op">&gt;</span> {
-    <span class="ident">read_ufo_glif_from_filename_pedantic</span>(<span class="ident">filename</span>, <span class="ident">Pedantry::default</span>())
+<span class="kw">use </span>std::fs;
+<span class="doccomment">/// If you have a known filename, it is always preferable to call this function, as it sets the
+/// filename on the Glif&lt;PD&gt; as well as on its GlifComponent&#39;s, easing their transition into
+/// Component&#39;s.
+</span><span class="kw">pub fn </span>read_ufo_glif_from_filename&lt;F: AsRef&lt;path::Path&gt; + Clone, PD: PointData&gt;(filename: F) -&gt; <span class="prelude-ty">Result</span>&lt;Glif&lt;PD&gt;, GlifParserError&gt; {
+    read_ufo_glif_from_filename_pedantic(filename, Pedantry::default())
 }
 
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">read_ufo_glif_from_filename_pedantic</span><span class="op">&lt;</span><span class="ident">F</span>: <span class="ident">AsRef</span><span class="op">&lt;</span><span class="ident">path::Path</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Clone</span>, <span class="ident">PD</span>: <span class="ident">PointData</span><span class="op">&gt;</span>(<span class="ident">filename</span>: <span class="ident">F</span>, <span class="ident">pedantry</span>: <span class="ident">Pedantry</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Glif</span><span class="op">&lt;</span><span class="ident">PD</span><span class="op">&gt;</span>, <span class="ident">GlifParserError</span><span class="op">&gt;</span> {
-    <span class="kw">let</span> <span class="ident">glifxml</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">fs::read_to_string</span>(<span class="kw-2">&amp;</span><span class="ident">filename</span>) {
-        <span class="prelude-val">Ok</span>(<span class="ident">s</span>) =&gt; <span class="ident">s</span>,
-        <span class="prelude-val">Err</span>(<span class="ident">ioe</span>) =&gt; <span class="prelude-val">Err</span>(<span class="ident">GlifParserError::GlifFileIoError</span>(<span class="prelude-val">Some</span>(<span class="ident">Rc::new</span>(<span class="ident">ioe</span>))))<span class="question-mark">?</span>
-    };
-    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">glif</span>: <span class="ident">Glif</span><span class="op">&lt;</span><span class="ident">PD</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">read_ufo_glif_pedantic</span>(<span class="kw-2">&amp;</span><span class="ident">glifxml</span>, <span class="ident">pedantry</span>)<span class="question-mark">?</span>;
-    <span class="kw">let</span> <span class="ident">filenamepb</span> <span class="op">=</span> <span class="ident">filename</span>.<span class="ident">as_ref</span>().<span class="ident">to_path_buf</span>();
-    <span class="kw">for</span> <span class="ident">component</span> <span class="kw">in</span> <span class="ident">glif</span>.<span class="ident">components</span>.<span class="ident">vec</span>.<span class="ident">iter_mut</span>() {
-        <span class="ident">component</span>.<span class="ident">set_file_name</span>(<span class="kw-2">&amp;</span><span class="ident">filenamepb</span>);
+<span class="kw">pub fn </span>read_ufo_glif_from_filename_pedantic&lt;F: AsRef&lt;path::Path&gt; + Clone, PD: PointData&gt;(filename: F, pedantry: Pedantry) -&gt; <span class="prelude-ty">Result</span>&lt;Glif&lt;PD&gt;, GlifParserError&gt; {
+    <span class="kw">let </span>glifxml = <span class="kw">match </span>fs::read_to_string(<span class="kw-2">&amp;</span>filename) {
+        <span class="prelude-val">Ok</span>(s) =&gt; s,
+        <span class="prelude-val">Err</span>(ioe) =&gt; <span class="prelude-val">Err</span>(GlifParserError::GlifFileIoError(<span class="prelude-val">Some</span>(Rc::new(ioe))))<span class="question-mark">?
+    </span>};
+    <span class="kw">let </span><span class="kw-2">mut </span>glif: Glif&lt;PD&gt; = read_ufo_glif_pedantic(<span class="kw-2">&amp;</span>glifxml, pedantry)<span class="question-mark">?</span>;
+    <span class="kw">let </span>filenamepb = filename.as_ref().to_path_buf();
+    <span class="kw">for </span>component <span class="kw">in </span>glif.components.vec.iter_mut() {
+        component.set_file_name(<span class="kw-2">&amp;</span>filenamepb);
     }
-    <span class="ident">glif</span>.<span class="ident">filename</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">filenamepb</span>);
-    <span class="prelude-val">Ok</span>(<span class="ident">glif</span>)
+    glif.filename = <span class="prelude-val">Some</span>(filenamepb);
+    <span class="prelude-val">Ok</span>(glif)
 }
 
-<span class="doccomment">/// Read UFO .glif XML to Glif struct. This should only be used when you have no known filename,</span>
-<span class="doccomment">/// and the glif is unattached from a UFO.</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">read_ufo_glif</span><span class="op">&lt;</span><span class="ident">PD</span>: <span class="ident">PointData</span><span class="op">&gt;</span>(<span class="ident">glif</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Glif</span><span class="op">&lt;</span><span class="ident">PD</span><span class="op">&gt;</span>, <span class="ident">GlifParserError</span><span class="op">&gt;</span> {
-    <span class="ident">read_ufo_glif_pedantic</span>(<span class="ident">glif</span>, <span class="ident">Pedantry::default</span>())
+<span class="doccomment">/// Read UFO .glif XML to Glif struct. This should only be used when you have no known filename,
+/// and the glif is unattached from a UFO.
+</span><span class="kw">pub fn </span>read_ufo_glif&lt;PD: PointData&gt;(glif: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;Glif&lt;PD&gt;, GlifParserError&gt; {
+    read_ufo_glif_pedantic(glif, Pedantry::default())
 }
 
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">read_ufo_glif_pedantic</span><span class="op">&lt;</span><span class="ident">PD</span>: <span class="ident">PointData</span><span class="op">&gt;</span>(<span class="ident">glif</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>, <span class="ident">pedantry</span>: <span class="ident">Pedantry</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Glif</span><span class="op">&lt;</span><span class="ident">PD</span><span class="op">&gt;</span>, <span class="ident">GlifParserError</span><span class="op">&gt;</span> {
-    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">glif</span> <span class="op">=</span> <span class="ident">xmltree::Element::parse</span>(<span class="ident">glif</span>.<span class="ident">as_bytes</span>())<span class="question-mark">?</span>;
+<span class="kw">pub fn </span>read_ufo_glif_pedantic&lt;PD: PointData&gt;(glif: <span class="kw-2">&amp;</span>str, pedantry: Pedantry) -&gt; <span class="prelude-ty">Result</span>&lt;Glif&lt;PD&gt;, GlifParserError&gt; {
+    <span class="kw">let </span><span class="kw-2">mut </span>glif = xmltree::Element::parse(glif.as_bytes())<span class="question-mark">?</span>;
 
-    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">ret</span> <span class="op">=</span> <span class="ident">Glif::new</span>();
+    <span class="kw">let </span><span class="kw-2">mut </span>ret = Glif::new();
 
-    <span class="kw">if</span> <span class="ident">glif</span>.<span class="ident">name</span> <span class="op">!</span><span class="op">=</span> <span class="string">&quot;glyph&quot;</span> {
-        <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="macro">input_error!</span>(<span class="string">&quot;Root element not &lt;glyph&gt;&quot;</span>))
+    <span class="kw">if </span>glif.name != <span class="string">&quot;glyph&quot; </span>{
+        <span class="kw">return </span><span class="prelude-val">Err</span>(<span class="macro">input_error!</span>(<span class="string">&quot;Root element not &lt;glyph&gt;&quot;</span>))
     }
 
-    <span class="kw">if</span> <span class="ident">glif</span>.<span class="ident">attributes</span>.<span class="ident">get</span>(<span class="string">&quot;format&quot;</span>).<span class="ident">ok_or</span>(<span class="macro">input_error!</span>(<span class="string">&quot;no format in &lt;glyph&gt;&quot;</span>))<span class="question-mark">?</span> <span class="op">!</span><span class="op">=</span> <span class="string">&quot;2&quot;</span> {
-        <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="macro">input_error!</span>(<span class="string">&quot;&lt;glyph&gt; format not 2&quot;</span>))
+    <span class="kw">if </span>glif.attributes.get(<span class="string">&quot;format&quot;</span>).ok_or(<span class="macro">input_error!</span>(<span class="string">&quot;no format in &lt;glyph&gt;&quot;</span>))<span class="question-mark">? </span>!= <span class="string">&quot;2&quot; </span>{
+        <span class="kw">return </span><span class="prelude-val">Err</span>(<span class="macro">input_error!</span>(<span class="string">&quot;&lt;glyph&gt; format not 2&quot;</span>))
     }
 
-    <span class="ident">ret</span>.<span class="ident">name</span> <span class="op">=</span> <span class="ident">glif</span>
-        .<span class="ident">attributes</span>
-        .<span class="ident">get</span>(<span class="string">&quot;name&quot;</span>)
-        .<span class="ident">ok_or</span>(<span class="macro">input_error!</span>(<span class="string">&quot;&lt;glyph&gt; has no name&quot;</span>))<span class="question-mark">?</span>
-        .<span class="ident">clone</span>();
-    <span class="ident">ret</span>.<span class="ident">components</span>.<span class="ident">root</span> <span class="op">=</span> <span class="ident">ret</span>.<span class="ident">name</span>.<span class="ident">clone</span>();
+    ret.name = glif
+        .attributes
+        .get(<span class="string">&quot;name&quot;</span>)
+        .ok_or(<span class="macro">input_error!</span>(<span class="string">&quot;&lt;glyph&gt; has no name&quot;</span>))<span class="question-mark">?
+        </span>.clone();
+    ret.components.root = ret.name.clone();
 
-    <span class="kw">let</span> <span class="ident">advance</span> <span class="op">=</span> <span class="ident">glif</span>
-        .<span class="ident">take_child</span>(<span class="string">&quot;advance&quot;</span>);
+    <span class="kw">let </span>advance = glif
+        .take_child(<span class="string">&quot;advance&quot;</span>);
 
-    <span class="ident">ret</span>.<span class="ident">width</span> <span class="op">=</span> <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">a</span>) <span class="op">=</span> <span class="ident">advance</span> {
-        <span class="prelude-val">Some</span>(<span class="ident">a</span>.<span class="ident">attributes</span>
-        .<span class="ident">get</span>(<span class="string">&quot;width&quot;</span>)
-        .<span class="ident">ok_or</span>(<span class="macro">input_error!</span>(<span class="string">&quot;&lt;advance&gt; has no width&quot;</span>))<span class="question-mark">?</span>
-        .<span class="ident">parse</span>()
-        .<span class="ident">or</span>(<span class="prelude-val">Err</span>(<span class="macro">input_error!</span>(<span class="string">&quot;&lt;advance&gt; width not int&quot;</span>)))<span class="question-mark">?</span>)
-    } <span class="kw">else</span> {
-        <span class="prelude-val">None</span>
-    };
+    ret.width = <span class="kw">if let </span><span class="prelude-val">Some</span>(a) = advance {
+        <span class="kw">let </span>width = a.attributes
+            .get(<span class="string">&quot;width&quot;</span>)
+            .ok_or(<span class="macro">input_error!</span>(<span class="string">&quot;&lt;advance&gt; has no width&quot;</span>))<span class="question-mark">?</span>;
+        <span class="kw">let </span>widthc = width.parse::&lt;u64&gt;();
 
-    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">unicodes</span> <span class="op">=</span> <span class="macro">vec!</span>[];
-    <span class="kw">while</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">u</span>) <span class="op">=</span> <span class="ident">glif</span>.<span class="ident">take_child</span>(<span class="string">&quot;unicode&quot;</span>) {
-        <span class="kw">let</span> <span class="ident">unicodehex</span> <span class="op">=</span> <span class="ident">u</span>
-            .<span class="ident">attributes</span>
-            .<span class="ident">get</span>(<span class="string">&quot;hex&quot;</span>)
-            .<span class="ident">ok_or</span>(<span class="macro">input_error!</span>(<span class="string">&quot;&lt;unicode&gt; has no hex&quot;</span>))<span class="question-mark">?</span>;
-        <span class="ident">unicodes</span>.<span class="ident">push</span>(
-            <span class="ident">char::from_u32</span>(
-                <span class="ident">u32::from_str_radix</span>(<span class="ident">unicodehex</span>, <span class="number">16</span>)
-                .<span class="ident">or</span>(<span class="prelude-val">Err</span>(<span class="macro">input_error!</span>(<span class="string">&quot;&lt;unicode&gt; hex not int&quot;</span>)))<span class="question-mark">?</span>
-            )
-            .<span class="ident">ok_or</span>(<span class="macro">input_error!</span>(<span class="string">&quot;&lt;unicode&gt; char conversion failed&quot;</span>))<span class="question-mark">?</span>,
+        <span class="kw">match </span>widthc {
+            <span class="prelude-val">Err</span>(e) =&gt; <span class="kw">if let </span><span class="prelude-val">Ok</span>((f, <span class="bool-val">false</span>)) = width.parse::&lt;f32&gt;().map(|f|(f, f.is_subnormal())) {
+                <span class="kw">const </span>FLOATPOINTWARNING: <span class="kw-2">&amp;</span>str = <span class="string">&quot;Floating point value given as &lt;advance&gt; width — OpenType `hmtx` / `vmtx` will truncate it&quot;</span>;
+                <span class="kw">if </span>!pedantry.should_mend() {
+                    <span class="prelude-val">Err</span>(<span class="macro">input_error!</span>(FLOATPOINTWARNING))<span class="question-mark">?
+                </span>}
+                <span class="macro">log::warn!</span>(<span class="string">&quot;{}, so we do too!&quot;</span>, FLOATPOINTWARNING);
+                <span class="prelude-val">Some</span>(f <span class="kw">as </span>u64)
+            } <span class="kw">else </span>{
+                <span class="macro">log::trace!</span>(<span class="string">&quot;&lt;advance&gt; parsing as int rose {:?}&quot;</span>, e);
+                <span class="prelude-val">Err</span>(<span class="macro">input_error!</span>(<span class="string">&quot;&lt;advance&gt; width neither int nor downgradable (not subnormal) float!&quot;</span>))<span class="question-mark">?
+            </span>},
+            <span class="prelude-val">Ok</span>(i) =&gt; <span class="prelude-val">Some</span>(i)
+        }
+    } <span class="kw">else </span>{
+        <span class="prelude-val">None
+    </span>};
+
+    <span class="kw">let </span><span class="kw-2">mut </span>unicodes = <span class="macro">vec!</span>[];
+    <span class="kw">while let </span><span class="prelude-val">Some</span>(u) = glif.take_child(<span class="string">&quot;unicode&quot;</span>) {
+        <span class="kw">let </span>unicodehex = u
+            .attributes
+            .get(<span class="string">&quot;hex&quot;</span>)
+            .ok_or(<span class="macro">input_error!</span>(<span class="string">&quot;&lt;unicode&gt; has no hex&quot;</span>))<span class="question-mark">?</span>;
+        unicodes.push(
+            char::from_u32(
+                u32::from_str_radix(unicodehex, <span class="number">16</span>)
+                .or(<span class="prelude-val">Err</span>(<span class="macro">input_error!</span>(<span class="string">&quot;&lt;unicode&gt; hex not int&quot;</span>)))<span class="question-mark">?
+            </span>)
+            .ok_or(<span class="macro">input_error!</span>(<span class="string">&quot;&lt;unicode&gt; char conversion failed&quot;</span>))<span class="question-mark">?</span>,
         );
     }
 
-    <span class="ident">ret</span>.<span class="ident">unicode</span> <span class="op">=</span> <span class="ident">unicodes</span>;
+    ret.unicode = unicodes;
 
-    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">anchors</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Anchor</span><span class="op">&lt;</span><span class="ident">PD</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Vec::new</span>();
+    <span class="kw">let </span><span class="kw-2">mut </span>anchors: Vec&lt;Anchor&lt;PD&gt;&gt; = Vec::new();
 
-    <span class="kw">while</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">anchor_el</span>) <span class="op">=</span> <span class="ident">glif</span>.<span class="ident">take_child</span>(<span class="string">&quot;anchor&quot;</span>) {
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">anchor</span> <span class="op">=</span> <span class="ident">GlifAnchor::default</span>();
+    <span class="kw">while let </span><span class="prelude-val">Some</span>(anchor_el) = glif.take_child(<span class="string">&quot;anchor&quot;</span>) {
+        <span class="kw">let </span><span class="kw-2">mut </span>anchor = GlifAnchor::default();
 
-        <span class="ident">anchor</span>.<span class="ident">x</span> <span class="op">=</span> <span class="ident">anchor_el</span>
-            .<span class="ident">attributes</span>
-            .<span class="ident">get</span>(<span class="string">&quot;x&quot;</span>)
-            .<span class="ident">ok_or</span>(<span class="macro">input_error!</span>(<span class="string">&quot;&lt;anchor&gt; missing x&quot;</span>))<span class="question-mark">?</span>
-            .<span class="ident">parse</span>()
-            .<span class="ident">or</span>(<span class="prelude-val">Err</span>(<span class="macro">input_error!</span>(<span class="string">&quot;&lt;anchor&gt; x not integer/float&quot;</span>)))<span class="question-mark">?</span>;
-        <span class="ident">anchor</span>.<span class="ident">y</span> <span class="op">=</span> <span class="ident">anchor_el</span>
-            .<span class="ident">attributes</span>
-            .<span class="ident">get</span>(<span class="string">&quot;y&quot;</span>)
-            .<span class="ident">ok_or</span>(<span class="macro">input_error!</span>(<span class="string">&quot;&lt;anchor&gt; missing y&quot;</span>))<span class="question-mark">?</span>
-            .<span class="ident">parse</span>()
-            .<span class="ident">or</span>(<span class="prelude-val">Err</span>(<span class="macro">input_error!</span>(<span class="string">&quot;&lt;anchor&gt; y not integer/float&quot;</span>)))<span class="question-mark">?</span>;
-        <span class="ident">anchor</span>.<span class="ident">class</span> <span class="op">=</span> <span class="ident">anchor_el</span>
-            .<span class="ident">attributes</span>
-            .<span class="ident">get</span>(<span class="string">&quot;name&quot;</span>)
-            .<span class="ident">map</span>(<span class="op">|</span><span class="ident">a</span><span class="op">|</span><span class="ident">GlifStringLenOne::try_from</span>(<span class="ident">a</span>.<span class="ident">clone</span>()))
-            .<span class="ident">map_or</span>(<span class="prelude-val">None</span>, <span class="op">|</span><span class="ident">r</span><span class="op">|</span><span class="ident">r</span>.<span class="ident">ok</span>());
-        <span class="ident">anchors</span>.<span class="ident">push</span>(<span class="ident">Anchor::from_glif</span>(<span class="kw-2">&amp;</span><span class="ident">anchor</span>, <span class="ident">pedantry</span>)<span class="question-mark">?</span>);
+        anchor.x = anchor_el
+            .attributes
+            .get(<span class="string">&quot;x&quot;</span>)
+            .ok_or(<span class="macro">input_error!</span>(<span class="string">&quot;&lt;anchor&gt; missing x&quot;</span>))<span class="question-mark">?
+            </span>.parse()
+            .or(<span class="prelude-val">Err</span>(<span class="macro">input_error!</span>(<span class="string">&quot;&lt;anchor&gt; x not integer/float&quot;</span>)))<span class="question-mark">?</span>;
+        anchor.y = anchor_el
+            .attributes
+            .get(<span class="string">&quot;y&quot;</span>)
+            .ok_or(<span class="macro">input_error!</span>(<span class="string">&quot;&lt;anchor&gt; missing y&quot;</span>))<span class="question-mark">?
+            </span>.parse()
+            .or(<span class="prelude-val">Err</span>(<span class="macro">input_error!</span>(<span class="string">&quot;&lt;anchor&gt; y not integer/float&quot;</span>)))<span class="question-mark">?</span>;
+        anchor.class = anchor_el
+            .attributes
+            .get(<span class="string">&quot;name&quot;</span>)
+            .map(|a|GlifStringLenOne::try_from(a.clone()))
+            .map_or(<span class="prelude-val">None</span>, |r|r.ok());
+        anchors.push(Anchor::from_glif(<span class="kw-2">&amp;</span>anchor, pedantry)<span class="question-mark">?</span>);
     }
 
-    <span class="ident">ret</span>.<span class="ident">anchors</span> <span class="op">=</span> <span class="ident">anchors</span>;
+    ret.anchors = anchors;
 
-    <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;glifimage&quot;</span>)]</span> {
-    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">images</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">GlifImage</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Vec::new</span>();
+    <span class="attribute">#[cfg(feature = <span class="string">&quot;glifimage&quot;</span>)] </span>{
+    <span class="kw">let </span><span class="kw-2">mut </span>images: Vec&lt;GlifImage&gt; = Vec::new();
 
-    <span class="kw">while</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">image_el</span>) <span class="op">=</span> <span class="ident">glif</span>.<span class="ident">take_child</span>(<span class="string">&quot;image&quot;</span>) {
-        <span class="kw">let</span> <span class="ident">filename</span> <span class="op">=</span> <span class="ident">path::PathBuf::from</span>(<span class="ident">image_el</span>
-            .<span class="ident">attributes</span>
-            .<span class="ident">get</span>(<span class="string">&quot;fileName&quot;</span>)
-            .<span class="ident">ok_or</span>(<span class="macro">input_error!</span>(<span class="string">&quot;&lt;image&gt; missing fileName&quot;</span>))<span class="question-mark">?</span>);
+    <span class="kw">while let </span><span class="prelude-val">Some</span>(image_el) = glif.take_child(<span class="string">&quot;image&quot;</span>) {
+        <span class="kw">let </span>filename = path::PathBuf::from(image_el
+            .attributes
+            .get(<span class="string">&quot;fileName&quot;</span>)
+            .ok_or(<span class="macro">input_error!</span>(<span class="string">&quot;&lt;image&gt; missing fileName&quot;</span>))<span class="question-mark">?</span>);
 
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">gimage</span> <span class="op">=</span> <span class="ident">GlifImage::from_filename</span>(<span class="ident">filename</span>)<span class="question-mark">?</span>;
+        <span class="kw">let </span><span class="kw-2">mut </span>gimage = GlifImage::from_filename(filename)<span class="question-mark">?</span>;
 
-        <span class="macro">load_matrix_and_identifier!</span>(<span class="ident">image_el</span>, <span class="ident">gimage</span>, (<span class="ident">xScale</span>, <span class="ident">xyScale</span>, <span class="ident">yxScale</span>, <span class="ident">yScale</span>, <span class="ident">xOffset</span>, <span class="ident">yOffset</span>));
+        <span class="macro">load_matrix_and_identifier!</span>(image_el, gimage, (xScale, xyScale, yxScale, yScale, xOffset, yOffset));
 
-        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">color</span>) <span class="op">=</span> <span class="ident">image_el</span>.<span class="ident">attributes</span>.<span class="ident">get</span>(<span class="string">&quot;color&quot;</span>) {
-            <span class="ident">gimage</span>.<span class="ident">color</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">color</span>.<span class="ident">parse</span>()<span class="question-mark">?</span>);
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(color) = image_el.attributes.get(<span class="string">&quot;color&quot;</span>) {
+            gimage.color = <span class="prelude-val">Some</span>(color.parse()<span class="question-mark">?</span>);
         }
 
-        <span class="ident">images</span>.<span class="ident">push</span>(<span class="ident">gimage</span>);
+        images.push(gimage);
     }
 
-    <span class="ident">ret</span>.<span class="ident">images</span> <span class="op">=</span> <span class="ident">images</span>;
+    ret.images = images;
     }
 
-    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">guidelines</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Guideline</span><span class="op">&lt;</span><span class="ident">PD</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Vec::new</span>();
+    <span class="kw">let </span><span class="kw-2">mut </span>guidelines: Vec&lt;Guideline&lt;PD&gt;&gt; = Vec::new();
 
-    <span class="kw">while</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">guideline_el</span>) <span class="op">=</span> <span class="ident">glif</span>.<span class="ident">take_child</span>(<span class="string">&quot;guideline&quot;</span>) {
-        <span class="kw">let</span> <span class="ident">gx</span> <span class="op">=</span> <span class="ident">guideline_el</span>
-            .<span class="ident">attributes</span>
-            .<span class="ident">get</span>(<span class="string">&quot;x&quot;</span>)
-            .<span class="ident">ok_or</span>(<span class="macro">input_error!</span>(<span class="string">&quot;&lt;guideline&gt; missing x&quot;</span>))<span class="question-mark">?</span>
-            .<span class="ident">parse</span>()
-            .<span class="ident">or</span>(<span class="prelude-val">Err</span>(<span class="macro">input_error!</span>(<span class="string">&quot;&lt;guideline&gt; x not float&quot;</span>)))<span class="question-mark">?</span>;
-        <span class="kw">let</span> <span class="ident">gy</span> <span class="op">=</span> <span class="ident">guideline_el</span>
-            .<span class="ident">attributes</span>
-            .<span class="ident">get</span>(<span class="string">&quot;y&quot;</span>)
-            .<span class="ident">ok_or</span>(<span class="macro">input_error!</span>(<span class="string">&quot;&lt;guideline&gt; missing y&quot;</span>))<span class="question-mark">?</span>
-            .<span class="ident">parse</span>()
-            .<span class="ident">or</span>(<span class="prelude-val">Err</span>(<span class="macro">input_error!</span>(<span class="string">&quot;&lt;guideline&gt; x not float&quot;</span>)))<span class="question-mark">?</span>;
-        <span class="kw">let</span> <span class="ident">angle</span>: <span class="ident">IntegerOrFloat</span> <span class="op">=</span> <span class="ident">guideline_el</span>
-            .<span class="ident">attributes</span>
-            .<span class="ident">get</span>(<span class="string">&quot;angle&quot;</span>)
-            .<span class="ident">ok_or</span>(<span class="macro">input_error!</span>(<span class="string">&quot;&lt;guideline&gt; missing angle&quot;</span>))<span class="question-mark">?</span>
-            .<span class="ident">as_str</span>()
-            .<span class="ident">try_into</span>()
-            .<span class="ident">or</span>(<span class="prelude-val">Err</span>(<span class="macro">input_error!</span>(<span class="string">&quot;&lt;guideline&gt; angle not float&quot;</span>)))<span class="question-mark">?</span>;
+    <span class="kw">while let </span><span class="prelude-val">Some</span>(guideline_el) = glif.take_child(<span class="string">&quot;guideline&quot;</span>) {
+        <span class="kw">let </span>gx = guideline_el
+            .attributes
+            .get(<span class="string">&quot;x&quot;</span>)
+            .ok_or(<span class="macro">input_error!</span>(<span class="string">&quot;&lt;guideline&gt; missing x&quot;</span>))<span class="question-mark">?
+            </span>.parse()
+            .or(<span class="prelude-val">Err</span>(<span class="macro">input_error!</span>(<span class="string">&quot;&lt;guideline&gt; x not float&quot;</span>)))<span class="question-mark">?</span>;
+        <span class="kw">let </span>gy = guideline_el
+            .attributes
+            .get(<span class="string">&quot;y&quot;</span>)
+            .ok_or(<span class="macro">input_error!</span>(<span class="string">&quot;&lt;guideline&gt; missing y&quot;</span>))<span class="question-mark">?
+            </span>.parse()
+            .or(<span class="prelude-val">Err</span>(<span class="macro">input_error!</span>(<span class="string">&quot;&lt;guideline&gt; x not float&quot;</span>)))<span class="question-mark">?</span>;
+        <span class="kw">let </span>angle: IntegerOrFloat = guideline_el
+            .attributes
+            .get(<span class="string">&quot;angle&quot;</span>)
+            .ok_or(<span class="macro">input_error!</span>(<span class="string">&quot;&lt;guideline&gt; missing angle&quot;</span>))<span class="question-mark">?
+            </span>.as_str()
+            .try_into()
+            .or(<span class="prelude-val">Err</span>(<span class="macro">input_error!</span>(<span class="string">&quot;&lt;guideline&gt; angle not float&quot;</span>)))<span class="question-mark">?</span>;
 
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">guideline</span> <span class="op">=</span> <span class="ident">Guideline::from_x_y_angle</span>(<span class="ident">gx</span>, <span class="ident">gy</span>, <span class="ident">angle</span>);
+        <span class="kw">let </span><span class="kw-2">mut </span>guideline = Guideline::from_x_y_angle(gx, gy, angle);
 
-        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">color</span>) <span class="op">=</span> <span class="ident">guideline_el</span>.<span class="ident">attributes</span>.<span class="ident">get</span>(<span class="string">&quot;color&quot;</span>) {
-            <span class="ident">guideline</span>.<span class="ident">color</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">color</span>.<span class="ident">parse</span>()<span class="question-mark">?</span>);
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(color) = guideline_el.attributes.get(<span class="string">&quot;color&quot;</span>) {
+            guideline.color = <span class="prelude-val">Some</span>(color.parse()<span class="question-mark">?</span>);
         }
 
-        <span class="ident">guideline</span>.<span class="ident">name</span> <span class="op">=</span> <span class="ident">guideline_el</span>.<span class="ident">attributes</span>.<span class="ident">get</span>(<span class="string">&quot;name&quot;</span>).<span class="ident">map</span>(<span class="op">|</span><span class="ident">n</span><span class="op">|</span><span class="ident">n</span>.<span class="ident">clone</span>());
+        guideline.name = guideline_el.attributes.get(<span class="string">&quot;name&quot;</span>).map(|n|n.clone());
 
-        <span class="ident">guideline</span>.<span class="ident">identifier</span> <span class="op">=</span> <span class="ident">guideline_el</span>.<span class="ident">attributes</span>.<span class="ident">get</span>(<span class="string">&quot;identifier&quot;</span>).<span class="ident">map</span>(<span class="op">|</span><span class="ident">i</span><span class="op">|</span><span class="ident">i</span>.<span class="ident">clone</span>());
+        guideline.identifier = guideline_el.attributes.get(<span class="string">&quot;identifier&quot;</span>).map(|i|i.clone());
 
-        <span class="ident">guidelines</span>.<span class="ident">push</span>(<span class="ident">guideline</span>);
+        guidelines.push(guideline);
     }
 
-    <span class="ident">ret</span>.<span class="ident">guidelines</span> <span class="op">=</span> <span class="ident">guidelines</span>;
+    ret.guidelines = guidelines;
 
-    <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">note_el</span>) <span class="op">=</span> <span class="ident">glif</span>.<span class="ident">take_child</span>(<span class="string">&quot;note&quot;</span>) {
-        <span class="ident">note_el</span>.<span class="ident">get_text</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">t</span><span class="op">|</span><span class="ident">ret</span>.<span class="ident">note</span><span class="op">=</span><span class="prelude-val">Some</span>(<span class="ident">t</span>.<span class="ident">into_owned</span>()));
+    <span class="kw">if let </span><span class="prelude-val">Some</span>(note_el) = glif.take_child(<span class="string">&quot;note&quot;</span>) {
+        note_el.get_text().map(|t|ret.note=<span class="prelude-val">Some</span>(t.into_owned()));
     }
 
-    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">goutline</span>: <span class="ident">GlifOutline</span> <span class="op">=</span> <span class="ident">GlifOutline::new</span>();
+    <span class="kw">let </span><span class="kw-2">mut </span>goutline: GlifOutline = GlifOutline::new();
 
-    <span class="kw">let</span> <span class="ident">outline_el</span> <span class="op">=</span> <span class="ident">glif</span>.<span class="ident">take_child</span>(<span class="string">&quot;outline&quot;</span>);
+    <span class="kw">let </span>outline_el = glif.take_child(<span class="string">&quot;outline&quot;</span>);
 
-    <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="kw-2">mut</span> <span class="ident">outline_elu</span>) <span class="op">=</span> <span class="ident">outline_el</span> {
-        <span class="kw">while</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="kw-2">mut</span> <span class="ident">contour_el</span>) <span class="op">=</span> <span class="ident">outline_elu</span>.<span class="ident">take_child</span>(<span class="string">&quot;contour&quot;</span>) {
-            <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">gcontour</span>: <span class="ident">GlifContour</span> <span class="op">=</span> <span class="ident">Vec::new</span>();
-            <span class="kw">while</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">point_el</span>) <span class="op">=</span> <span class="ident">contour_el</span>.<span class="ident">take_child</span>(<span class="string">&quot;point&quot;</span>) {
-                <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">gpoint</span> <span class="op">=</span> <span class="ident">GlifPoint::new</span>();
+    <span class="kw">if let </span><span class="prelude-val">Some</span>(<span class="kw-2">mut </span>outline_elu) = outline_el {
+        <span class="kw">while let </span><span class="prelude-val">Some</span>(<span class="kw-2">mut </span>contour_el) = outline_elu.take_child(<span class="string">&quot;contour&quot;</span>) {
+            <span class="kw">let </span><span class="kw-2">mut </span>gcontour: GlifContour = Vec::new();
+            <span class="kw">while let </span><span class="prelude-val">Some</span>(point_el) = contour_el.take_child(<span class="string">&quot;point&quot;</span>) {
+                <span class="kw">let </span><span class="kw-2">mut </span>gpoint = GlifPoint::new();
 
-                <span class="ident">gpoint</span>.<span class="ident">x</span> <span class="op">=</span> <span class="ident">point_el</span>
-                    .<span class="ident">attributes</span>
-                    .<span class="ident">get</span>(<span class="string">&quot;x&quot;</span>)
-                    .<span class="ident">ok_or</span>(<span class="macro">input_error!</span>(<span class="string">&quot;&lt;point&gt; missing x&quot;</span>))<span class="question-mark">?</span>
-                    .<span class="ident">parse</span>()
-                    .<span class="ident">or</span>(<span class="prelude-val">Err</span>(<span class="macro">input_error!</span>(<span class="string">&quot;&lt;point&gt; x not float&quot;</span>)))<span class="question-mark">?</span>;
-                <span class="ident">gpoint</span>.<span class="ident">y</span> <span class="op">=</span> <span class="ident">point_el</span>
-                    .<span class="ident">attributes</span>
-                    .<span class="ident">get</span>(<span class="string">&quot;y&quot;</span>)
-                    .<span class="ident">ok_or</span>(<span class="macro">input_error!</span>(<span class="string">&quot;&lt;point&gt; missing y&quot;</span>))<span class="question-mark">?</span>
-                    .<span class="ident">parse</span>()
-                    .<span class="ident">or</span>(<span class="prelude-val">Err</span>(<span class="macro">input_error!</span>(<span class="string">&quot;&lt;point&gt; y not float&quot;</span>)))<span class="question-mark">?</span>;
+                gpoint.x = point_el
+                    .attributes
+                    .get(<span class="string">&quot;x&quot;</span>)
+                    .ok_or(<span class="macro">input_error!</span>(<span class="string">&quot;&lt;point&gt; missing x&quot;</span>))<span class="question-mark">?
+                    </span>.parse()
+                    .or(<span class="prelude-val">Err</span>(<span class="macro">input_error!</span>(<span class="string">&quot;&lt;point&gt; x not float&quot;</span>)))<span class="question-mark">?</span>;
+                gpoint.y = point_el
+                    .attributes
+                    .get(<span class="string">&quot;y&quot;</span>)
+                    .ok_or(<span class="macro">input_error!</span>(<span class="string">&quot;&lt;point&gt; missing y&quot;</span>))<span class="question-mark">?
+                    </span>.parse()
+                    .or(<span class="prelude-val">Err</span>(<span class="macro">input_error!</span>(<span class="string">&quot;&lt;point&gt; y not float&quot;</span>)))<span class="question-mark">?</span>;
 
-                <span class="kw">match</span> <span class="ident">point_el</span>.<span class="ident">attributes</span>.<span class="ident">get</span>(<span class="string">&quot;name&quot;</span>) {
-                    <span class="prelude-val">Some</span>(<span class="ident">n</span>) =&gt; <span class="ident">gpoint</span>.<span class="ident">name</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">n</span>.<span class="ident">clone</span>()),
-                    <span class="prelude-val">None</span> =&gt; {}
+                <span class="kw">match </span>point_el.attributes.get(<span class="string">&quot;name&quot;</span>) {
+                    <span class="prelude-val">Some</span>(n) =&gt; gpoint.name = <span class="prelude-val">Some</span>(n.clone()),
+                    <span class="prelude-val">None </span>=&gt; {}
                 }
 
-                <span class="ident">gpoint</span>.<span class="ident">ptype</span> <span class="op">=</span> <span class="ident">point_el</span>.<span class="ident">attributes</span>.<span class="ident">get</span>(<span class="string">&quot;type&quot;</span>).<span class="ident">as_ref</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">s</span><span class="op">|</span> <span class="ident">s</span>.<span class="ident">as_str</span>()).<span class="ident">unwrap_or</span>(<span class="string">&quot;offcurve&quot;</span>).<span class="ident">into</span>();
+                gpoint.ptype = point_el.attributes.get(<span class="string">&quot;type&quot;</span>).as_ref().map(|s| s.as_str()).unwrap_or(<span class="string">&quot;offcurve&quot;</span>).into();
 
-                <span class="kw">match</span> <span class="ident">point_el</span>.<span class="ident">attributes</span>.<span class="ident">get</span>(<span class="string">&quot;smooth&quot;</span>) {
-                    <span class="prelude-val">Some</span>(<span class="ident">s</span>) =&gt; <span class="kw">if</span> <span class="ident">s</span> <span class="op">==</span> <span class="string">&quot;yes&quot;</span> {
-                        <span class="kw">if</span> <span class="ident">gpoint</span>.<span class="ident">ptype</span> <span class="op">!</span><span class="op">=</span> <span class="ident">PointType::OffCurve</span> {
-                            <span class="ident">gpoint</span>.<span class="ident">smooth</span> <span class="op">=</span> <span class="bool-val">true</span>;
-                        } <span class="kw">else</span> {
+                <span class="kw">match </span>point_el.attributes.get(<span class="string">&quot;smooth&quot;</span>) {
+                    <span class="prelude-val">Some</span>(s) =&gt; <span class="kw">if </span>s == <span class="string">&quot;yes&quot; </span>{
+                        <span class="kw">if </span>gpoint.ptype != PointType::OffCurve {
+                            gpoint.smooth = <span class="bool-val">true</span>;
+                        } <span class="kw">else </span>{
                             <span class="macro">log::error!</span>(<span class="string">&quot;Ignoring illogical `smooth=yes` on offcurve point&quot;</span>);
                         }
                     },
-                    <span class="kw">_</span> =&gt; {}
+                    <span class="kw">_ </span>=&gt; {}
                 }
 
-                <span class="kw">if</span> <span class="ident">gpoint</span>.<span class="ident">ptype</span>.<span class="ident">is_valid</span>() {
-                    <span class="ident">gcontour</span>.<span class="ident">push</span>(<span class="ident">gpoint</span>);
-                } <span class="kw">else</span> {
-                    <span class="prelude-val">Err</span>(<span class="ident">GlifInputError</span>(<span class="macro">format!</span>(<span class="string">&quot;Shouldn&#39;t write &lt;point type={}&gt; to UFO .glif!&quot;</span>, <span class="ident">gpoint</span>.<span class="ident">ptype</span>)))<span class="question-mark">?</span>;
+                <span class="kw">if </span>gpoint.ptype.is_valid() {
+                    gcontour.push(gpoint);
+                } <span class="kw">else </span>{
+                    <span class="prelude-val">Err</span>(GlifInputError(<span class="macro">format!</span>(<span class="string">&quot;Shouldn&#39;t write &lt;point type={}&gt; to UFO .glif!&quot;</span>, gpoint.ptype)))<span class="question-mark">?</span>;
                 }
             }
-            <span class="kw">if</span> <span class="ident">gcontour</span>.<span class="ident">len</span>() <span class="op">&gt;</span> <span class="number">0</span> {
-                <span class="ident">goutline</span>.<span class="ident">push</span>(<span class="ident">gcontour</span>);
+            <span class="kw">if </span>gcontour.len() &gt; <span class="number">0 </span>{
+                goutline.push(gcontour);
             }
         }
         
-        <span class="kw">while</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">component_el</span>) <span class="op">=</span> <span class="ident">outline_elu</span>.<span class="ident">take_child</span>(<span class="string">&quot;component&quot;</span>) {
-            <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">gcomponent</span> <span class="op">=</span> <span class="ident">GlifComponent::new</span>();
-            <span class="macro">load_matrix_and_identifier!</span>(<span class="ident">component_el</span>, <span class="ident">gcomponent</span>, (<span class="ident">xScale</span>, <span class="ident">xyScale</span>, <span class="ident">yxScale</span>, <span class="ident">yScale</span>, <span class="ident">xOffset</span>, <span class="ident">yOffset</span>));
-            <span class="ident">gcomponent</span>.<span class="ident">base</span> <span class="op">=</span> <span class="ident">component_el</span>.<span class="ident">attributes</span>.<span class="ident">get</span>(<span class="string">&quot;base&quot;</span>).<span class="ident">ok_or</span>(<span class="macro">input_error!</span>(<span class="string">&quot;&lt;component&gt; missing base&quot;</span>))<span class="question-mark">?</span>.<span class="ident">clone</span>();
-            <span class="ident">ret</span>.<span class="ident">components</span>.<span class="ident">vec</span>.<span class="ident">push</span>(<span class="ident">gcomponent</span>);
+        <span class="kw">while let </span><span class="prelude-val">Some</span>(component_el) = outline_elu.take_child(<span class="string">&quot;component&quot;</span>) {
+            <span class="kw">let </span><span class="kw-2">mut </span>gcomponent = GlifComponent::new();
+            <span class="macro">load_matrix_and_identifier!</span>(component_el, gcomponent, (xScale, xyScale, yxScale, yScale, xOffset, yOffset));
+            gcomponent.base = component_el.attributes.get(<span class="string">&quot;base&quot;</span>).ok_or(<span class="macro">input_error!</span>(<span class="string">&quot;&lt;component&gt; missing base&quot;</span>))<span class="question-mark">?</span>.clone();
+            ret.components.vec.push(gcomponent);
         }
     }
 
-    <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;glifserde&quot;</span>)]</span>
-    <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="kw-2">mut</span> <span class="ident">lib</span>) <span class="op">=</span> <span class="ident">glif</span>.<span class="ident">take_child</span>(<span class="string">&quot;lib&quot;</span>) {
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">plist_temp</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span> <span class="op">=</span> <span class="macro">vec!</span>[];
-        <span class="ident">lib</span>.<span class="ident">name</span> <span class="op">=</span> <span class="ident">String::from</span>(<span class="string">&quot;plist&quot;</span>);
-        <span class="kw">match</span> <span class="ident">lib</span>.<span class="ident">write</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">plist_temp</span>).<span class="ident">map</span>(<span class="op">|</span>()<span class="op">|</span><span class="ident">plist::from_bytes</span>(<span class="kw-2">&amp;</span><span class="ident">plist_temp</span>)) {
-            <span class="prelude-val">Ok</span>(<span class="prelude-val">Ok</span>(<span class="ident">lib_p</span>)) =&gt; <span class="ident">ret</span>.<span class="ident">lib</span> <span class="op">=</span> <span class="ident">Lib::Plist</span>(<span class="ident">lib_p</span>),
-            <span class="prelude-val">Err</span>(<span class="ident">e</span>) =&gt; {
-                <span class="macro">log::error!</span>(<span class="string">&quot;Failed to serialize .glif lib as XML? Error: {:?}&quot;</span>, <span class="ident">e</span>);
-                <span class="ident">ret</span>.<span class="ident">lib</span> <span class="op">=</span> <span class="ident">Lib::Xml</span>(<span class="ident">lib</span>)
+    <span class="attribute">#[cfg(feature = <span class="string">&quot;glifserde&quot;</span>)]
+    </span><span class="kw">if let </span><span class="prelude-val">Some</span>(<span class="kw-2">mut </span>lib) = glif.take_child(<span class="string">&quot;lib&quot;</span>) {
+        <span class="kw">let </span><span class="kw-2">mut </span>plist_temp: Vec&lt;u8&gt; = <span class="macro">vec!</span>[];
+        lib.name = String::from(<span class="string">&quot;plist&quot;</span>);
+        <span class="kw">match </span>lib.write(<span class="kw-2">&amp;mut </span>plist_temp).map(|()|plist::from_bytes(<span class="kw-2">&amp;</span>plist_temp)) {
+            <span class="prelude-val">Ok</span>(<span class="prelude-val">Ok</span>(lib_p)) =&gt; ret.lib = Lib::Plist(lib_p),
+            <span class="prelude-val">Err</span>(e) =&gt; {
+                <span class="macro">log::error!</span>(<span class="string">&quot;Failed to serialize .glif lib as XML? Error: {:?}&quot;</span>, e);
+                ret.lib = Lib::Xml(lib)
             },
-            <span class="prelude-val">Ok</span>(<span class="prelude-val">Err</span>(<span class="ident">e</span>)) =&gt; {
-                <span class="macro">log::error!</span>(<span class="string">&quot;Failed to deserialize .glif lib XML as plist? Error: {:?}&quot;</span>, <span class="ident">e</span>);
+            <span class="prelude-val">Ok</span>(<span class="prelude-val">Err</span>(e)) =&gt; {
+                <span class="macro">log::error!</span>(<span class="string">&quot;Failed to deserialize .glif lib XML as plist? Error: {:?}&quot;</span>, e);
             }
         }
     }
-    <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">not</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;glifserde&quot;</span>))]</span>
-    <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="kw">_</span>) <span class="op">=</span> <span class="ident">glif</span>.<span class="ident">take_child</span>(<span class="string">&quot;lib&quot;</span>) {
+    <span class="attribute">#[cfg(not(feature = <span class="string">&quot;glifserde&quot;</span>))]
+    </span><span class="kw">if let </span><span class="prelude-val">Some</span>(<span class="kw">_</span>) = glif.take_child(<span class="string">&quot;lib&quot;</span>) {
         <span class="macro">log::warn!</span>(<span class="string">&quot;Without glifserde, cannot decode plist!&quot;</span>)
     }
 
-    <span class="ident">goutline</span>.<span class="ident">figure_type</span>();
-    <span class="ident">ret</span>.<span class="ident">order</span> <span class="op">=</span> <span class="ident">goutline</span>.<span class="ident">otype</span>.<span class="ident">into</span>();
+    goutline.figure_type();
+    ret.order = goutline.otype.into();
 
-    <span class="kw">let</span> <span class="ident">outline</span>: <span class="ident">Outline</span><span class="op">&lt;</span><span class="ident">PD</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">goutline</span>.<span class="ident">try_into</span>()<span class="question-mark">?</span>;
+    <span class="kw">let </span>outline: Outline&lt;PD&gt; = goutline.try_into()<span class="question-mark">?</span>;
 
-    <span class="kw">if</span> <span class="ident">outline</span>.<span class="ident">len</span>() <span class="op">&gt;</span> <span class="number">0</span> <span class="op">|</span><span class="op">|</span> <span class="ident">ret</span>.<span class="ident">components</span>.<span class="ident">vec</span>.<span class="ident">len</span>() <span class="op">&gt;</span> <span class="number">0</span> {
-        <span class="ident">ret</span>.<span class="ident">outline</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">outline</span>);
+    <span class="kw">if </span>outline.len() &gt; <span class="number">0 </span>|| ret.components.vec.len() &gt; <span class="number">0 </span>{
+        ret.outline = <span class="prelude-val">Some</span>(outline);
     }
 
-    <span class="prelude-val">Ok</span>(<span class="ident">ret</span>)
+    <span class="prelude-val">Ok</span>(ret)
 }
 </code></pre></div>
-</section><section id="search" class="content hidden"></section><div id="rustdoc-vars" data-root-path="../../../" data-current-crate="glifparser" data-search-index-js="../../../search-index.js" data-search-js="../../../search.js"></div>
-    <script src="../../../main.js"></script><script src="../../../source-script.js"></script><script src="../../../source-files.js"></script>
-</body></html>
+</section></div></main><div id="rustdoc-vars" data-root-path="../../../" data-current-crate="glifparser" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.65.0 (897e37553 2022-11-02)" ></div></body></html>

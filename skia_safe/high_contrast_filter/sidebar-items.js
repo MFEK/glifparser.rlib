@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"fn":[["new",""]],"mod":[["high_contrast_config",""]],"struct":[["HighContrastConfig",""]]};

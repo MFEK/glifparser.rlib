@@ -1,1 +1,1 @@
-initSidebarItems({"enum":[["Error","Errors that can occur parsing XML"],["XMLNode",""]],"struct":[["Element","Represents an XML element."]],"trait":[["FromXML",""],["IntoXML",""],["TryIntoXML",""],["XMLConversion",""]]});
+window.SIDEBAR_ITEMS = {"enum":[["Error","Errors that can occur parsing XML"],["XMLNode",""]],"struct":[["Element","Represents an XML element."]],"trait":[["FromXML",""],["IntoXML",""],["TryIntoXML",""],["XMLConversion",""]]};

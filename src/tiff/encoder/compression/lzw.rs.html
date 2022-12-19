@@ -1,0 +1,96 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/fred/.cargo/registry/src/github.com-1ecc6299db9ec823/tiff-0.8.1/src/encoder/compression/lzw.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>lzw.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" href="../../../../normalize.css"><link rel="stylesheet" href="../../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" href="../../../../ayu.css" disabled><link rel="stylesheet" href="../../../../dark.css" disabled><link rel="stylesheet" href="../../../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../../../storage.js"></script><script defer src="../../../../source-script.js"></script><script defer src="../../../../source-files.js"></script><script defer src="../../../../main.js"></script><noscript><link rel="stylesheet" href="../../../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../../../tiff/index.html"><div class="logo-container"><img class="rust-logo" src="../../../../rust-logo.svg" alt="logo"></div></a><h2 class="location"></h2></nav><nav class="sidebar"><a class="sidebar-logo" href="../../../../tiff/index.html"><div class="logo-container"><img class="rust-logo" src="../../../../rust-logo.svg" alt="logo"></div></a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../../../tiff/index.html"><img class="rust-logo" src="../../../../rust-logo.svg" alt="logo"></a><nav class="sub"><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><button type="button">?</button></div><div id="settings-menu" tabindex="-1"><a href="../../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../../wheel.svg"></a></div></div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">1</span>
+<span id="2">2</span>
+<span id="3">3</span>
+<span id="4">4</span>
+<span id="5">5</span>
+<span id="6">6</span>
+<span id="7">7</span>
+<span id="8">8</span>
+<span id="9">9</span>
+<span id="10">10</span>
+<span id="11">11</span>
+<span id="12">12</span>
+<span id="13">13</span>
+<span id="14">14</span>
+<span id="15">15</span>
+<span id="16">16</span>
+<span id="17">17</span>
+<span id="18">18</span>
+<span id="19">19</span>
+<span id="20">20</span>
+<span id="21">21</span>
+<span id="22">22</span>
+<span id="23">23</span>
+<span id="24">24</span>
+<span id="25">25</span>
+<span id="26">26</span>
+<span id="27">27</span>
+<span id="28">28</span>
+<span id="29">29</span>
+<span id="30">30</span>
+<span id="31">31</span>
+<span id="32">32</span>
+<span id="33">33</span>
+<span id="34">34</span>
+<span id="35">35</span>
+<span id="36">36</span>
+<span id="37">37</span>
+<span id="38">38</span>
+<span id="39">39</span>
+<span id="40">40</span>
+<span id="41">41</span>
+<span id="42">42</span>
+<span id="43">43</span>
+<span id="44">44</span>
+<span id="45">45</span>
+<span id="46">46</span>
+<span id="47">47</span>
+</pre><pre class="rust"><code><span class="kw">use crate</span>::{encoder::compression::<span class="kw-2">*</span>, tags::CompressionMethod};
+<span class="kw">use </span>std::io::Write;
+<span class="kw">use </span>weezl::encode::Encoder <span class="kw">as </span>LZWEncoder;
+
+<span class="doccomment">/// The LZW algorithm used to compress image data in TIFF files.
+</span><span class="attribute">#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+</span><span class="kw">pub struct </span>Lzw;
+
+<span class="kw">impl </span>Compression <span class="kw">for </span>Lzw {
+    <span class="kw">const </span>COMPRESSION_METHOD: CompressionMethod = CompressionMethod::LZW;
+
+    <span class="kw">fn </span>get_algorithm(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Compressor {
+        Compressor::Lzw(<span class="kw-2">*</span><span class="self">self</span>)
+    }
+}
+
+<span class="kw">impl </span>CompressionAlgorithm <span class="kw">for </span>Lzw {
+    <span class="kw">fn </span>write_to&lt;W: Write&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, writer: <span class="kw-2">&amp;mut </span>W, bytes: <span class="kw-2">&amp;</span>[u8]) -&gt; <span class="prelude-ty">Result</span>&lt;u64, io::Error&gt; {
+        <span class="kw">let </span><span class="kw-2">mut </span>encoder = LZWEncoder::with_tiff_size_switch(weezl::BitOrder::Msb, <span class="number">8</span>);
+        <span class="kw">let </span>result = encoder.into_stream(writer).encode_all(bytes);
+        <span class="kw">let </span>byte_count = result.bytes_written <span class="kw">as </span>u64;
+        result.status.map(|<span class="kw">_</span>| byte_count)
+    }
+}
+
+<span class="attribute">#[cfg(test)]
+</span><span class="kw">mod </span>tests {
+    <span class="kw">use super</span>::<span class="kw-2">*</span>;
+    <span class="kw">use </span><span class="kw">crate</span>::encoder::compression::tests::TEST_DATA;
+    <span class="kw">use </span>std::io::Cursor;
+
+    <span class="attribute">#[test]
+    </span><span class="kw">fn </span>test_lzw() {
+        <span class="kw">const </span>EXPECTED_COMPRESSED_DATA: [u8; <span class="number">63</span>] = [
+            <span class="number">0x80</span>, <span class="number">0x15</span>, <span class="number">0x0D</span>, <span class="number">0x06</span>, <span class="number">0x93</span>, <span class="number">0x98</span>, <span class="number">0x82</span>, <span class="number">0x08</span>, <span class="number">0x20</span>, <span class="number">0x30</span>, <span class="number">0x88</span>, <span class="number">0x0E</span>, <span class="number">0x67</span>, <span class="number">0x43</span>,
+            <span class="number">0x91</span>, <span class="number">0xA4</span>, <span class="number">0xDC</span>, <span class="number">0x67</span>, <span class="number">0x10</span>, <span class="number">0x19</span>, <span class="number">0x8D</span>, <span class="number">0xE7</span>, <span class="number">0x21</span>, <span class="number">0x01</span>, <span class="number">0x8C</span>, <span class="number">0xD0</span>, <span class="number">0x65</span>, <span class="number">0x31</span>,
+            <span class="number">0x9A</span>, <span class="number">0xE1</span>, <span class="number">0xD1</span>, <span class="number">0x03</span>, <span class="number">0xB1</span>, <span class="number">0x86</span>, <span class="number">0x1A</span>, <span class="number">0x6F</span>, <span class="number">0x3A</span>, <span class="number">0xC1</span>, <span class="number">0x4C</span>, <span class="number">0x66</span>, <span class="number">0xF3</span>, <span class="number">0x69</span>,
+            <span class="number">0xC0</span>, <span class="number">0xE4</span>, <span class="number">0x65</span>, <span class="number">0x39</span>, <span class="number">0x9C</span>, <span class="number">0xCD</span>, <span class="number">0x26</span>, <span class="number">0xF3</span>, <span class="number">0x74</span>, <span class="number">0x20</span>, <span class="number">0xD8</span>, <span class="number">0x67</span>, <span class="number">0x89</span>, <span class="number">0x9A</span>,
+            <span class="number">0x4E</span>, <span class="number">0x86</span>, <span class="number">0x83</span>, <span class="number">0x69</span>, <span class="number">0xCC</span>, <span class="number">0x5D</span>, <span class="number">0x01</span>,
+        ];
+
+        <span class="kw">let </span><span class="kw-2">mut </span>compressed_data = Vec::&lt;u8&gt;::new();
+        <span class="kw">let </span><span class="kw-2">mut </span>writer = Cursor::new(<span class="kw-2">&amp;mut </span>compressed_data);
+        Lzw::default().write_to(<span class="kw-2">&amp;mut </span>writer, TEST_DATA).unwrap();
+        <span class="macro">assert_eq!</span>(EXPECTED_COMPRESSED_DATA, compressed_data.as_slice());
+    }
+}
+</code></pre></div>
+</section></div></main><div id="rustdoc-vars" data-root-path="../../../../" data-current-crate="tiff" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.65.0 (897e37553 2022-11-02)" ></div></body></html>

@@ -1,1 +1,1 @@
-initSidebarItems({"struct":[["Color",""]]});
+window.SIDEBAR_ITEMS = {"struct":[["Color",""]]};

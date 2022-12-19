@@ -1,0 +1,606 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/fred/.cargo/registry/src/github.com-1ecc6299db9ec823/kurbo-0.9.0/src/ellipse.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>ellipse.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" href="../../normalize.css"><link rel="stylesheet" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" href="../../ayu.css" disabled><link rel="stylesheet" href="../../dark.css" disabled><link rel="stylesheet" href="../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../storage.js"></script><script defer src="../../source-script.js"></script><script defer src="../../source-files.js"></script><script defer src="../../main.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../kurbo/index.html"><div class="logo-container"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></div></a><h2 class="location"></h2></nav><nav class="sidebar"><a class="sidebar-logo" href="../../kurbo/index.html"><div class="logo-container"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></div></a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../kurbo/index.html"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></a><nav class="sub"><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><button type="button">?</button></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../wheel.svg"></a></div></div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">1</span>
+<span id="2">2</span>
+<span id="3">3</span>
+<span id="4">4</span>
+<span id="5">5</span>
+<span id="6">6</span>
+<span id="7">7</span>
+<span id="8">8</span>
+<span id="9">9</span>
+<span id="10">10</span>
+<span id="11">11</span>
+<span id="12">12</span>
+<span id="13">13</span>
+<span id="14">14</span>
+<span id="15">15</span>
+<span id="16">16</span>
+<span id="17">17</span>
+<span id="18">18</span>
+<span id="19">19</span>
+<span id="20">20</span>
+<span id="21">21</span>
+<span id="22">22</span>
+<span id="23">23</span>
+<span id="24">24</span>
+<span id="25">25</span>
+<span id="26">26</span>
+<span id="27">27</span>
+<span id="28">28</span>
+<span id="29">29</span>
+<span id="30">30</span>
+<span id="31">31</span>
+<span id="32">32</span>
+<span id="33">33</span>
+<span id="34">34</span>
+<span id="35">35</span>
+<span id="36">36</span>
+<span id="37">37</span>
+<span id="38">38</span>
+<span id="39">39</span>
+<span id="40">40</span>
+<span id="41">41</span>
+<span id="42">42</span>
+<span id="43">43</span>
+<span id="44">44</span>
+<span id="45">45</span>
+<span id="46">46</span>
+<span id="47">47</span>
+<span id="48">48</span>
+<span id="49">49</span>
+<span id="50">50</span>
+<span id="51">51</span>
+<span id="52">52</span>
+<span id="53">53</span>
+<span id="54">54</span>
+<span id="55">55</span>
+<span id="56">56</span>
+<span id="57">57</span>
+<span id="58">58</span>
+<span id="59">59</span>
+<span id="60">60</span>
+<span id="61">61</span>
+<span id="62">62</span>
+<span id="63">63</span>
+<span id="64">64</span>
+<span id="65">65</span>
+<span id="66">66</span>
+<span id="67">67</span>
+<span id="68">68</span>
+<span id="69">69</span>
+<span id="70">70</span>
+<span id="71">71</span>
+<span id="72">72</span>
+<span id="73">73</span>
+<span id="74">74</span>
+<span id="75">75</span>
+<span id="76">76</span>
+<span id="77">77</span>
+<span id="78">78</span>
+<span id="79">79</span>
+<span id="80">80</span>
+<span id="81">81</span>
+<span id="82">82</span>
+<span id="83">83</span>
+<span id="84">84</span>
+<span id="85">85</span>
+<span id="86">86</span>
+<span id="87">87</span>
+<span id="88">88</span>
+<span id="89">89</span>
+<span id="90">90</span>
+<span id="91">91</span>
+<span id="92">92</span>
+<span id="93">93</span>
+<span id="94">94</span>
+<span id="95">95</span>
+<span id="96">96</span>
+<span id="97">97</span>
+<span id="98">98</span>
+<span id="99">99</span>
+<span id="100">100</span>
+<span id="101">101</span>
+<span id="102">102</span>
+<span id="103">103</span>
+<span id="104">104</span>
+<span id="105">105</span>
+<span id="106">106</span>
+<span id="107">107</span>
+<span id="108">108</span>
+<span id="109">109</span>
+<span id="110">110</span>
+<span id="111">111</span>
+<span id="112">112</span>
+<span id="113">113</span>
+<span id="114">114</span>
+<span id="115">115</span>
+<span id="116">116</span>
+<span id="117">117</span>
+<span id="118">118</span>
+<span id="119">119</span>
+<span id="120">120</span>
+<span id="121">121</span>
+<span id="122">122</span>
+<span id="123">123</span>
+<span id="124">124</span>
+<span id="125">125</span>
+<span id="126">126</span>
+<span id="127">127</span>
+<span id="128">128</span>
+<span id="129">129</span>
+<span id="130">130</span>
+<span id="131">131</span>
+<span id="132">132</span>
+<span id="133">133</span>
+<span id="134">134</span>
+<span id="135">135</span>
+<span id="136">136</span>
+<span id="137">137</span>
+<span id="138">138</span>
+<span id="139">139</span>
+<span id="140">140</span>
+<span id="141">141</span>
+<span id="142">142</span>
+<span id="143">143</span>
+<span id="144">144</span>
+<span id="145">145</span>
+<span id="146">146</span>
+<span id="147">147</span>
+<span id="148">148</span>
+<span id="149">149</span>
+<span id="150">150</span>
+<span id="151">151</span>
+<span id="152">152</span>
+<span id="153">153</span>
+<span id="154">154</span>
+<span id="155">155</span>
+<span id="156">156</span>
+<span id="157">157</span>
+<span id="158">158</span>
+<span id="159">159</span>
+<span id="160">160</span>
+<span id="161">161</span>
+<span id="162">162</span>
+<span id="163">163</span>
+<span id="164">164</span>
+<span id="165">165</span>
+<span id="166">166</span>
+<span id="167">167</span>
+<span id="168">168</span>
+<span id="169">169</span>
+<span id="170">170</span>
+<span id="171">171</span>
+<span id="172">172</span>
+<span id="173">173</span>
+<span id="174">174</span>
+<span id="175">175</span>
+<span id="176">176</span>
+<span id="177">177</span>
+<span id="178">178</span>
+<span id="179">179</span>
+<span id="180">180</span>
+<span id="181">181</span>
+<span id="182">182</span>
+<span id="183">183</span>
+<span id="184">184</span>
+<span id="185">185</span>
+<span id="186">186</span>
+<span id="187">187</span>
+<span id="188">188</span>
+<span id="189">189</span>
+<span id="190">190</span>
+<span id="191">191</span>
+<span id="192">192</span>
+<span id="193">193</span>
+<span id="194">194</span>
+<span id="195">195</span>
+<span id="196">196</span>
+<span id="197">197</span>
+<span id="198">198</span>
+<span id="199">199</span>
+<span id="200">200</span>
+<span id="201">201</span>
+<span id="202">202</span>
+<span id="203">203</span>
+<span id="204">204</span>
+<span id="205">205</span>
+<span id="206">206</span>
+<span id="207">207</span>
+<span id="208">208</span>
+<span id="209">209</span>
+<span id="210">210</span>
+<span id="211">211</span>
+<span id="212">212</span>
+<span id="213">213</span>
+<span id="214">214</span>
+<span id="215">215</span>
+<span id="216">216</span>
+<span id="217">217</span>
+<span id="218">218</span>
+<span id="219">219</span>
+<span id="220">220</span>
+<span id="221">221</span>
+<span id="222">222</span>
+<span id="223">223</span>
+<span id="224">224</span>
+<span id="225">225</span>
+<span id="226">226</span>
+<span id="227">227</span>
+<span id="228">228</span>
+<span id="229">229</span>
+<span id="230">230</span>
+<span id="231">231</span>
+<span id="232">232</span>
+<span id="233">233</span>
+<span id="234">234</span>
+<span id="235">235</span>
+<span id="236">236</span>
+<span id="237">237</span>
+<span id="238">238</span>
+<span id="239">239</span>
+<span id="240">240</span>
+<span id="241">241</span>
+<span id="242">242</span>
+<span id="243">243</span>
+<span id="244">244</span>
+<span id="245">245</span>
+<span id="246">246</span>
+<span id="247">247</span>
+<span id="248">248</span>
+<span id="249">249</span>
+<span id="250">250</span>
+<span id="251">251</span>
+<span id="252">252</span>
+<span id="253">253</span>
+<span id="254">254</span>
+<span id="255">255</span>
+<span id="256">256</span>
+<span id="257">257</span>
+<span id="258">258</span>
+<span id="259">259</span>
+<span id="260">260</span>
+<span id="261">261</span>
+<span id="262">262</span>
+<span id="263">263</span>
+<span id="264">264</span>
+<span id="265">265</span>
+<span id="266">266</span>
+<span id="267">267</span>
+<span id="268">268</span>
+<span id="269">269</span>
+<span id="270">270</span>
+<span id="271">271</span>
+<span id="272">272</span>
+<span id="273">273</span>
+<span id="274">274</span>
+<span id="275">275</span>
+<span id="276">276</span>
+<span id="277">277</span>
+<span id="278">278</span>
+<span id="279">279</span>
+<span id="280">280</span>
+<span id="281">281</span>
+<span id="282">282</span>
+<span id="283">283</span>
+<span id="284">284</span>
+<span id="285">285</span>
+<span id="286">286</span>
+<span id="287">287</span>
+<span id="288">288</span>
+<span id="289">289</span>
+<span id="290">290</span>
+<span id="291">291</span>
+<span id="292">292</span>
+<span id="293">293</span>
+<span id="294">294</span>
+<span id="295">295</span>
+<span id="296">296</span>
+<span id="297">297</span>
+<span id="298">298</span>
+<span id="299">299</span>
+<span id="300">300</span>
+<span id="301">301</span>
+<span id="302">302</span>
+</pre><pre class="rust"><code><span class="doccomment">//! Implementation of ellipse shape.
+
+</span><span class="kw">use </span>std::f64::consts::PI;
+<span class="kw">use </span>std::{
+    iter,
+    ops::{Add, Mul, Sub},
+};
+
+<span class="kw">use crate</span>::{Affine, Arc, ArcAppendIter, Circle, PathEl, Point, Rect, Shape, Size, Vec2};
+
+<span class="doccomment">/// An ellipse.
+</span><span class="attribute">#[derive(Clone, Copy, Default, Debug, PartialEq)]
+#[cfg_attr(feature = <span class="string">&quot;schemars&quot;</span>, derive(schemars::JsonSchema))]
+#[cfg_attr(feature = <span class="string">&quot;serde&quot;</span>, derive(serde::Serialize, serde::Deserialize))]
+</span><span class="kw">pub struct </span>Ellipse {
+    <span class="doccomment">/// All ellipses can be represented as an affine map of the unit circle,
+    /// centred at (0, 0). Therefore we can store the ellipse as an affine map,
+    /// with the implication that it be applied to the unit circle to recover the
+    /// actual shape.
+    </span>inner: Affine,
+}
+
+<span class="kw">impl </span>Ellipse {
+    <span class="doccomment">/// Create A new ellipse with a given center, radii, and rotation.
+    ///
+    /// The returned ellipse will be the result of taking a circle, stretching
+    /// it by the `radii` along the x and y axes, then rotating it from the
+    /// x asix by `rotation` radians, before finally translating the center
+    /// to `center`.
+    ///
+    /// Rotation is clockwise in a y-down coordinate system. For more on
+    /// rotation, see [`Affine::rotate`].
+    </span><span class="attribute">#[inline]
+    </span><span class="kw">pub fn </span>new(center: <span class="kw">impl </span>Into&lt;Point&gt;, radii: <span class="kw">impl </span>Into&lt;Vec2&gt;, x_rotation: f64) -&gt; Ellipse {
+        <span class="kw">let </span>Point { x: cx, y: cy } = center.into();
+        <span class="kw">let </span>Vec2 { x: rx, y: ry } = radii.into();
+        Ellipse::private_new(Vec2 { x: cx, y: cy }, rx, ry, x_rotation)
+    }
+
+    <span class="doccomment">/// Returns the largest ellipse that can be bounded by this [`Rect`].
+    ///
+    /// This uses the absolute width and height of the rectangle.
+    ///
+    /// This ellipse is always axis-aligned; to apply rotation you can call
+    /// [`with_rotation`] with the result.
+    ///
+    /// [`with_rotation`]: Ellipse::with_rotation
+    </span><span class="attribute">#[inline]
+    </span><span class="kw">pub fn </span>from_rect(rect: Rect) -&gt; <span class="self">Self </span>{
+        <span class="kw">let </span>center = rect.center().to_vec2();
+        <span class="kw">let </span>Size { width, height } = rect.size() / <span class="number">2.0</span>;
+        Ellipse::private_new(center, width, height, <span class="number">0.0</span>)
+    }
+
+    <span class="doccomment">/// Create an ellipse from an affine transformation of the unit circle.
+    </span><span class="attribute">#[inline]
+    </span><span class="kw">pub fn </span>from_affine(affine: Affine) -&gt; <span class="self">Self </span>{
+        Ellipse { inner: affine }
+    }
+
+    <span class="doccomment">/// Create a new `Ellipse` centered on the provided point.
+    </span><span class="attribute">#[inline]
+    #[must_use]
+    </span><span class="kw">pub fn </span>with_center(<span class="self">self</span>, new_center: Point) -&gt; Ellipse {
+        <span class="kw">let </span>Point { x: cx, y: cy } = new_center;
+        Ellipse {
+            inner: <span class="self">self</span>.inner.set_translation(Vec2 { x: cx, y: cy }),
+        }
+    }
+
+    <span class="doccomment">/// Create a new `Ellipse` with the provided radii.
+    </span><span class="attribute">#[must_use]
+    </span><span class="kw">pub fn </span>with_radii(<span class="self">self</span>, new_radii: Vec2) -&gt; Ellipse {
+        <span class="kw">let </span>rotation = <span class="self">self</span>.inner.svd().<span class="number">1</span>;
+        <span class="kw">let </span>translation = <span class="self">self</span>.inner.get_translation();
+        Ellipse::private_new(translation, new_radii.x, new_radii.y, rotation)
+    }
+
+    <span class="doccomment">/// Create a new `Ellipse`, with the rotation replaced by `rotation`
+    /// radians.
+    ///
+    /// The rotation is clockwise, for a y-down coordinate system. For more
+    /// on rotation, See [`Affine::rotate`].
+    </span><span class="attribute">#[must_use]
+    </span><span class="kw">pub fn </span>with_rotation(<span class="self">self</span>, rotation: f64) -&gt; Ellipse {
+        <span class="kw">let </span>scale = <span class="self">self</span>.inner.svd().<span class="number">0</span>;
+        <span class="kw">let </span>translation = <span class="self">self</span>.inner.get_translation();
+        Ellipse::private_new(translation, scale.x, scale.y, rotation)
+    }
+
+    <span class="attribute">#[deprecated(since = <span class="string">&quot;0.7.0&quot;</span>, note = <span class="string">&quot;use with_rotation instead&quot;</span>)]
+    #[must_use]
+    #[doc(hidden)]
+    </span><span class="kw">pub fn </span>with_x_rotation(<span class="self">self</span>, rotation_radians: f64) -&gt; Ellipse {
+        <span class="self">self</span>.with_rotation(rotation_radians)
+    }
+
+    <span class="doccomment">/// This gives us an internal method without any type conversions.
+    </span><span class="attribute">#[inline]
+    </span><span class="kw">fn </span>private_new(center: Vec2, scale_x: f64, scale_y: f64, x_rotation: f64) -&gt; Ellipse {
+        <span class="comment">// Since the circle is symmetric about the x and y axes, using absolute values for the
+        // radii results in the same ellipse. For simplicity we make this change here.
+        </span>Ellipse {
+            inner: Affine::translate(center)
+                * Affine::rotate(x_rotation)
+                * Affine::scale_non_uniform(scale_x.abs(), scale_y.abs()),
+        }
+    }
+
+    <span class="comment">// Getters and setters.
+
+    </span><span class="doccomment">/// Returns the center of this ellipse.
+    </span><span class="attribute">#[inline]
+    </span><span class="kw">pub fn </span>center(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Point {
+        <span class="kw">let </span>Vec2 { x: cx, y: cy } = <span class="self">self</span>.inner.get_translation();
+        Point { x: cx, y: cy }
+    }
+
+    <span class="doccomment">/// Returns the two radii of this ellipse.
+    ///
+    /// The first number is the horizontal radius and the second is the vertical
+    /// radius, before rotation.
+    </span><span class="kw">pub fn </span>radii(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Vec2 {
+        <span class="self">self</span>.inner.svd().<span class="number">0
+    </span>}
+
+    <span class="doccomment">/// The ellipse&#39;s rotation, in radians.
+    ///
+    /// This allows all possible ellipses to be drawn by always starting with
+    /// an ellipse with the two radii on the x and y axes.
+    </span><span class="kw">pub fn </span>rotation(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; f64 {
+        <span class="self">self</span>.inner.svd().<span class="number">1
+    </span>}
+
+    <span class="doccomment">/// Is this ellipse finite?
+    </span><span class="attribute">#[inline]
+    </span><span class="kw">pub fn </span>is_finite(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
+        <span class="self">self</span>.inner.is_finite()
+    }
+
+    <span class="doccomment">/// Is this ellipse NaN?
+    </span><span class="attribute">#[inline]
+    </span><span class="kw">pub fn </span>is_nan(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
+        <span class="self">self</span>.inner.is_nan()
+    }
+
+    <span class="attribute">#[doc(hidden)]
+    #[deprecated(since = <span class="string">&quot;0.7.0&quot;</span>, note = <span class="string">&quot;use rotation() instead&quot;</span>)]
+    </span><span class="kw">pub fn </span>x_rotation(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; f64 {
+        <span class="self">self</span>.rotation()
+    }
+}
+
+<span class="kw">impl </span>Add&lt;Vec2&gt; <span class="kw">for </span>Ellipse {
+    <span class="kw">type </span>Output = Ellipse;
+
+    <span class="doccomment">/// In this context adding a `Vec2` applies the corresponding translation to the ellipse.
+    </span><span class="attribute">#[inline]
+    #[allow(clippy::suspicious_arithmetic_impl)]
+    </span><span class="kw">fn </span>add(<span class="self">self</span>, v: Vec2) -&gt; Ellipse {
+        Ellipse {
+            inner: Affine::translate(v) * <span class="self">self</span>.inner,
+        }
+    }
+}
+
+<span class="kw">impl </span>Sub&lt;Vec2&gt; <span class="kw">for </span>Ellipse {
+    <span class="kw">type </span>Output = Ellipse;
+
+    <span class="doccomment">/// In this context subtracting a `Vec2` applies the corresponding translation to the ellipse.
+    </span><span class="attribute">#[inline]
+    </span><span class="kw">fn </span>sub(<span class="self">self</span>, v: Vec2) -&gt; Ellipse {
+        Ellipse {
+            inner: Affine::translate(-v) * <span class="self">self</span>.inner,
+        }
+    }
+}
+
+<span class="kw">impl </span>Mul&lt;Ellipse&gt; <span class="kw">for </span>Affine {
+    <span class="kw">type </span>Output = Ellipse;
+    <span class="kw">fn </span>mul(<span class="self">self</span>, other: Ellipse) -&gt; <span class="self">Self</span>::Output {
+        Ellipse {
+            inner: <span class="self">self </span>* other.inner,
+        }
+    }
+}
+
+<span class="kw">impl </span>From&lt;Circle&gt; <span class="kw">for </span>Ellipse {
+    <span class="kw">fn </span>from(circle: Circle) -&gt; <span class="self">Self </span>{
+        Ellipse::new(circle.center, Vec2::splat(circle.radius), <span class="number">0.0</span>)
+    }
+}
+
+<span class="kw">impl </span>Shape <span class="kw">for </span>Ellipse {
+    <span class="kw">type </span>PathElementsIter&lt;<span class="lifetime">&#39;iter</span>&gt; = iter::Chain&lt;iter::Once&lt;PathEl&gt;, ArcAppendIter&gt;;
+
+    <span class="kw">fn </span>path_elements(<span class="kw-2">&amp;</span><span class="self">self</span>, tolerance: f64) -&gt; <span class="self">Self</span>::PathElementsIter&lt;<span class="lifetime">&#39;_</span>&gt; {
+        <span class="kw">let </span>(radii, x_rotation) = <span class="self">self</span>.inner.svd();
+        Arc {
+            center: <span class="self">self</span>.center(),
+            radii,
+            start_angle: <span class="number">0.0</span>,
+            sweep_angle: <span class="number">2.0 </span>* PI,
+            x_rotation,
+        }
+        .path_elements(tolerance)
+    }
+
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>area(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; f64 {
+        <span class="kw">let </span>Vec2 { x, y } = <span class="self">self</span>.radii();
+        PI * x * y
+    }
+
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>perimeter(<span class="kw-2">&amp;</span><span class="self">self</span>, accuracy: f64) -&gt; f64 {
+        <span class="comment">// TODO rather than delegate to the bezier path, it is possible to use various series
+        // expansions to compute the perimeter to any accuracy. I believe Ramanujan authored the
+        // quickest to converge. See
+        // https://www.mathematica-journal.com/2009/11/23/on-the-perimeter-of-an-ellipse/
+        // and https://en.wikipedia.org/wiki/Ellipse#Circumference
+        //
+        </span><span class="self">self</span>.path_segments(<span class="number">0.1</span>).perimeter(accuracy)
+    }
+
+    <span class="kw">fn </span>winding(<span class="kw-2">&amp;</span><span class="self">self</span>, pt: Point) -&gt; i32 {
+        <span class="comment">// Strategy here is to apply the inverse map to the point and see if it is in the unit
+        // circle.
+        </span><span class="kw">let </span>inv = <span class="self">self</span>.inner.inverse();
+        <span class="kw">if </span>(inv * pt).to_vec2().hypot2() &lt; <span class="number">1.0 </span>{
+            <span class="number">1
+        </span>} <span class="kw">else </span>{
+            <span class="number">0
+        </span>}
+    }
+
+    <span class="comment">// Compute a tight bounding box of the ellipse.
+    //
+    // See https://www.iquilezles.org/www/articles/ellipses/ellipses.htm. We can get the two
+    // radius vectors by applying the affine map to the two impulses (1, 0) and (0, 1) which gives
+    // (a, b) and (c, d) if the affine map is
+    //
+    //  a | c | e
+    // -----------
+    //  b | d | f
+    //
+    //  We can then use the method in the link with the translation to get the bounding box.
+    </span><span class="attribute">#[inline]
+    </span><span class="kw">fn </span>bounding_box(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Rect {
+        <span class="kw">let </span>aff = <span class="self">self</span>.inner.as_coeffs();
+        <span class="kw">let </span>a2 = aff[<span class="number">0</span>] * aff[<span class="number">0</span>];
+        <span class="kw">let </span>b2 = aff[<span class="number">1</span>] * aff[<span class="number">1</span>];
+        <span class="kw">let </span>c2 = aff[<span class="number">2</span>] * aff[<span class="number">2</span>];
+        <span class="kw">let </span>d2 = aff[<span class="number">3</span>] * aff[<span class="number">3</span>];
+        <span class="kw">let </span>cx = aff[<span class="number">4</span>];
+        <span class="kw">let </span>cy = aff[<span class="number">5</span>];
+        <span class="kw">let </span>range_x = (a2 + c2).sqrt();
+        <span class="kw">let </span>range_y = (b2 + d2).sqrt();
+        Rect {
+            x0: cx - range_x,
+            y0: cy - range_y,
+            x1: cx + range_x,
+            y1: cy + range_y,
+        }
+    }
+}
+
+<span class="attribute">#[cfg(test)]
+</span><span class="kw">mod </span>tests {
+    <span class="kw">use crate</span>::{Ellipse, Point, Shape};
+    <span class="kw">use </span>std::f64::consts::PI;
+
+    <span class="kw">fn </span>assert_approx_eq(x: f64, y: f64) {
+        <span class="comment">// Note: we might want to be more rigorous in testing the accuracy
+        // of the conversion into Béziers. But this seems good enough.
+        </span><span class="macro">assert!</span>((x - y).abs() &lt; <span class="number">1e-7</span>, <span class="string">&quot;{} != {}&quot;</span>, x, y);
+    }
+
+    <span class="attribute">#[test]
+    </span><span class="kw">fn </span>area_sign() {
+        <span class="kw">let </span>center = Point::new(<span class="number">5.0</span>, <span class="number">5.0</span>);
+        <span class="kw">let </span>e = Ellipse::new(center, (<span class="number">5.0</span>, <span class="number">5.0</span>), <span class="number">1.0</span>);
+        assert_approx_eq(e.area(), <span class="number">25.0 </span>* PI);
+        <span class="kw">let </span>e = Ellipse::new(center, (<span class="number">5.0</span>, <span class="number">10.0</span>), <span class="number">1.0</span>);
+        assert_approx_eq(e.area(), <span class="number">50.0 </span>* PI);
+
+        <span class="macro">assert_eq!</span>(e.winding(center), <span class="number">1</span>);
+
+        <span class="kw">let </span>p = e.to_path(<span class="number">1e-9</span>);
+        assert_approx_eq(e.area(), p.area());
+        <span class="macro">assert_eq!</span>(e.winding(center), p.winding(center));
+
+        <span class="kw">let </span>e_neg_radius = Ellipse::new(center, (-<span class="number">5.0</span>, <span class="number">10.0</span>), <span class="number">1.0</span>);
+        assert_approx_eq(e_neg_radius.area(), <span class="number">50.0 </span>* PI);
+
+        <span class="macro">assert_eq!</span>(e_neg_radius.winding(center), <span class="number">1</span>);
+
+        <span class="kw">let </span>p_neg_radius = e_neg_radius.to_path(<span class="number">1e-9</span>);
+        assert_approx_eq(e_neg_radius.area(), p_neg_radius.area());
+        <span class="macro">assert_eq!</span>(e_neg_radius.winding(center), p_neg_radius.winding(center));
+    }
+}
+</code></pre></div>
+</section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="kurbo" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.65.0 (897e37553 2022-11-02)" ></div></body></html>

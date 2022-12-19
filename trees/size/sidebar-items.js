@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"struct":[["Size","A struct keeping the node’s children count and all its descendants count for resource management purpose."]]};

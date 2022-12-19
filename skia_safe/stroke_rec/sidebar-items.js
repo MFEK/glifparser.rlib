@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"enum":[["InitStyle",""],["Style",""]],"type":[["StrokeRec",""]]};

@@ -1,102 +1,102 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src&#x2F;glif&#x2F;mfek.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>mfek.rs - source</title><link rel="stylesheet" type="text/css" href="../../../normalize.css"><link rel="stylesheet" type="text/css" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../../ayu.css" disabled ><script id="default-settings" ></script><script src="../../../storage.js"></script><script src="../../../crates.js"></script><noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../../favicon.svg"><style type="text/css">#crate-search{background-image:url("../../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../../glifparser/index.html'><div class='logo-container rust-logo'><img src='../../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="18" height="18" alt="Pick another theme!" src="../../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../../settings.html" title="settings"><img width="18" height="18" alt="Change settings" src="../../../wheel.svg"></a></div></form></nav><section id="main" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">  1</span>
-<span id="2">  2</span>
-<span id="3">  3</span>
-<span id="4">  4</span>
-<span id="5">  5</span>
-<span id="6">  6</span>
-<span id="7">  7</span>
-<span id="8">  8</span>
-<span id="9">  9</span>
-<span id="10"> 10</span>
-<span id="11"> 11</span>
-<span id="12"> 12</span>
-<span id="13"> 13</span>
-<span id="14"> 14</span>
-<span id="15"> 15</span>
-<span id="16"> 16</span>
-<span id="17"> 17</span>
-<span id="18"> 18</span>
-<span id="19"> 19</span>
-<span id="20"> 20</span>
-<span id="21"> 21</span>
-<span id="22"> 22</span>
-<span id="23"> 23</span>
-<span id="24"> 24</span>
-<span id="25"> 25</span>
-<span id="26"> 26</span>
-<span id="27"> 27</span>
-<span id="28"> 28</span>
-<span id="29"> 29</span>
-<span id="30"> 30</span>
-<span id="31"> 31</span>
-<span id="32"> 32</span>
-<span id="33"> 33</span>
-<span id="34"> 34</span>
-<span id="35"> 35</span>
-<span id="36"> 36</span>
-<span id="37"> 37</span>
-<span id="38"> 38</span>
-<span id="39"> 39</span>
-<span id="40"> 40</span>
-<span id="41"> 41</span>
-<span id="42"> 42</span>
-<span id="43"> 43</span>
-<span id="44"> 44</span>
-<span id="45"> 45</span>
-<span id="46"> 46</span>
-<span id="47"> 47</span>
-<span id="48"> 48</span>
-<span id="49"> 49</span>
-<span id="50"> 50</span>
-<span id="51"> 51</span>
-<span id="52"> 52</span>
-<span id="53"> 53</span>
-<span id="54"> 54</span>
-<span id="55"> 55</span>
-<span id="56"> 56</span>
-<span id="57"> 57</span>
-<span id="58"> 58</span>
-<span id="59"> 59</span>
-<span id="60"> 60</span>
-<span id="61"> 61</span>
-<span id="62"> 62</span>
-<span id="63"> 63</span>
-<span id="64"> 64</span>
-<span id="65"> 65</span>
-<span id="66"> 66</span>
-<span id="67"> 67</span>
-<span id="68"> 68</span>
-<span id="69"> 69</span>
-<span id="70"> 70</span>
-<span id="71"> 71</span>
-<span id="72"> 72</span>
-<span id="73"> 73</span>
-<span id="74"> 74</span>
-<span id="75"> 75</span>
-<span id="76"> 76</span>
-<span id="77"> 77</span>
-<span id="78"> 78</span>
-<span id="79"> 79</span>
-<span id="80"> 80</span>
-<span id="81"> 81</span>
-<span id="82"> 82</span>
-<span id="83"> 83</span>
-<span id="84"> 84</span>
-<span id="85"> 85</span>
-<span id="86"> 86</span>
-<span id="87"> 87</span>
-<span id="88"> 88</span>
-<span id="89"> 89</span>
-<span id="90"> 90</span>
-<span id="91"> 91</span>
-<span id="92"> 92</span>
-<span id="93"> 93</span>
-<span id="94"> 94</span>
-<span id="95"> 95</span>
-<span id="96"> 96</span>
-<span id="97"> 97</span>
-<span id="98"> 98</span>
-<span id="99"> 99</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/glif/mfek.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>mfek.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" href="../../../normalize.css"><link rel="stylesheet" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" href="../../../ayu.css" disabled><link rel="stylesheet" href="../../../dark.css" disabled><link rel="stylesheet" href="../../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../../storage.js"></script><script defer src="../../../source-script.js"></script><script defer src="../../../source-files.js"></script><script defer src="../../../main.js"></script><noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../../glifparser/index.html"><div class="logo-container"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></div></a><h2 class="location"></h2></nav><nav class="sidebar"><a class="sidebar-logo" href="../../../glifparser/index.html"><div class="logo-container"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></div></a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../../glifparser/index.html"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></a><nav class="sub"><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><button type="button">?</button></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../wheel.svg"></a></div></div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">1</span>
+<span id="2">2</span>
+<span id="3">3</span>
+<span id="4">4</span>
+<span id="5">5</span>
+<span id="6">6</span>
+<span id="7">7</span>
+<span id="8">8</span>
+<span id="9">9</span>
+<span id="10">10</span>
+<span id="11">11</span>
+<span id="12">12</span>
+<span id="13">13</span>
+<span id="14">14</span>
+<span id="15">15</span>
+<span id="16">16</span>
+<span id="17">17</span>
+<span id="18">18</span>
+<span id="19">19</span>
+<span id="20">20</span>
+<span id="21">21</span>
+<span id="22">22</span>
+<span id="23">23</span>
+<span id="24">24</span>
+<span id="25">25</span>
+<span id="26">26</span>
+<span id="27">27</span>
+<span id="28">28</span>
+<span id="29">29</span>
+<span id="30">30</span>
+<span id="31">31</span>
+<span id="32">32</span>
+<span id="33">33</span>
+<span id="34">34</span>
+<span id="35">35</span>
+<span id="36">36</span>
+<span id="37">37</span>
+<span id="38">38</span>
+<span id="39">39</span>
+<span id="40">40</span>
+<span id="41">41</span>
+<span id="42">42</span>
+<span id="43">43</span>
+<span id="44">44</span>
+<span id="45">45</span>
+<span id="46">46</span>
+<span id="47">47</span>
+<span id="48">48</span>
+<span id="49">49</span>
+<span id="50">50</span>
+<span id="51">51</span>
+<span id="52">52</span>
+<span id="53">53</span>
+<span id="54">54</span>
+<span id="55">55</span>
+<span id="56">56</span>
+<span id="57">57</span>
+<span id="58">58</span>
+<span id="59">59</span>
+<span id="60">60</span>
+<span id="61">61</span>
+<span id="62">62</span>
+<span id="63">63</span>
+<span id="64">64</span>
+<span id="65">65</span>
+<span id="66">66</span>
+<span id="67">67</span>
+<span id="68">68</span>
+<span id="69">69</span>
+<span id="70">70</span>
+<span id="71">71</span>
+<span id="72">72</span>
+<span id="73">73</span>
+<span id="74">74</span>
+<span id="75">75</span>
+<span id="76">76</span>
+<span id="77">77</span>
+<span id="78">78</span>
+<span id="79">79</span>
+<span id="80">80</span>
+<span id="81">81</span>
+<span id="82">82</span>
+<span id="83">83</span>
+<span id="84">84</span>
+<span id="85">85</span>
+<span id="86">86</span>
+<span id="87">87</span>
+<span id="88">88</span>
+<span id="89">89</span>
+<span id="90">90</span>
+<span id="91">91</span>
+<span id="92">92</span>
+<span id="93">93</span>
+<span id="94">94</span>
+<span id="95">95</span>
+<span id="96">96</span>
+<span id="97">97</span>
+<span id="98">98</span>
+<span id="99">99</span>
 <span id="100">100</span>
 <span id="101">101</span>
 <span id="102">102</span>
@@ -422,431 +422,435 @@
 <span id="422">422</span>
 <span id="423">423</span>
 <span id="424">424</span>
-</pre><pre class="rust"><code><span class="kw">use</span> <span class="ident">std::collections::HashSet</span>;
-<span class="kw">use</span> <span class="ident">std::path</span> <span class="kw">as</span> <span class="ident">stdpath</span>;
-<span class="kw">use</span> <span class="ident">std</span>::{<span class="ident">fmt::Display</span>, <span class="ident">str::FromStr</span>};
+<span id="425">425</span>
+<span id="426">426</span>
+<span id="427">427</span>
+</pre><pre class="rust"><code><span class="kw">use </span>std::collections::HashSet;
+<span class="kw">use </span>std::path <span class="kw">as </span>stdpath;
+<span class="kw">use </span>std::{fmt::Display, str::FromStr};
 
-<span class="kw">use</span> <span class="ident">skia_safe</span>::{<span class="self">self</span> <span class="kw">as</span> <span class="ident">skia</span>, <span class="ident">Path</span>};
-<span class="kw">use</span> <span class="ident">kurbo::Affine</span>;
-<span class="kw">use</span> <span class="ident">serde</span>::{<span class="ident">Serialize</span>, <span class="ident">Deserialize</span>};
+<span class="kw">use </span>kurbo::Affine;
+<span class="kw">use </span>serde::{Deserialize, Serialize};
+<span class="attribute">#[cfg(feature = <span class="string">&quot;skia&quot;</span>)]
+</span><span class="kw">use </span>skia_safe::{<span class="self">self </span><span class="kw">as </span>skia, Path};
 
-<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::anchor::Anchor</span>;
-<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::component</span>::{<span class="ident">ComponentRect</span>, <span class="ident">GlifComponents</span>};
-<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::error</span>::{<span class="ident">mfek</span>::<span class="kw-2">*</span>, <span class="ident">GlifParserError</span>};
-<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::glif::Glif</span>;
-<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::guideline::Guideline</span>;
-<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::outline</span>::{<span class="ident">Outline</span>, <span class="ident">Contour</span>, <span class="ident">OutlineType</span>};
-<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::outline::skia</span>::{<span class="ident">SkiaPaths</span>, <span class="ident">SkiaPointTransforms</span>, <span class="ident">ToSkiaPath</span>, <span class="ident">ToSkiaPaths</span>};
-<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::point</span>::{<span class="ident">Point</span>, <span class="ident">PointData</span>, <span class="ident">PointType</span>};
+<span class="kw">use </span><span class="kw">crate</span>::anchor::Anchor;
+<span class="kw">use </span><span class="kw">crate</span>::component::{ComponentRect, GlifComponents};
+<span class="kw">use </span><span class="kw">crate</span>::error::{mfek::<span class="kw-2">*</span>, GlifParserError};
+<span class="kw">use </span><span class="kw">crate</span>::glif::Glif;
+<span class="kw">use </span><span class="kw">crate</span>::guideline::Guideline;
+<span class="attribute">#[cfg(feature = <span class="string">&quot;skia&quot;</span>)]
+</span><span class="kw">use </span><span class="kw">crate</span>::outline::skia::{SkiaPaths, SkiaPointTransforms, ToSkiaPath, ToSkiaPaths};
+<span class="kw">use </span><span class="kw">crate</span>::outline::{Contour, Outline, OutlineType};
+<span class="kw">use </span><span class="kw">crate</span>::point::{Point, PointData, PointType};
 
-<span class="attribute">#[<span class="ident">macro_use</span>]</span> <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">layer</span>;
-<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">layer::Layer</span>;
-<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">use</span> <span class="ident">DEFAULT_LAYER_FORMAT_STR</span>;
-<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">traits</span>;
+<span class="attribute">#[macro_use] </span><span class="kw">pub mod </span>layer;
+<span class="kw">pub use </span>layer::Layer;
+<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">use </span>DEFAULT_LAYER_FORMAT_STR;
+<span class="kw">pub mod </span>traits;
 
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">Default</span>, <span class="ident">Clone</span>, <span class="ident">Serialize</span>, <span class="ident">Deserialize</span>)]</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">MFEKPointData</span>;
-<span class="kw">impl</span> <span class="ident">PointData</span> <span class="kw">for</span> <span class="ident">MFEKPointData</span> {}
-<span class="kw">impl</span> <span class="ident">PointData</span> <span class="kw">for</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">MFEKPointData</span><span class="op">&gt;</span> {}
-<span class="kw">impl</span> <span class="ident">From</span><span class="op">&lt;</span>()<span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">MFEKPointData</span> {
-    <span class="kw">fn</span> <span class="ident">from</span>(<span class="kw">_</span>: ()) -&gt; <span class="self">Self</span> {
-        <span class="ident"><span class="self">Self</span>::default</span>()
+<span class="attribute">#[derive(Debug, Default, Clone, Serialize, Deserialize)]
+</span><span class="kw">pub struct </span>MFEKPointData;
+<span class="kw">impl </span>PointData <span class="kw">for </span>MFEKPointData {}
+<span class="kw">impl </span>PointData <span class="kw">for </span><span class="prelude-ty">Option</span>&lt;MFEKPointData&gt; {}
+<span class="kw">impl </span>From&lt;()&gt; <span class="kw">for </span>MFEKPointData {
+    <span class="kw">fn </span>from(<span class="kw">_</span>: ()) -&gt; <span class="self">Self </span>{
+        <span class="self">Self</span>::default()
     }
 }
-<span class="kw">impl</span> <span class="ident">Into</span><span class="op">&lt;</span>()<span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">MFEKPointData</span> {
-    <span class="kw">fn</span> <span class="ident">into</span>(<span class="self">self</span>) -&gt; () {
+<span class="kw">impl </span>Into&lt;()&gt; <span class="kw">for </span>MFEKPointData {
+    <span class="kw">fn </span>into(<span class="self">self</span>) -&gt; () {
         ()
     }
 }
 
-<span class="doccomment">/// This is an intermediary form used in MFEKglif and other tools. You can .into() a glif into this</span>
-<span class="doccomment">/// make changes to MFEK data and then turn it back into a standard UFO glif before saving.</span>
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>, <span class="ident">Debug</span>, <span class="ident">Default</span>, <span class="ident">PartialEq</span>, <span class="ident">Serialize</span>, <span class="ident">Deserialize</span>)]</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">MFEKGlif</span><span class="op">&lt;</span><span class="ident">PD</span>: <span class="ident">PointData</span><span class="op">&gt;</span> {
-    <span class="kw">pub</span> <span class="ident">layers</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Layer</span><span class="op">&lt;</span><span class="ident">PD</span><span class="op">&gt;</span><span class="op">&gt;</span>,
-    <span class="kw">pub</span> <span class="ident">history</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">HistoryEntry</span><span class="op">&lt;</span><span class="ident">PD</span><span class="op">&gt;</span><span class="op">&gt;</span>,
-    <span class="kw">pub</span> <span class="ident">order</span>: <span class="ident">OutlineType</span>,
-    <span class="kw">pub</span> <span class="ident">anchors</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Anchor</span><span class="op">&lt;</span><span class="ident">PD</span><span class="op">&gt;</span><span class="op">&gt;</span>,
-    <span class="doccomment">/// Note that these components are not yet parsed or checked for infinite loops. You need to</span>
-    <span class="doccomment">/// call either ``GlifComponent::to_component_of`` on each of these, or ``Glif::flatten``.</span>
-    <span class="kw">pub</span> <span class="ident">components</span>: <span class="ident">GlifComponents</span>,
-    <span class="kw">pub</span> <span class="ident">flattened</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Outline</span><span class="op">&lt;</span><span class="ident">PD</span><span class="op">&gt;</span><span class="op">&gt;</span>, <span class="comment">// holds cached flattened glif (components to points)</span>
-    <span class="kw">pub</span> <span class="ident">component_rects</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">ComponentRect</span><span class="op">&gt;</span><span class="op">&gt;</span>, <span class="comment">// holds cached flattened component rects</span>
-    <span class="kw">pub</span> <span class="ident">guidelines</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Guideline</span><span class="op">&lt;</span><span class="ident">PD</span><span class="op">&gt;</span><span class="op">&gt;</span>,
-    <span class="kw">pub</span> <span class="ident">width</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">u64</span><span class="op">&gt;</span>,
-    <span class="kw">pub</span> <span class="ident">unicode</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">char</span><span class="op">&gt;</span>,
-    <span class="kw">pub</span> <span class="ident">name</span>: <span class="ident">String</span>,
-    <span class="doccomment">/// This is an arbitrary glyph comment, exactly like the comment field in FontForge SFD.</span>
-    <span class="kw">pub</span> <span class="ident">note</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span>,
-    <span class="doccomment">/// It&#39;s up to the API consumer to set this.</span>
-    <span class="kw">pub</span> <span class="ident">filename</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">stdpath::PathBuf</span><span class="op">&gt;</span>,
+<span class="doccomment">/// This is an intermediary form used in MFEKglif and other tools. You can .into() a glif into this
+/// make changes to MFEK data and then turn it back into a standard UFO glif before saving.
+</span><span class="attribute">#[derive(Clone, Debug, Default, PartialEq, Serialize, Deserialize)]
+</span><span class="kw">pub struct </span>MFEKGlif&lt;PD: PointData&gt; {
+    <span class="kw">pub </span>layers: Vec&lt;Layer&lt;PD&gt;&gt;,
+    <span class="kw">pub </span>history: Vec&lt;HistoryEntry&lt;PD&gt;&gt;,
+    <span class="kw">pub </span>order: OutlineType,
+    <span class="kw">pub </span>anchors: Vec&lt;Anchor&lt;PD&gt;&gt;,
+    <span class="doccomment">/// Note that these components are not yet parsed or checked for infinite loops. You need to
+    /// call either ``GlifComponent::to_component_of`` on each of these, or ``Glif::flatten``.
+    </span><span class="kw">pub </span>components: GlifComponents,
+    <span class="kw">pub </span>flattened: <span class="prelude-ty">Option</span>&lt;Outline&lt;PD&gt;&gt;, <span class="comment">// holds cached flattened glif (components to points)
+    </span><span class="kw">pub </span>component_rects: <span class="prelude-ty">Option</span>&lt;Vec&lt;ComponentRect&gt;&gt;, <span class="comment">// holds cached flattened component rects
+    </span><span class="kw">pub </span>guidelines: Vec&lt;Guideline&lt;PD&gt;&gt;,
+    <span class="kw">pub </span>width: <span class="prelude-ty">Option</span>&lt;u64&gt;,
+    <span class="kw">pub </span>unicode: Vec&lt;char&gt;,
+    <span class="kw">pub </span>name: String,
+    <span class="doccomment">/// This is an arbitrary glyph comment, exactly like the comment field in FontForge SFD.
+    </span><span class="kw">pub </span>note: <span class="prelude-ty">Option</span>&lt;String&gt;,
+    <span class="doccomment">/// It&#39;s up to the API consumer to set this.
+    </span><span class="kw">pub </span>filename: <span class="prelude-ty">Option</span>&lt;stdpath::PathBuf&gt;,
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">PD</span>: <span class="ident">PointData</span><span class="op">&gt;</span> <span class="ident">From</span><span class="op">&lt;</span><span class="ident">Glif</span><span class="op">&lt;</span><span class="ident">PD</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">MFEKGlif</span><span class="op">&lt;</span><span class="ident">PD</span><span class="op">&gt;</span> {
-    <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">glif</span>: <span class="ident">Glif</span><span class="op">&lt;</span><span class="ident">PD</span><span class="op">&gt;</span>) -&gt; <span class="self">Self</span> {
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">layers</span> <span class="op">=</span> <span class="ident">Vec::new</span>();
-        <span class="kw">let</span> <span class="ident">history</span> <span class="op">=</span> <span class="ident">Vec::new</span>();
+<span class="kw">impl</span>&lt;PD: PointData&gt; From&lt;Glif&lt;PD&gt;&gt; <span class="kw">for </span>MFEKGlif&lt;PD&gt; {
+    <span class="kw">fn </span>from(glif: Glif&lt;PD&gt;) -&gt; <span class="self">Self </span>{
+        <span class="kw">let </span><span class="kw-2">mut </span>layers = Vec::new();
+        <span class="kw">let </span>history = Vec::new();
 
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">ret</span> <span class="op">=</span> <span class="ident">MFEKGlif</span> {
-            <span class="ident">layers</span>: <span class="macro">vec!</span>[],
-            <span class="ident">history</span>,
-            <span class="ident">flattened</span>: <span class="prelude-val">None</span>,
-            <span class="ident">component_rects</span>: <span class="prelude-val">None</span>,
-            <span class="ident">order</span>: <span class="ident">glif</span>.<span class="ident">order</span>,
-            <span class="ident">anchors</span>: <span class="ident">glif</span>.<span class="ident">anchors</span>,
-            <span class="ident">components</span>: <span class="ident">glif</span>.<span class="ident">components</span>,
-            <span class="ident">guidelines</span>: <span class="ident">glif</span>.<span class="ident">guidelines</span>,
-            <span class="ident">width</span>: <span class="ident">glif</span>.<span class="ident">width</span>,
-            <span class="ident">unicode</span>: <span class="ident">glif</span>.<span class="ident">unicode</span>,
-            <span class="ident">name</span>: <span class="ident">glif</span>.<span class="ident">name</span>,
-            <span class="ident">note</span>: <span class="ident">glif</span>.<span class="ident">note</span>,
-            <span class="ident">filename</span>: <span class="ident">glif</span>.<span class="ident">filename</span>,
+        <span class="kw">let </span><span class="kw-2">mut </span>ret = MFEKGlif {
+            layers: <span class="macro">vec!</span>[],
+            history,
+            flattened: <span class="prelude-val">None</span>,
+            component_rects: <span class="prelude-val">None</span>,
+            order: glif.order,
+            anchors: glif.anchors,
+            components: glif.components,
+            guidelines: glif.guidelines,
+            width: glif.width,
+            unicode: glif.unicode,
+            name: glif.name,
+            note: glif.note,
+            filename: glif.filename,
         };
 
-        <span class="ident">layers</span>.<span class="ident">push</span>(<span class="ident">Layer</span> {
-            <span class="comment">// Warning: due to Rust language limitations, the const</span>
-            <span class="comment">// `layer::DEFAULT_LAYER_FORMAT_STR` is not usable here. Thus, the macro.</span>
-            <span class="ident">name</span>: <span class="macro">format!</span>(<span class="macro">DEFAULT_LAYER_FORMAT_STR!</span>(), <span class="number">0</span>),
-            <span class="ident">visible</span>: <span class="bool-val">true</span>,
-            <span class="ident">color</span>: <span class="prelude-val">None</span>,
-            <span class="ident">outline</span>: <span class="ident">glif</span>.<span class="ident">outline</span>.<span class="ident">unwrap_or</span>(<span class="ident">Vec::new</span>()).<span class="ident">iter</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">contour</span><span class="op">|</span> <span class="ident">contour</span>.<span class="ident">into</span>() ).<span class="ident">collect</span>(),
-            <span class="ident">operation</span>: <span class="prelude-val">None</span>,
-            <span class="ident">images</span>: <span class="ident">glif</span>.<span class="ident">images</span>.<span class="ident">iter</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">im</span><span class="op">|</span> {
-                <span class="kw">let</span> <span class="ident">temp_affine</span>: <span class="ident">Affine</span> <span class="op">=</span> <span class="ident">im</span>.<span class="ident">matrix</span>().<span class="ident">into</span>();
-                (<span class="ident">im</span>.<span class="ident">clone</span>(), <span class="ident">temp_affine</span>)
-            }).<span class="ident">collect</span>(),
+        layers.push(Layer {
+            <span class="comment">// Warning: due to Rust language limitations, the const
+            // `layer::DEFAULT_LAYER_FORMAT_STR` is not usable here. Thus, the macro.
+            </span>name: <span class="macro">format!</span>(<span class="macro">DEFAULT_LAYER_FORMAT_STR!</span>(), <span class="number">0</span>),
+            visible: <span class="bool-val">true</span>,
+            color: <span class="prelude-val">None</span>,
+            outline: glif.outline.unwrap_or(Vec::new()).iter().map(|contour| contour.into() ).collect(),
+            operation: <span class="prelude-val">None</span>,
+            images: glif.images.iter().map(|im| {
+                <span class="kw">let </span>temp_affine: Affine = im.matrix().into();
+                (im.clone(), temp_affine)
+            }).collect(),
         });
-        <span class="ident">ret</span>.<span class="ident">layers</span> <span class="op">=</span> <span class="ident">layers</span>;
+        ret.layers = layers;
 
-        <span class="ident">ret</span>
+        ret
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">PD</span>: <span class="ident">PointData</span><span class="op">&gt;</span> <span class="ident">From</span><span class="op">&lt;</span><span class="ident">MFEKGlif</span><span class="op">&lt;</span><span class="ident">PD</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Glif</span><span class="op">&lt;</span><span class="ident">PD</span><span class="op">&gt;</span> {
-    <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">glif</span>: <span class="ident">MFEKGlif</span><span class="op">&lt;</span><span class="ident">PD</span><span class="op">&gt;</span>) -&gt; <span class="self">Self</span> {
-        <span class="kw">let</span> <span class="ident">outline</span> <span class="op">=</span> <span class="ident">glif</span>.<span class="ident">layers</span>[<span class="number">0</span>].<span class="ident">outline</span>.<span class="ident">iter</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">contour</span><span class="op">|</span> 
-            <span class="ident">contour</span>.<span class="ident">inner</span>.<span class="ident">clone</span>()
-        ).<span class="ident">collect</span>();
+<span class="kw">impl</span>&lt;PD: PointData&gt; From&lt;MFEKGlif&lt;PD&gt;&gt; <span class="kw">for </span>Glif&lt;PD&gt; {
+    <span class="kw">fn </span>from(glif: MFEKGlif&lt;PD&gt;) -&gt; <span class="self">Self </span>{
+        <span class="kw">let </span>outline = glif.layers[<span class="number">0</span>].outline.iter().map(|contour| 
+            contour.inner.clone()
+        ).collect();
 
-        <span class="kw">let</span> <span class="ident">images</span> <span class="op">=</span> <span class="ident">glif</span>.<span class="ident">layers</span>[<span class="number">0</span>].<span class="ident">images</span>.<span class="ident">iter</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">tupes</span><span class="op">|</span> {
-            <span class="ident">tupes</span>.<span class="number">0</span>.<span class="ident">clone</span>()
-        }).<span class="ident">collect</span>();
+        <span class="kw">let </span>images = glif.layers[<span class="number">0</span>].images.iter().map(|tupes| {
+            tupes.<span class="number">0</span>.clone()
+        }).collect();
 
-        <span class="ident">Glif</span> {
-            <span class="ident">order</span>: <span class="ident">glif</span>.<span class="ident">order</span>,
-            <span class="ident">anchors</span>: <span class="ident">glif</span>.<span class="ident">anchors</span>.<span class="ident">clone</span>(),
-            <span class="ident">components</span>: <span class="ident">glif</span>.<span class="ident">components</span>.<span class="ident">clone</span>(),
-            <span class="ident">guidelines</span>: <span class="ident">glif</span>.<span class="ident">guidelines</span>.<span class="ident">clone</span>(),
-            <span class="ident">width</span>: <span class="ident">glif</span>.<span class="ident">width</span>,
-            <span class="ident">unicode</span>: <span class="ident">glif</span>.<span class="ident">unicode</span>.<span class="ident">clone</span>(),
-            <span class="ident">name</span>: <span class="ident">glif</span>.<span class="ident">name</span>.<span class="ident">clone</span>(),
-            <span class="ident">filename</span>: <span class="ident">glif</span>.<span class="ident">filename</span>.<span class="ident">clone</span>(),
-            <span class="ident">outline</span>: <span class="prelude-val">Some</span>(<span class="ident">outline</span>),
-            <span class="ident">images</span>,
-            <span class="ident">note</span>: <span class="ident">glif</span>.<span class="ident">note</span>.<span class="ident">clone</span>(),
-            ..<span class="ident">Glif::default</span>()
+        Glif {
+            order: glif.order,
+            anchors: glif.anchors.clone(),
+            components: glif.components.clone(),
+            guidelines: glif.guidelines.clone(),
+            width: glif.width,
+            unicode: glif.unicode.clone(),
+            name: glif.name.clone(),
+            filename: glif.filename.clone(),
+            outline: <span class="prelude-val">Some</span>(outline),
+            images,
+            note: glif.note.clone(),
+            ..Glif::default()
         }
     }
 }
 
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>, <span class="ident">Debug</span>, <span class="ident">PartialEq</span>, <span class="ident">Serialize</span>, <span class="ident">Deserialize</span>)]</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">HistoryEntry</span><span class="op">&lt;</span><span class="ident">PD</span>: <span class="ident">PointData</span><span class="op">&gt;</span> {
-    <span class="kw">pub</span> <span class="ident">description</span>: <span class="ident">String</span>,
-    <span class="kw">pub</span> <span class="ident">layer_idx</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span>,
-    <span class="kw">pub</span> <span class="ident">contour_idx</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span>,
-    <span class="kw">pub</span> <span class="ident">point_idx</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span>,
-    <span class="kw">pub</span> <span class="ident">guidelines</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Guideline</span><span class="op">&lt;</span><span class="ident">PD</span><span class="op">&gt;</span><span class="op">&gt;</span>, <span class="comment">// UFO-level, not glyph-level which&#39;d be in HistoryEntry::glyph</span>
-    <span class="kw">pub</span> <span class="ident">selected</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">HashSet</span><span class="op">&lt;</span>(<span class="ident">usize</span>, <span class="ident">usize</span>)<span class="op">&gt;</span><span class="op">&gt;</span>,
-    <span class="kw">pub</span> <span class="ident">glyph</span>: <span class="ident">MFEKGlif</span><span class="op">&lt;</span><span class="ident">PD</span><span class="op">&gt;</span>,
+<span class="attribute">#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+</span><span class="kw">pub struct </span>HistoryEntry&lt;PD: PointData&gt; {
+    <span class="kw">pub </span>description: String,
+    <span class="kw">pub </span>layer_idx: <span class="prelude-ty">Option</span>&lt;usize&gt;,
+    <span class="kw">pub </span>contour_idx: <span class="prelude-ty">Option</span>&lt;usize&gt;,
+    <span class="kw">pub </span>point_idx: <span class="prelude-ty">Option</span>&lt;usize&gt;,
+    <span class="kw">pub </span>guidelines: Vec&lt;Guideline&lt;PD&gt;&gt;, <span class="comment">// UFO-level, not glyph-level which&#39;d be in HistoryEntry::glyph
+    </span><span class="kw">pub </span>selected: <span class="prelude-ty">Option</span>&lt;HashSet&lt;(usize, usize)&gt;&gt;,
+    <span class="kw">pub </span>glyph: MFEKGlif&lt;PD&gt;,
 }
 
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>, <span class="ident">Debug</span>, <span class="ident">PartialEq</span>, <span class="ident">Serialize</span>, <span class="ident">Deserialize</span>)]</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">MFEKContour</span><span class="op">&lt;</span><span class="ident">PD</span>: <span class="ident">PointData</span><span class="op">&gt;</span> {
-    <span class="kw">pub</span> <span class="ident">inner</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Point</span><span class="op">&lt;</span><span class="ident">PD</span><span class="op">&gt;</span><span class="op">&gt;</span>,
-    <span class="kw">pub</span> <span class="ident">operation</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">ContourOperations</span><span class="op">&lt;</span><span class="ident">PD</span><span class="op">&gt;</span><span class="op">&gt;</span>,
+<span class="attribute">#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+</span><span class="kw">pub struct </span>MFEKContour&lt;PD: PointData&gt; {
+    <span class="kw">pub </span>inner: Vec&lt;Point&lt;PD&gt;&gt;,
+    <span class="kw">pub </span>operation: <span class="prelude-ty">Option</span>&lt;ContourOperations&lt;PD&gt;&gt;,
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">PD</span>: <span class="ident">PointData</span><span class="op">&gt;</span> <span class="ident">From</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Point</span><span class="op">&lt;</span><span class="ident">PD</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">MFEKContour</span><span class="op">&lt;</span><span class="ident">PD</span><span class="op">&gt;</span> {
-    <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">contour</span>: <span class="kw-2">&amp;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Point</span><span class="op">&lt;</span><span class="ident">PD</span><span class="op">&gt;</span><span class="op">&gt;</span>) -&gt; <span class="self">Self</span> {
-        <span class="self">Self</span> {
-            <span class="ident">inner</span>: <span class="ident">contour</span>.<span class="ident">clone</span>(),
-            <span class="ident">operation</span>: <span class="prelude-val">None</span>,
+<span class="kw">impl</span>&lt;PD: PointData&gt; From&lt;<span class="kw-2">&amp;</span>Vec&lt;Point&lt;PD&gt;&gt;&gt; <span class="kw">for </span>MFEKContour&lt;PD&gt; {
+    <span class="kw">fn </span>from(contour: <span class="kw-2">&amp;</span>Vec&lt;Point&lt;PD&gt;&gt;) -&gt; <span class="self">Self </span>{
+        <span class="self">Self </span>{
+            inner: contour.clone(),
+            operation: <span class="prelude-val">None</span>,
         }
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">PD</span>: <span class="ident">PointData</span><span class="op">&gt;</span> <span class="ident">From</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Point</span><span class="op">&lt;</span><span class="ident">PD</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">MFEKContour</span><span class="op">&lt;</span><span class="ident">PD</span><span class="op">&gt;</span> {
-    <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">contour</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Point</span><span class="op">&lt;</span><span class="ident">PD</span><span class="op">&gt;</span><span class="op">&gt;</span>) -&gt; <span class="self">Self</span> {
-        <span class="self">Self</span> {
-            <span class="ident">inner</span>: <span class="ident">contour</span>,
-            <span class="ident">operation</span>: <span class="prelude-val">None</span>,
+<span class="kw">impl</span>&lt;PD: PointData&gt; From&lt;Vec&lt;Point&lt;PD&gt;&gt;&gt; <span class="kw">for </span>MFEKContour&lt;PD&gt; {
+    <span class="kw">fn </span>from(contour: Vec&lt;Point&lt;PD&gt;&gt;) -&gt; <span class="self">Self </span>{
+        <span class="self">Self </span>{
+            inner: contour,
+            operation: <span class="prelude-val">None</span>,
         }
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">PD</span>: <span class="ident">PointData</span><span class="op">&gt;</span> <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">Contour</span><span class="op">&lt;</span><span class="ident">PD</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">MFEKContour</span><span class="op">&lt;</span><span class="ident">PD</span><span class="op">&gt;</span> {
-    <span class="kw">fn</span> <span class="ident">into</span>(<span class="self">self</span>) -&gt; <span class="ident">Contour</span><span class="op">&lt;</span><span class="ident">PD</span><span class="op">&gt;</span> {
-        <span class="self">self</span>.<span class="ident">inner</span>
+<span class="kw">impl</span>&lt;PD: PointData&gt; Into&lt;Contour&lt;PD&gt;&gt; <span class="kw">for </span>MFEKContour&lt;PD&gt; {
+    <span class="kw">fn </span>into(<span class="self">self</span>) -&gt; Contour&lt;PD&gt; {
+        <span class="self">self</span>.inner
     }
 }
 
-<span class="kw">pub</span> <span class="kw">type</span> <span class="ident">MFEKOutline</span><span class="op">&lt;</span><span class="ident">PD</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">MFEKContour</span><span class="op">&lt;</span><span class="ident">PD</span><span class="op">&gt;</span><span class="op">&gt;</span>;
+<span class="kw">pub type </span>MFEKOutline&lt;PD&gt; = Vec&lt;MFEKContour&lt;PD&gt;&gt;;
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">PD</span>: <span class="ident">PointData</span><span class="op">&gt;</span> <span class="ident">ToSkiaPaths</span> <span class="kw">for</span> <span class="ident">MFEKOutline</span><span class="op">&lt;</span><span class="ident">PD</span><span class="op">&gt;</span> {
-    <span class="kw">fn</span> <span class="ident">to_skia_paths</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">spt</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">SkiaPointTransforms</span><span class="op">&gt;</span>) -&gt; <span class="ident">SkiaPaths</span> {
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">ret</span> <span class="op">=</span> <span class="ident">SkiaPaths</span> {
-            <span class="ident">open</span>: <span class="prelude-val">None</span>,
-            <span class="ident">closed</span>: <span class="prelude-val">None</span>
-        };
+<span class="attribute">#[cfg(feature = <span class="string">&quot;skia&quot;</span>)]
+</span><span class="kw">impl</span>&lt;PD: PointData&gt; ToSkiaPaths <span class="kw">for </span>MFEKOutline&lt;PD&gt; {
+    <span class="kw">fn </span>to_skia_paths(<span class="kw-2">&amp;</span><span class="self">self</span>, spt: <span class="prelude-ty">Option</span>&lt;SkiaPointTransforms&gt;) -&gt; SkiaPaths {
+        <span class="kw">let </span><span class="kw-2">mut </span>ret = SkiaPaths {
+            open: <span class="prelude-val">None</span>,
+            closed: <span class="prelude-val">None
+        </span>};
 
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">open</span> <span class="op">=</span> <span class="ident">Path::new</span>();
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">closed</span> <span class="op">=</span> <span class="ident">Path::new</span>();
+        <span class="kw">let </span><span class="kw-2">mut </span>open = Path::new();
+        <span class="kw">let </span><span class="kw-2">mut </span>closed = Path::new();
 
-        <span class="kw">for</span> <span class="ident">contour</span> <span class="kw">in</span> <span class="self">self</span> {
-            <span class="kw">let</span> <span class="ident">firstpoint</span>: <span class="kw-2">&amp;</span><span class="ident">Point</span><span class="op">&lt;</span><span class="ident">PD</span><span class="op">&gt;</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">contour</span>.<span class="ident">inner</span>.<span class="ident">first</span>() {
-                <span class="prelude-val">Some</span>(<span class="ident">p</span>) =&gt; <span class="ident">p</span>,
-                <span class="prelude-val">None</span> =&gt; { <span class="kw">continue</span> } <span class="comment">// contour has no points</span>
-            };
-            <span class="kw">let</span> <span class="ident">skpath</span> <span class="op">=</span> <span class="ident">contour</span>.<span class="ident">inner</span>.<span class="ident">to_skia_path</span>(<span class="ident">spt</span>).<span class="ident">unwrap</span>(); <span class="comment">// therefore we know it&#39;ll be Some</span>
-            <span class="kw">if</span> <span class="ident">firstpoint</span>.<span class="ident">ptype</span> <span class="op">==</span> <span class="ident">PointType::Move</span> {
-                <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">open</span>
-            } <span class="kw">else</span> {
-                <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">closed</span>
-            }.<span class="ident">add_path</span>(<span class="kw-2">&amp;</span><span class="ident">skpath</span>, (<span class="number">0.</span>, <span class="number">0.</span>), <span class="ident">skia::path::AddPathMode::Append</span>);
+        <span class="kw">for </span>contour <span class="kw">in </span><span class="self">self </span>{
+            <span class="kw">let </span>firstpoint: <span class="kw-2">&amp;</span>Point&lt;PD&gt; = <span class="kw">match </span>contour.inner.first() {
+                <span class="prelude-val">Some</span>(p) =&gt; p,
+                <span class="prelude-val">None </span>=&gt; { <span class="kw">continue </span>} <span class="comment">// contour has no points
+            </span>};
+            <span class="kw">let </span>skpath = contour.inner.to_skia_path(spt).unwrap(); <span class="comment">// therefore we know it&#39;ll be Some
+            </span><span class="kw">if </span>firstpoint.ptype == PointType::Move {
+                <span class="kw-2">&amp;mut </span>open
+            } <span class="kw">else </span>{
+                <span class="kw-2">&amp;mut </span>closed
+            }.add_path(<span class="kw-2">&amp;</span>skpath, (<span class="number">0.</span>, <span class="number">0.</span>), skia::path::AddPathMode::Append);
         }
 
-        <span class="kw">if</span> <span class="ident">open</span>.<span class="ident">count_points</span>() <span class="op">&gt;</span> <span class="number">0</span> {
-            <span class="ident">ret</span>.<span class="ident">open</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">open</span>);
+        <span class="kw">if </span>open.count_points() &gt; <span class="number">0 </span>{
+            ret.open = <span class="prelude-val">Some</span>(open);
         }
 
-        <span class="kw">if</span> <span class="ident">closed</span>.<span class="ident">count_points</span>() <span class="op">&gt;</span> <span class="number">0</span> {
-            <span class="ident">ret</span>.<span class="ident">closed</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">closed</span>);
+        <span class="kw">if </span>closed.count_points() &gt; <span class="number">0 </span>{
+            ret.closed = <span class="prelude-val">Some</span>(closed);
         }
 
-        <span class="ident">ret</span>
+        ret
     }
 }
 
-<span class="comment">// The reason that all this is here and not in MFEK/math.rlib is because this data needs to be</span>
-<span class="comment">// serialized and deserialized in glif files. So, MFEK/math.rlib gets its structs from here.</span>
+<span class="comment">// The reason that all this is here and not in MFEK/math.rlib is because this data needs to be
+// serialized and deserialized in glif files. So, MFEK/math.rlib gets its structs from here.
 
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>, <span class="ident">Debug</span>, <span class="ident">PartialEq</span>, <span class="ident">Serialize</span>, <span class="ident">Deserialize</span>)]</span>
-<span class="attribute">#[<span class="ident">non_exhaustive</span>]</span>
-<span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">ContourOperations</span><span class="op">&lt;</span><span class="ident">PD</span>: <span class="ident">PointData</span><span class="op">&gt;</span> {
-    <span class="ident">VariableWidthStroke</span> { <span class="ident">data</span>: <span class="ident">VWSContour</span> },
-    <span class="ident">PatternAlongPath</span> { <span class="ident">data</span>: <span class="ident">PAPContour</span><span class="op">&lt;</span><span class="ident">PD</span><span class="op">&gt;</span> },
-    <span class="ident">DashAlongPath</span> { <span class="ident">data</span>: <span class="ident">DashContour</span> },
+</span><span class="attribute">#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[non_exhaustive]
+</span><span class="kw">pub enum </span>ContourOperations&lt;PD: PointData&gt; {
+    VariableWidthStroke { data: VWSContour },
+    PatternAlongPath { data: PAPContour&lt;PD&gt; },
+    DashAlongPath { data: DashContour },
 }
 
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>, <span class="ident">Debug</span>, <span class="ident">PartialEq</span>, <span class="ident">Serialize</span>, <span class="ident">Deserialize</span>)]</span>
-<span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">PatternCopies</span> {
-    <span class="ident">Single</span>,
-    <span class="ident">Repeated</span>,
-    <span class="ident">Fixed</span>(<span class="ident">usize</span>) <span class="comment">// TODO: Implement</span>
+<span class="attribute">#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+</span><span class="kw">pub enum </span>PatternCopies {
+    Single,
+    Repeated,
+    Fixed(usize) <span class="comment">// TODO: Implement
+</span>}
+
+<span class="attribute">#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+</span><span class="kw">pub enum </span>PatternSubdivide {
+    <span class="doccomment">/// no splitting
+    </span>Off,
+    <span class="doccomment">/// split each curve at its midpoint
+    </span>Simple(usize), <span class="comment">// The value here is how many times we&#39;ll subdivide simply
+    // split the input pattern each x degrees in change in direction on the path
+    //Angle(f64) TODO: Implement.
+</span>}
+
+<span class="attribute">#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+</span><span class="kw">pub enum </span>PatternHandleDiscontinuity {
+    <span class="doccomment">/// no handling
+    </span>Off,
+    <span class="doccomment">/// handle by splitting
+    </span>Split(f64) 
+    <span class="comment">// Cut TODO: implement
+</span>}
+
+<span class="attribute">#[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
+</span><span class="kw">pub enum </span>PatternStretch {
+    <span class="doccomment">/// no stretching
+    </span>Off,
+    <span class="doccomment">/// stretch the pattern
+    </span>On,
+    <span class="doccomment">/// stretch the spacing between the pattern
+    </span>Spacing,
 }
 
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>, <span class="ident">Debug</span>, <span class="ident">PartialEq</span>, <span class="ident">Serialize</span>, <span class="ident">Deserialize</span>)]</span>
-<span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">PatternSubdivide</span> {
-    <span class="doccomment">/// no splitting</span>
-    <span class="ident">Off</span>,
-    <span class="doccomment">/// split each curve at its midpoint</span>
-    <span class="ident">Simple</span>(<span class="ident">usize</span>), <span class="comment">// The value here is how many times we&#39;ll subdivide simply</span>
-    <span class="comment">// split the input pattern each x degrees in change in direction on the path</span>
-    <span class="comment">//Angle(f64) TODO: Implement.</span>
+<span class="attribute">#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+</span><span class="kw">pub struct </span>PAPContour&lt;PD: PointData&gt; {
+    <span class="kw">pub </span>pattern: MFEKOutline&lt;PD&gt;,
+    <span class="kw">pub </span>copies: PatternCopies,
+    <span class="kw">pub </span>subdivide: PatternSubdivide,
+    <span class="kw">pub </span>is_vertical: bool, <span class="comment">// TODO: Implement this. Might replace it with a general rotation parameter to make it more useful.
+    </span><span class="kw">pub </span>stretch: PatternStretch,
+    <span class="kw">pub </span>spacing: f64,
+    <span class="kw">pub </span>simplify: bool,
+    <span class="kw">pub </span>normal_offset: f64,
+    <span class="kw">pub </span>tangent_offset: f64,
+    <span class="kw">pub </span>pattern_scale: (f64, f64),
+    <span class="kw">pub </span>center_pattern: bool,
+    <span class="kw">pub </span>prevent_overdraw: f64,
+    <span class="kw">pub </span>two_pass_culling: bool,
+    <span class="kw">pub </span>reverse_path: bool,
+    <span class="kw">pub </span>reverse_culling: bool,
 }
 
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>, <span class="ident">Debug</span>, <span class="ident">PartialEq</span>, <span class="ident">Serialize</span>, <span class="ident">Deserialize</span>)]</span>
-<span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">PatternHandleDiscontinuity</span> {
-    <span class="doccomment">/// no handling</span>
-    <span class="ident">Off</span>,
-    <span class="doccomment">/// handle by splitting</span>
-    <span class="ident">Split</span>(<span class="ident">f64</span>) 
-    <span class="comment">// Cut TODO: implement</span>
+<span class="attribute">#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
+</span><span class="kw">pub struct </span>VWSContour {
+    <span class="kw">pub </span>handles: Vec&lt;VWSHandle&gt;,
+    <span class="kw">pub </span>join_type: JoinType,
+    <span class="kw">pub </span>cap_start_type: CapType,
+    <span class="kw">pub </span>cap_end_type: CapType,
+    <span class="kw">pub </span>remove_internal: bool,
+    <span class="kw">pub </span>remove_external: bool,
 }
 
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">Clone</span>, <span class="ident">Copy</span>, <span class="ident">PartialEq</span>, <span class="ident">Serialize</span>, <span class="ident">Deserialize</span>)]</span>
-<span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">PatternStretch</span> {
-    <span class="doccomment">/// no stretching</span>
-    <span class="ident">Off</span>,
-    <span class="doccomment">/// stretch the pattern</span>
-    <span class="ident">On</span>,
-    <span class="doccomment">/// stretch the spacing between the pattern</span>
-    <span class="ident">Spacing</span>,
+<span class="attribute">#[derive(Copy, Clone, Debug, Serialize, Deserialize, PartialEq)]
+</span><span class="kw">pub struct </span>DashCull {
+    <span class="kw">pub </span>width: f32,
+    <span class="kw">pub </span>area_cutoff: f32,
 }
 
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>, <span class="ident">Debug</span>, <span class="ident">PartialEq</span>, <span class="ident">Serialize</span>, <span class="ident">Deserialize</span>)]</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">PAPContour</span><span class="op">&lt;</span><span class="ident">PD</span>: <span class="ident">PointData</span><span class="op">&gt;</span> {
-    <span class="kw">pub</span> <span class="ident">pattern</span>: <span class="ident">MFEKOutline</span><span class="op">&lt;</span><span class="ident">PD</span><span class="op">&gt;</span>,
-    <span class="kw">pub</span> <span class="ident">copies</span>: <span class="ident">PatternCopies</span>,
-    <span class="kw">pub</span> <span class="ident">subdivide</span>: <span class="ident">PatternSubdivide</span>,
-    <span class="kw">pub</span> <span class="ident">is_vertical</span>: <span class="ident">bool</span>, <span class="comment">// TODO: Implement this. Might replace it with a general rotation parameter to make it more useful.</span>
-    <span class="kw">pub</span> <span class="ident">stretch</span>: <span class="ident">PatternStretch</span>,
-    <span class="kw">pub</span> <span class="ident">spacing</span>: <span class="ident">f64</span>,
-    <span class="kw">pub</span> <span class="ident">simplify</span>: <span class="ident">bool</span>,
-    <span class="kw">pub</span> <span class="ident">normal_offset</span>: <span class="ident">f64</span>,
-    <span class="kw">pub</span> <span class="ident">tangent_offset</span>: <span class="ident">f64</span>,
-    <span class="kw">pub</span> <span class="ident">pattern_scale</span>: (<span class="ident">f64</span>, <span class="ident">f64</span>),
-    <span class="kw">pub</span> <span class="ident">center_pattern</span>: <span class="ident">bool</span>,
-    <span class="kw">pub</span> <span class="ident">prevent_overdraw</span>: <span class="ident">f64</span>,
-    <span class="kw">pub</span> <span class="ident">two_pass_culling</span>: <span class="ident">bool</span>,
-    <span class="kw">pub</span> <span class="ident">reverse_path</span>: <span class="ident">bool</span>,
-    <span class="kw">pub</span> <span class="ident">reverse_culling</span>: <span class="ident">bool</span>,
+<span class="attribute">#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
+</span><span class="kw">pub struct </span>DashContour {
+    <span class="kw">pub </span>stroke_width: f32,
+    <span class="kw">pub </span>cull: <span class="prelude-ty">Option</span>&lt;DashCull&gt;,
+    <span class="kw">pub </span>dash_desc: Vec&lt;f32&gt;,
+    <span class="kw">pub </span>include_last_path: bool,
+    <span class="kw">pub </span>paint_join: u8, <span class="comment">// skia::PaintJoin,
+    </span><span class="kw">pub </span>paint_cap: u8, <span class="comment">// skia::PaintCap,
+</span>}
+
+<span class="attribute">#[derive(Clone, Copy, Debug, Serialize, Deserialize, PartialEq)]
+</span><span class="kw">pub enum </span>InterpolationType {
+    Null,
+    Linear,
 }
 
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>, <span class="ident">Debug</span>, <span class="ident">Serialize</span>, <span class="ident">Deserialize</span>, <span class="ident">PartialEq</span>)]</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">VWSContour</span> {
-    <span class="kw">pub</span> <span class="ident">handles</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">VWSHandle</span><span class="op">&gt;</span>,
-    <span class="kw">pub</span> <span class="ident">join_type</span>: <span class="ident">JoinType</span>,
-    <span class="kw">pub</span> <span class="ident">cap_start_type</span>: <span class="ident">CapType</span>,
-    <span class="kw">pub</span> <span class="ident">cap_end_type</span>: <span class="ident">CapType</span>,
-    <span class="kw">pub</span> <span class="ident">remove_internal</span>: <span class="ident">bool</span>,
-    <span class="kw">pub</span> <span class="ident">remove_external</span>: <span class="ident">bool</span>,
-}
-
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Copy</span>, <span class="ident">Clone</span>, <span class="ident">Debug</span>, <span class="ident">Serialize</span>, <span class="ident">Deserialize</span>, <span class="ident">PartialEq</span>)]</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">DashCull</span> {
-    <span class="kw">pub</span> <span class="ident">width</span>: <span class="ident">f32</span>,
-    <span class="kw">pub</span> <span class="ident">area_cutoff</span>: <span class="ident">f32</span>,
-}
-
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>, <span class="ident">Debug</span>, <span class="ident">Serialize</span>, <span class="ident">Deserialize</span>, <span class="ident">PartialEq</span>)]</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">DashContour</span> {
-    <span class="kw">pub</span> <span class="ident">stroke_width</span>: <span class="ident">f32</span>,
-    <span class="kw">pub</span> <span class="ident">cull</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">DashCull</span><span class="op">&gt;</span>,
-    <span class="kw">pub</span> <span class="ident">dash_desc</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">f32</span><span class="op">&gt;</span>,
-    <span class="kw">pub</span> <span class="ident">include_last_path</span>: <span class="ident">bool</span>,
-    <span class="kw">pub</span> <span class="ident">paint_join</span>: <span class="ident">u8</span>, <span class="comment">// skia::PaintJoin,</span>
-    <span class="kw">pub</span> <span class="ident">paint_cap</span>: <span class="ident">u8</span>, <span class="comment">// skia::PaintCap,</span>
-}
-
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>, <span class="ident">Copy</span>, <span class="ident">Debug</span>, <span class="ident">Serialize</span>, <span class="ident">Deserialize</span>, <span class="ident">PartialEq</span>)]</span>
-<span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">InterpolationType</span> {
-    <span class="ident">Null</span>,
-    <span class="ident">Linear</span>,
-}
-
-<span class="kw">impl</span> <span class="ident">Display</span> <span class="kw">for</span> <span class="ident">InterpolationType</span> {
-    <span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">std::fmt::Formatter</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">std::fmt::Error</span><span class="op">&gt;</span> {
-        <span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;{}&quot;</span>, <span class="kw">match</span> <span class="self">self</span> {
-            <span class="ident">InterpolationType::Null</span> =&gt; <span class="string">&quot;none&quot;</span>,
-            <span class="ident">InterpolationType::Linear</span> =&gt; <span class="string">&quot;linear&quot;</span>,
+<span class="kw">impl </span>Display <span class="kw">for </span>InterpolationType {
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>std::fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;(), std::fmt::Error&gt; {
+        <span class="macro">write!</span>(f, <span class="string">&quot;{}&quot;</span>, <span class="kw">match </span><span class="self">self </span>{
+            InterpolationType::Null =&gt; <span class="string">&quot;none&quot;</span>,
+            InterpolationType::Linear =&gt; <span class="string">&quot;linear&quot;</span>,
         })
     }
 }
 
-<span class="kw">impl</span> <span class="ident">FromStr</span> <span class="kw">for</span> <span class="ident">InterpolationType</span> {
-    <span class="kw">type</span> <span class="prelude-val">Err</span> <span class="op">=</span> <span class="ident">GlifParserError</span><span class="comment">/*::TypeConversionError(type, s)*/</span>;
-    <span class="kw">fn</span> <span class="ident">from_str</span>(<span class="ident">s</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident"><span class="self">Self</span>::Err</span><span class="op">&gt;</span> {
-        <span class="kw">match</span> <span class="ident">s</span> {
-            <span class="string">&quot;none&quot;</span> =&gt; <span class="prelude-val">Ok</span>(<span class="ident">InterpolationType::Null</span>),
-            <span class="string">&quot;linear&quot;</span> =&gt; <span class="prelude-val">Ok</span>(<span class="ident">InterpolationType::Linear</span>),
-            <span class="kw">_</span> =&gt; <span class="prelude-val">Err</span>(<span class="ident">GlifParserError::TypeConversionError</span>{<span class="ident">req_type</span>: <span class="string">&quot;InterpolationType&quot;</span>, <span class="ident">req_variant</span>: <span class="ident">s</span>.<span class="ident">to_owned</span>()}),
+<span class="kw">impl </span>FromStr <span class="kw">for </span>InterpolationType {
+    <span class="kw">type </span><span class="prelude-val">Err </span>= GlifParserError<span class="comment">/*::TypeConversionError(type, s)*/</span>;
+    <span class="kw">fn </span>from_str(s: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, <span class="self">Self</span>::Err&gt; {
+        <span class="kw">match </span>s {
+            <span class="string">&quot;none&quot; </span>=&gt; <span class="prelude-val">Ok</span>(InterpolationType::Null),
+            <span class="string">&quot;linear&quot; </span>=&gt; <span class="prelude-val">Ok</span>(InterpolationType::Linear),
+            <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(GlifParserError::TypeConversionError{req_type: <span class="string">&quot;InterpolationType&quot;</span>, req_variant: s.to_owned()}),
         }
     }
 }
 
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>, <span class="ident">Copy</span>, <span class="ident">Debug</span>, <span class="ident">Serialize</span>, <span class="ident">Deserialize</span>, <span class="ident">PartialEq</span>)]</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">VWSHandle</span> {
-    <span class="kw">pub</span> <span class="ident">left_offset</span>: <span class="ident">f64</span>,
-    <span class="kw">pub</span> <span class="ident">right_offset</span>: <span class="ident">f64</span>,
-    <span class="kw">pub</span> <span class="ident">tangent_offset</span>: <span class="ident">f64</span>,
-    <span class="kw">pub</span> <span class="ident">interpolation</span>: <span class="ident">InterpolationType</span>,
+<span class="attribute">#[derive(Clone, Copy, Debug, Serialize, Deserialize, PartialEq)]
+</span><span class="kw">pub struct </span>VWSHandle {
+    <span class="kw">pub </span>left_offset: f64,
+    <span class="kw">pub </span>right_offset: f64,
+    <span class="kw">pub </span>tangent_offset: f64,
+    <span class="kw">pub </span>interpolation: InterpolationType,
 }
 
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>, <span class="ident">Copy</span>, <span class="ident">Debug</span>, <span class="ident">PartialEq</span>, <span class="ident">Serialize</span>, <span class="ident">Deserialize</span>)]</span>
-<span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">JoinType</span> {
-    <span class="ident">Bevel</span>,
-    <span class="ident">Miter</span>,
-    <span class="ident">Circle</span>,
-    <span class="ident">Round</span>,
+<span class="attribute">#[derive(Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
+</span><span class="kw">pub enum </span>JoinType {
+    Bevel,
+    Miter,
+    Circle,
+    Round,
 }
 
-<span class="kw">impl</span> <span class="ident">Display</span> <span class="kw">for</span> <span class="ident">JoinType</span> {
-    <span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">std::fmt::Formatter</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">std::fmt::Error</span><span class="op">&gt;</span> {
-        <span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;{}&quot;</span>, <span class="kw">match</span> <span class="self">self</span> {
-            <span class="ident">JoinType::Bevel</span> =&gt; <span class="string">&quot;bevel&quot;</span>,
-            <span class="ident">JoinType::Miter</span> =&gt; <span class="string">&quot;miter&quot;</span>,
-            <span class="ident">JoinType::Circle</span> =&gt; <span class="string">&quot;circle&quot;</span>,
-            <span class="ident">JoinType::Round</span> =&gt; <span class="string">&quot;round&quot;</span>,
+<span class="kw">impl </span>Display <span class="kw">for </span>JoinType {
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>std::fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;(), std::fmt::Error&gt; {
+        <span class="macro">write!</span>(f, <span class="string">&quot;{}&quot;</span>, <span class="kw">match </span><span class="self">self </span>{
+            JoinType::Bevel =&gt; <span class="string">&quot;bevel&quot;</span>,
+            JoinType::Miter =&gt; <span class="string">&quot;miter&quot;</span>,
+            JoinType::Circle =&gt; <span class="string">&quot;circle&quot;</span>,
+            JoinType::Round =&gt; <span class="string">&quot;round&quot;</span>,
         })
     }
 }
 
-<span class="kw">impl</span> <span class="ident">FromStr</span> <span class="kw">for</span> <span class="ident">JoinType</span> {
-    <span class="kw">type</span> <span class="prelude-val">Err</span> <span class="op">=</span> <span class="ident">GlifParserError</span><span class="comment">/*::TypeConversionError(type, s)*/</span>;
-    <span class="kw">fn</span> <span class="ident">from_str</span>(<span class="ident">s</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident"><span class="self">Self</span>::Err</span><span class="op">&gt;</span> {
-        <span class="kw">match</span> <span class="ident">s</span> {
-            <span class="string">&quot;bevel&quot;</span> =&gt; <span class="prelude-val">Ok</span>(<span class="ident">JoinType::Bevel</span>),
-            <span class="string">&quot;miter&quot;</span> =&gt; <span class="prelude-val">Ok</span>(<span class="ident">JoinType::Miter</span>),
-            <span class="string">&quot;circle&quot;</span> =&gt; <span class="prelude-val">Ok</span>(<span class="ident">JoinType::Circle</span>),
-            <span class="string">&quot;round&quot;</span> =&gt; <span class="prelude-val">Ok</span>(<span class="ident">JoinType::Round</span>),
-            <span class="kw">_</span> =&gt; <span class="prelude-val">Err</span>(<span class="ident">GlifParserError::TypeConversionError</span>{<span class="ident">req_type</span>: <span class="string">&quot;JoinType&quot;</span>, <span class="ident">req_variant</span>: <span class="ident">s</span>.<span class="ident">to_owned</span>()}),
+<span class="kw">impl </span>FromStr <span class="kw">for </span>JoinType {
+    <span class="kw">type </span><span class="prelude-val">Err </span>= GlifParserError<span class="comment">/*::TypeConversionError(type, s)*/</span>;
+    <span class="kw">fn </span>from_str(s: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, <span class="self">Self</span>::Err&gt; {
+        <span class="kw">match </span>s {
+            <span class="string">&quot;bevel&quot; </span>=&gt; <span class="prelude-val">Ok</span>(JoinType::Bevel),
+            <span class="string">&quot;miter&quot; </span>=&gt; <span class="prelude-val">Ok</span>(JoinType::Miter),
+            <span class="string">&quot;circle&quot; </span>=&gt; <span class="prelude-val">Ok</span>(JoinType::Circle),
+            <span class="string">&quot;round&quot; </span>=&gt; <span class="prelude-val">Ok</span>(JoinType::Round),
+            <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(GlifParserError::TypeConversionError{req_type: <span class="string">&quot;JoinType&quot;</span>, req_variant: s.to_owned()}),
         }
     }
 }
 
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>, <span class="ident">Copy</span>, <span class="ident">Debug</span>, <span class="ident">PartialEq</span>, <span class="ident">Serialize</span>, <span class="ident">Deserialize</span>)]</span>
-<span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">CapType</span> {
-    <span class="ident">Custom</span>,
-    <span class="ident">Square</span>,
-    <span class="ident">Circle</span>,
-    <span class="ident">Round</span>,
+<span class="attribute">#[derive(Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
+</span><span class="kw">pub enum </span>CapType {
+    Custom,
+    Square,
+    Circle,
+    Round,
 }
 
-<span class="kw">impl</span> <span class="ident">Display</span> <span class="kw">for</span> <span class="ident">CapType</span> {
-    <span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">std::fmt::Formatter</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">std::fmt::Error</span><span class="op">&gt;</span> {
-        <span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;{}&quot;</span>, <span class="kw">match</span> <span class="self">self</span> {
-            <span class="ident">CapType::Custom</span> =&gt; <span class="string">&quot;custom&quot;</span>,
-            <span class="ident">CapType::Square</span> =&gt; <span class="string">&quot;square&quot;</span>,
-            <span class="ident">CapType::Circle</span> =&gt; <span class="string">&quot;circle&quot;</span>,
-            <span class="ident">CapType::Round</span> =&gt; <span class="string">&quot;round&quot;</span>,
+<span class="kw">impl </span>Display <span class="kw">for </span>CapType {
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>std::fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;(), std::fmt::Error&gt; {
+        <span class="macro">write!</span>(f, <span class="string">&quot;{}&quot;</span>, <span class="kw">match </span><span class="self">self </span>{
+            CapType::Custom =&gt; <span class="string">&quot;custom&quot;</span>,
+            CapType::Square =&gt; <span class="string">&quot;square&quot;</span>,
+            CapType::Circle =&gt; <span class="string">&quot;circle&quot;</span>,
+            CapType::Round =&gt; <span class="string">&quot;round&quot;</span>,
         })
     }
 }
 
-<span class="kw">impl</span> <span class="ident">FromStr</span> <span class="kw">for</span> <span class="ident">CapType</span> {
-    <span class="kw">type</span> <span class="prelude-val">Err</span> <span class="op">=</span> <span class="ident">GlifParserError</span><span class="comment">/*::TypeConversionError(type, s)*/</span>;
-    <span class="kw">fn</span> <span class="ident">from_str</span>(<span class="ident">s</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident"><span class="self">Self</span>::Err</span><span class="op">&gt;</span> {
-        <span class="kw">match</span> <span class="ident">s</span> {
-            <span class="string">&quot;custom&quot;</span> =&gt; <span class="prelude-val">Ok</span>(<span class="ident">CapType::Custom</span>),
-            <span class="string">&quot;square&quot;</span> =&gt; <span class="prelude-val">Ok</span>(<span class="ident">CapType::Square</span>),
-            <span class="string">&quot;circle&quot;</span> =&gt; <span class="prelude-val">Ok</span>(<span class="ident">CapType::Circle</span>),
-            <span class="string">&quot;round&quot;</span> =&gt; <span class="prelude-val">Ok</span>(<span class="ident">CapType::Round</span>),
-            <span class="kw">_</span> =&gt; {
-                <span class="kw">if</span> <span class="ident">s</span>.<span class="ident">ends_with</span>(<span class="string">&quot;.glif&quot;</span>) {
-                    <span class="prelude-val">Ok</span>(<span class="ident">CapType::Custom</span>)
-                } <span class="kw">else</span> {
-                    <span class="prelude-val">Err</span>(<span class="ident">GlifParserError::TypeConversionError</span>{<span class="ident">req_type</span>: <span class="string">&quot;CapType&quot;</span>, <span class="ident">req_variant</span>: <span class="ident">s</span>.<span class="ident">to_owned</span>()})
+<span class="kw">impl </span>FromStr <span class="kw">for </span>CapType {
+    <span class="kw">type </span><span class="prelude-val">Err </span>= GlifParserError<span class="comment">/*::TypeConversionError(type, s)*/</span>;
+    <span class="kw">fn </span>from_str(s: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, <span class="self">Self</span>::Err&gt; {
+        <span class="kw">match </span>s {
+            <span class="string">&quot;custom&quot; </span>=&gt; <span class="prelude-val">Ok</span>(CapType::Custom),
+            <span class="string">&quot;square&quot; </span>=&gt; <span class="prelude-val">Ok</span>(CapType::Square),
+            <span class="string">&quot;circle&quot; </span>=&gt; <span class="prelude-val">Ok</span>(CapType::Circle),
+            <span class="string">&quot;round&quot; </span>=&gt; <span class="prelude-val">Ok</span>(CapType::Round),
+            <span class="kw">_ </span>=&gt; {
+                <span class="kw">if </span>s.ends_with(<span class="string">&quot;.glif&quot;</span>) {
+                    <span class="prelude-val">Ok</span>(CapType::Custom)
+                } <span class="kw">else </span>{
+                    <span class="prelude-val">Err</span>(GlifParserError::TypeConversionError{req_type: <span class="string">&quot;CapType&quot;</span>, req_variant: s.to_owned()})
                 }
             }
         }
     }
 }
 
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>, <span class="ident">Debug</span>, <span class="ident">PartialEq</span>, <span class="ident">Eq</span>, <span class="ident">Serialize</span>, <span class="ident">Deserialize</span>)]</span>
-<span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">LayerOperation</span> {
-    <span class="ident">Difference</span>,
-    <span class="ident">Union</span>,
-    <span class="ident">XOR</span>,
-    <span class="ident">Intersect</span>,
+<span class="attribute">#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+</span><span class="kw">pub enum </span>LayerOperation {
+    Difference,
+    Union,
+    XOR,
+    Intersect,
 }
 
-<span class="kw">use</span> <span class="ident"><span class="kw">super</span>::GlifLike</span>;
+<span class="kw">use </span><span class="kw">super</span>::GlifLike;
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">PD</span>: <span class="ident">PointData</span><span class="op">&gt;</span> <span class="ident">GlifLike</span> <span class="kw">for</span> <span class="ident">MFEKGlif</span><span class="op">&lt;</span><span class="ident">PD</span><span class="op">&gt;</span> {
-    <span class="kw">fn</span> <span class="ident">filename</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">stdpath::PathBuf</span><span class="op">&gt;</span> {
-        <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">filename</span>
+<span class="kw">impl</span>&lt;PD: PointData&gt; GlifLike <span class="kw">for </span>MFEKGlif&lt;PD&gt; {
+    <span class="kw">fn </span>filename(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="prelude-ty">Option</span>&lt;stdpath::PathBuf&gt; {
+        <span class="kw-2">&amp;</span><span class="self">self</span>.filename
     }
-    <span class="kw">fn</span> <span class="ident">name</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="ident">String</span> {
-        <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">name</span>
+    <span class="kw">fn </span>name(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>String {
+        <span class="kw-2">&amp;</span><span class="self">self</span>.name
     }
 }
 
-<span class="attribute">#[<span class="ident">test</span>]</span>
-<span class="kw">fn</span> <span class="ident">test_tostring</span>() {
-  <span class="macro">assert!</span>(<span class="macro">format!</span>(<span class="string">&quot;{}&quot;</span>, <span class="ident">CapType::Circle</span>) <span class="op">==</span> <span class="ident">CapType::Circle</span>.<span class="ident">to_string</span>() <span class="op">&amp;&amp;</span> <span class="ident">CapType::Circle</span>.<span class="ident">to_string</span>() <span class="op">==</span> <span class="ident">String::from</span>(<span class="string">&quot;circle&quot;</span>));
+<span class="attribute">#[test]
+</span><span class="kw">fn </span>test_tostring() {
+  <span class="macro">assert!</span>(<span class="macro">format!</span>(<span class="string">&quot;{}&quot;</span>, CapType::Circle) == CapType::Circle.to_string() &amp;&amp; CapType::Circle.to_string() == String::from(<span class="string">&quot;circle&quot;</span>));
 }
 </code></pre></div>
-</section><section id="search" class="content hidden"></section><div id="rustdoc-vars" data-root-path="../../../" data-current-crate="glifparser" data-search-index-js="../../../search-index.js" data-search-js="../../../search.js"></div>
-    <script src="../../../main.js"></script><script src="../../../source-script.js"></script><script src="../../../source-files.js"></script>
-</body></html>
+</section></div></main><div id="rustdoc-vars" data-root-path="../../../" data-current-crate="glifparser" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.65.0 (897e37553 2022-11-02)" ></div></body></html>

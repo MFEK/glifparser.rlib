@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"fn":[["arithmetic","Create a blender that implements the following: `k1 * src * dst + k2 * src + k3 * dst + k4`"]]};

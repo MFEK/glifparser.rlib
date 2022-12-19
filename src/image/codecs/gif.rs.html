@@ -1,0 +1,1220 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/fred/.cargo/registry/src/github.com-1ecc6299db9ec823/image-0.24.5/./src/codecs/gif.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>gif.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" href="../../../normalize.css"><link rel="stylesheet" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" href="../../../ayu.css" disabled><link rel="stylesheet" href="../../../dark.css" disabled><link rel="stylesheet" href="../../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../../storage.js"></script><script defer src="../../../source-script.js"></script><script defer src="../../../source-files.js"></script><script defer src="../../../main.js"></script><noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../../image/index.html"><div class="logo-container"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></div></a><h2 class="location"></h2></nav><nav class="sidebar"><a class="sidebar-logo" href="../../../image/index.html"><div class="logo-container"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></div></a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../../image/index.html"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></a><nav class="sub"><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><button type="button">?</button></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../wheel.svg"></a></div></div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">1</span>
+<span id="2">2</span>
+<span id="3">3</span>
+<span id="4">4</span>
+<span id="5">5</span>
+<span id="6">6</span>
+<span id="7">7</span>
+<span id="8">8</span>
+<span id="9">9</span>
+<span id="10">10</span>
+<span id="11">11</span>
+<span id="12">12</span>
+<span id="13">13</span>
+<span id="14">14</span>
+<span id="15">15</span>
+<span id="16">16</span>
+<span id="17">17</span>
+<span id="18">18</span>
+<span id="19">19</span>
+<span id="20">20</span>
+<span id="21">21</span>
+<span id="22">22</span>
+<span id="23">23</span>
+<span id="24">24</span>
+<span id="25">25</span>
+<span id="26">26</span>
+<span id="27">27</span>
+<span id="28">28</span>
+<span id="29">29</span>
+<span id="30">30</span>
+<span id="31">31</span>
+<span id="32">32</span>
+<span id="33">33</span>
+<span id="34">34</span>
+<span id="35">35</span>
+<span id="36">36</span>
+<span id="37">37</span>
+<span id="38">38</span>
+<span id="39">39</span>
+<span id="40">40</span>
+<span id="41">41</span>
+<span id="42">42</span>
+<span id="43">43</span>
+<span id="44">44</span>
+<span id="45">45</span>
+<span id="46">46</span>
+<span id="47">47</span>
+<span id="48">48</span>
+<span id="49">49</span>
+<span id="50">50</span>
+<span id="51">51</span>
+<span id="52">52</span>
+<span id="53">53</span>
+<span id="54">54</span>
+<span id="55">55</span>
+<span id="56">56</span>
+<span id="57">57</span>
+<span id="58">58</span>
+<span id="59">59</span>
+<span id="60">60</span>
+<span id="61">61</span>
+<span id="62">62</span>
+<span id="63">63</span>
+<span id="64">64</span>
+<span id="65">65</span>
+<span id="66">66</span>
+<span id="67">67</span>
+<span id="68">68</span>
+<span id="69">69</span>
+<span id="70">70</span>
+<span id="71">71</span>
+<span id="72">72</span>
+<span id="73">73</span>
+<span id="74">74</span>
+<span id="75">75</span>
+<span id="76">76</span>
+<span id="77">77</span>
+<span id="78">78</span>
+<span id="79">79</span>
+<span id="80">80</span>
+<span id="81">81</span>
+<span id="82">82</span>
+<span id="83">83</span>
+<span id="84">84</span>
+<span id="85">85</span>
+<span id="86">86</span>
+<span id="87">87</span>
+<span id="88">88</span>
+<span id="89">89</span>
+<span id="90">90</span>
+<span id="91">91</span>
+<span id="92">92</span>
+<span id="93">93</span>
+<span id="94">94</span>
+<span id="95">95</span>
+<span id="96">96</span>
+<span id="97">97</span>
+<span id="98">98</span>
+<span id="99">99</span>
+<span id="100">100</span>
+<span id="101">101</span>
+<span id="102">102</span>
+<span id="103">103</span>
+<span id="104">104</span>
+<span id="105">105</span>
+<span id="106">106</span>
+<span id="107">107</span>
+<span id="108">108</span>
+<span id="109">109</span>
+<span id="110">110</span>
+<span id="111">111</span>
+<span id="112">112</span>
+<span id="113">113</span>
+<span id="114">114</span>
+<span id="115">115</span>
+<span id="116">116</span>
+<span id="117">117</span>
+<span id="118">118</span>
+<span id="119">119</span>
+<span id="120">120</span>
+<span id="121">121</span>
+<span id="122">122</span>
+<span id="123">123</span>
+<span id="124">124</span>
+<span id="125">125</span>
+<span id="126">126</span>
+<span id="127">127</span>
+<span id="128">128</span>
+<span id="129">129</span>
+<span id="130">130</span>
+<span id="131">131</span>
+<span id="132">132</span>
+<span id="133">133</span>
+<span id="134">134</span>
+<span id="135">135</span>
+<span id="136">136</span>
+<span id="137">137</span>
+<span id="138">138</span>
+<span id="139">139</span>
+<span id="140">140</span>
+<span id="141">141</span>
+<span id="142">142</span>
+<span id="143">143</span>
+<span id="144">144</span>
+<span id="145">145</span>
+<span id="146">146</span>
+<span id="147">147</span>
+<span id="148">148</span>
+<span id="149">149</span>
+<span id="150">150</span>
+<span id="151">151</span>
+<span id="152">152</span>
+<span id="153">153</span>
+<span id="154">154</span>
+<span id="155">155</span>
+<span id="156">156</span>
+<span id="157">157</span>
+<span id="158">158</span>
+<span id="159">159</span>
+<span id="160">160</span>
+<span id="161">161</span>
+<span id="162">162</span>
+<span id="163">163</span>
+<span id="164">164</span>
+<span id="165">165</span>
+<span id="166">166</span>
+<span id="167">167</span>
+<span id="168">168</span>
+<span id="169">169</span>
+<span id="170">170</span>
+<span id="171">171</span>
+<span id="172">172</span>
+<span id="173">173</span>
+<span id="174">174</span>
+<span id="175">175</span>
+<span id="176">176</span>
+<span id="177">177</span>
+<span id="178">178</span>
+<span id="179">179</span>
+<span id="180">180</span>
+<span id="181">181</span>
+<span id="182">182</span>
+<span id="183">183</span>
+<span id="184">184</span>
+<span id="185">185</span>
+<span id="186">186</span>
+<span id="187">187</span>
+<span id="188">188</span>
+<span id="189">189</span>
+<span id="190">190</span>
+<span id="191">191</span>
+<span id="192">192</span>
+<span id="193">193</span>
+<span id="194">194</span>
+<span id="195">195</span>
+<span id="196">196</span>
+<span id="197">197</span>
+<span id="198">198</span>
+<span id="199">199</span>
+<span id="200">200</span>
+<span id="201">201</span>
+<span id="202">202</span>
+<span id="203">203</span>
+<span id="204">204</span>
+<span id="205">205</span>
+<span id="206">206</span>
+<span id="207">207</span>
+<span id="208">208</span>
+<span id="209">209</span>
+<span id="210">210</span>
+<span id="211">211</span>
+<span id="212">212</span>
+<span id="213">213</span>
+<span id="214">214</span>
+<span id="215">215</span>
+<span id="216">216</span>
+<span id="217">217</span>
+<span id="218">218</span>
+<span id="219">219</span>
+<span id="220">220</span>
+<span id="221">221</span>
+<span id="222">222</span>
+<span id="223">223</span>
+<span id="224">224</span>
+<span id="225">225</span>
+<span id="226">226</span>
+<span id="227">227</span>
+<span id="228">228</span>
+<span id="229">229</span>
+<span id="230">230</span>
+<span id="231">231</span>
+<span id="232">232</span>
+<span id="233">233</span>
+<span id="234">234</span>
+<span id="235">235</span>
+<span id="236">236</span>
+<span id="237">237</span>
+<span id="238">238</span>
+<span id="239">239</span>
+<span id="240">240</span>
+<span id="241">241</span>
+<span id="242">242</span>
+<span id="243">243</span>
+<span id="244">244</span>
+<span id="245">245</span>
+<span id="246">246</span>
+<span id="247">247</span>
+<span id="248">248</span>
+<span id="249">249</span>
+<span id="250">250</span>
+<span id="251">251</span>
+<span id="252">252</span>
+<span id="253">253</span>
+<span id="254">254</span>
+<span id="255">255</span>
+<span id="256">256</span>
+<span id="257">257</span>
+<span id="258">258</span>
+<span id="259">259</span>
+<span id="260">260</span>
+<span id="261">261</span>
+<span id="262">262</span>
+<span id="263">263</span>
+<span id="264">264</span>
+<span id="265">265</span>
+<span id="266">266</span>
+<span id="267">267</span>
+<span id="268">268</span>
+<span id="269">269</span>
+<span id="270">270</span>
+<span id="271">271</span>
+<span id="272">272</span>
+<span id="273">273</span>
+<span id="274">274</span>
+<span id="275">275</span>
+<span id="276">276</span>
+<span id="277">277</span>
+<span id="278">278</span>
+<span id="279">279</span>
+<span id="280">280</span>
+<span id="281">281</span>
+<span id="282">282</span>
+<span id="283">283</span>
+<span id="284">284</span>
+<span id="285">285</span>
+<span id="286">286</span>
+<span id="287">287</span>
+<span id="288">288</span>
+<span id="289">289</span>
+<span id="290">290</span>
+<span id="291">291</span>
+<span id="292">292</span>
+<span id="293">293</span>
+<span id="294">294</span>
+<span id="295">295</span>
+<span id="296">296</span>
+<span id="297">297</span>
+<span id="298">298</span>
+<span id="299">299</span>
+<span id="300">300</span>
+<span id="301">301</span>
+<span id="302">302</span>
+<span id="303">303</span>
+<span id="304">304</span>
+<span id="305">305</span>
+<span id="306">306</span>
+<span id="307">307</span>
+<span id="308">308</span>
+<span id="309">309</span>
+<span id="310">310</span>
+<span id="311">311</span>
+<span id="312">312</span>
+<span id="313">313</span>
+<span id="314">314</span>
+<span id="315">315</span>
+<span id="316">316</span>
+<span id="317">317</span>
+<span id="318">318</span>
+<span id="319">319</span>
+<span id="320">320</span>
+<span id="321">321</span>
+<span id="322">322</span>
+<span id="323">323</span>
+<span id="324">324</span>
+<span id="325">325</span>
+<span id="326">326</span>
+<span id="327">327</span>
+<span id="328">328</span>
+<span id="329">329</span>
+<span id="330">330</span>
+<span id="331">331</span>
+<span id="332">332</span>
+<span id="333">333</span>
+<span id="334">334</span>
+<span id="335">335</span>
+<span id="336">336</span>
+<span id="337">337</span>
+<span id="338">338</span>
+<span id="339">339</span>
+<span id="340">340</span>
+<span id="341">341</span>
+<span id="342">342</span>
+<span id="343">343</span>
+<span id="344">344</span>
+<span id="345">345</span>
+<span id="346">346</span>
+<span id="347">347</span>
+<span id="348">348</span>
+<span id="349">349</span>
+<span id="350">350</span>
+<span id="351">351</span>
+<span id="352">352</span>
+<span id="353">353</span>
+<span id="354">354</span>
+<span id="355">355</span>
+<span id="356">356</span>
+<span id="357">357</span>
+<span id="358">358</span>
+<span id="359">359</span>
+<span id="360">360</span>
+<span id="361">361</span>
+<span id="362">362</span>
+<span id="363">363</span>
+<span id="364">364</span>
+<span id="365">365</span>
+<span id="366">366</span>
+<span id="367">367</span>
+<span id="368">368</span>
+<span id="369">369</span>
+<span id="370">370</span>
+<span id="371">371</span>
+<span id="372">372</span>
+<span id="373">373</span>
+<span id="374">374</span>
+<span id="375">375</span>
+<span id="376">376</span>
+<span id="377">377</span>
+<span id="378">378</span>
+<span id="379">379</span>
+<span id="380">380</span>
+<span id="381">381</span>
+<span id="382">382</span>
+<span id="383">383</span>
+<span id="384">384</span>
+<span id="385">385</span>
+<span id="386">386</span>
+<span id="387">387</span>
+<span id="388">388</span>
+<span id="389">389</span>
+<span id="390">390</span>
+<span id="391">391</span>
+<span id="392">392</span>
+<span id="393">393</span>
+<span id="394">394</span>
+<span id="395">395</span>
+<span id="396">396</span>
+<span id="397">397</span>
+<span id="398">398</span>
+<span id="399">399</span>
+<span id="400">400</span>
+<span id="401">401</span>
+<span id="402">402</span>
+<span id="403">403</span>
+<span id="404">404</span>
+<span id="405">405</span>
+<span id="406">406</span>
+<span id="407">407</span>
+<span id="408">408</span>
+<span id="409">409</span>
+<span id="410">410</span>
+<span id="411">411</span>
+<span id="412">412</span>
+<span id="413">413</span>
+<span id="414">414</span>
+<span id="415">415</span>
+<span id="416">416</span>
+<span id="417">417</span>
+<span id="418">418</span>
+<span id="419">419</span>
+<span id="420">420</span>
+<span id="421">421</span>
+<span id="422">422</span>
+<span id="423">423</span>
+<span id="424">424</span>
+<span id="425">425</span>
+<span id="426">426</span>
+<span id="427">427</span>
+<span id="428">428</span>
+<span id="429">429</span>
+<span id="430">430</span>
+<span id="431">431</span>
+<span id="432">432</span>
+<span id="433">433</span>
+<span id="434">434</span>
+<span id="435">435</span>
+<span id="436">436</span>
+<span id="437">437</span>
+<span id="438">438</span>
+<span id="439">439</span>
+<span id="440">440</span>
+<span id="441">441</span>
+<span id="442">442</span>
+<span id="443">443</span>
+<span id="444">444</span>
+<span id="445">445</span>
+<span id="446">446</span>
+<span id="447">447</span>
+<span id="448">448</span>
+<span id="449">449</span>
+<span id="450">450</span>
+<span id="451">451</span>
+<span id="452">452</span>
+<span id="453">453</span>
+<span id="454">454</span>
+<span id="455">455</span>
+<span id="456">456</span>
+<span id="457">457</span>
+<span id="458">458</span>
+<span id="459">459</span>
+<span id="460">460</span>
+<span id="461">461</span>
+<span id="462">462</span>
+<span id="463">463</span>
+<span id="464">464</span>
+<span id="465">465</span>
+<span id="466">466</span>
+<span id="467">467</span>
+<span id="468">468</span>
+<span id="469">469</span>
+<span id="470">470</span>
+<span id="471">471</span>
+<span id="472">472</span>
+<span id="473">473</span>
+<span id="474">474</span>
+<span id="475">475</span>
+<span id="476">476</span>
+<span id="477">477</span>
+<span id="478">478</span>
+<span id="479">479</span>
+<span id="480">480</span>
+<span id="481">481</span>
+<span id="482">482</span>
+<span id="483">483</span>
+<span id="484">484</span>
+<span id="485">485</span>
+<span id="486">486</span>
+<span id="487">487</span>
+<span id="488">488</span>
+<span id="489">489</span>
+<span id="490">490</span>
+<span id="491">491</span>
+<span id="492">492</span>
+<span id="493">493</span>
+<span id="494">494</span>
+<span id="495">495</span>
+<span id="496">496</span>
+<span id="497">497</span>
+<span id="498">498</span>
+<span id="499">499</span>
+<span id="500">500</span>
+<span id="501">501</span>
+<span id="502">502</span>
+<span id="503">503</span>
+<span id="504">504</span>
+<span id="505">505</span>
+<span id="506">506</span>
+<span id="507">507</span>
+<span id="508">508</span>
+<span id="509">509</span>
+<span id="510">510</span>
+<span id="511">511</span>
+<span id="512">512</span>
+<span id="513">513</span>
+<span id="514">514</span>
+<span id="515">515</span>
+<span id="516">516</span>
+<span id="517">517</span>
+<span id="518">518</span>
+<span id="519">519</span>
+<span id="520">520</span>
+<span id="521">521</span>
+<span id="522">522</span>
+<span id="523">523</span>
+<span id="524">524</span>
+<span id="525">525</span>
+<span id="526">526</span>
+<span id="527">527</span>
+<span id="528">528</span>
+<span id="529">529</span>
+<span id="530">530</span>
+<span id="531">531</span>
+<span id="532">532</span>
+<span id="533">533</span>
+<span id="534">534</span>
+<span id="535">535</span>
+<span id="536">536</span>
+<span id="537">537</span>
+<span id="538">538</span>
+<span id="539">539</span>
+<span id="540">540</span>
+<span id="541">541</span>
+<span id="542">542</span>
+<span id="543">543</span>
+<span id="544">544</span>
+<span id="545">545</span>
+<span id="546">546</span>
+<span id="547">547</span>
+<span id="548">548</span>
+<span id="549">549</span>
+<span id="550">550</span>
+<span id="551">551</span>
+<span id="552">552</span>
+<span id="553">553</span>
+<span id="554">554</span>
+<span id="555">555</span>
+<span id="556">556</span>
+<span id="557">557</span>
+<span id="558">558</span>
+<span id="559">559</span>
+<span id="560">560</span>
+<span id="561">561</span>
+<span id="562">562</span>
+<span id="563">563</span>
+<span id="564">564</span>
+<span id="565">565</span>
+<span id="566">566</span>
+<span id="567">567</span>
+<span id="568">568</span>
+<span id="569">569</span>
+<span id="570">570</span>
+<span id="571">571</span>
+<span id="572">572</span>
+<span id="573">573</span>
+<span id="574">574</span>
+<span id="575">575</span>
+<span id="576">576</span>
+<span id="577">577</span>
+<span id="578">578</span>
+<span id="579">579</span>
+<span id="580">580</span>
+<span id="581">581</span>
+<span id="582">582</span>
+<span id="583">583</span>
+<span id="584">584</span>
+<span id="585">585</span>
+<span id="586">586</span>
+<span id="587">587</span>
+<span id="588">588</span>
+<span id="589">589</span>
+<span id="590">590</span>
+<span id="591">591</span>
+<span id="592">592</span>
+<span id="593">593</span>
+<span id="594">594</span>
+<span id="595">595</span>
+<span id="596">596</span>
+<span id="597">597</span>
+<span id="598">598</span>
+<span id="599">599</span>
+<span id="600">600</span>
+<span id="601">601</span>
+<span id="602">602</span>
+<span id="603">603</span>
+<span id="604">604</span>
+<span id="605">605</span>
+<span id="606">606</span>
+<span id="607">607</span>
+<span id="608">608</span>
+<span id="609">609</span>
+</pre><pre class="rust"><code><span class="doccomment">//!  Decoding of GIF Images
+//!
+//!  GIF (Graphics Interchange Format) is an image format that supports lossless compression.
+//!
+//!  # Related Links
+//!  * &lt;http://www.w3.org/Graphics/GIF/spec-gif89a.txt&gt; - The GIF Specification
+//!
+//! # Examples
+//! ```rust,no_run
+//! use image::codecs::gif::{GifDecoder, GifEncoder};
+//! use image::{ImageDecoder, AnimationDecoder};
+//! use std::fs::File;
+//! # fn main() -&gt; std::io::Result&lt;()&gt; {
+//! // Decode a gif into frames
+//! let file_in = File::open(&quot;foo.gif&quot;)?;
+//! let mut decoder = GifDecoder::new(file_in).unwrap();
+//! let frames = decoder.into_frames();
+//! let frames = frames.collect_frames().expect(&quot;error decoding gif&quot;);
+//!
+//! // Encode frames into a gif and save to a file
+//! let mut file_out = File::open(&quot;out.gif&quot;)?;
+//! let mut encoder = GifEncoder::new(file_out);
+//! encoder.encode_frames(frames.into_iter());
+//! # Ok(())
+//! # }
+//! ```
+</span><span class="attribute">#![allow(clippy::while_let_loop)]
+
+</span><span class="kw">use </span>std::convert::TryFrom;
+<span class="kw">use </span>std::convert::TryInto;
+<span class="kw">use </span>std::io::{<span class="self">self</span>, Cursor, Read, Write};
+<span class="kw">use </span>std::marker::PhantomData;
+<span class="kw">use </span>std::mem;
+
+<span class="kw">use </span>gif::ColorOutput;
+<span class="kw">use </span>gif::{DisposalMethod, Frame};
+<span class="kw">use </span>num_rational::Ratio;
+
+<span class="kw">use </span><span class="kw">crate</span>::animation;
+<span class="kw">use </span><span class="kw">crate</span>::color::{ColorType, Rgba};
+<span class="kw">use </span><span class="kw">crate</span>::error::{
+    DecodingError, EncodingError, ImageError, ImageResult, ParameterError, ParameterErrorKind,
+    UnsupportedError, UnsupportedErrorKind,
+};
+<span class="kw">use </span><span class="kw">crate</span>::image::{<span class="self">self</span>, AnimationDecoder, ImageDecoder, ImageFormat};
+<span class="kw">use </span><span class="kw">crate</span>::io::Limits;
+<span class="kw">use </span><span class="kw">crate</span>::traits::Pixel;
+<span class="kw">use </span><span class="kw">crate</span>::ImageBuffer;
+
+<span class="doccomment">/// GIF decoder
+</span><span class="kw">pub struct </span>GifDecoder&lt;R: Read&gt; {
+    reader: gif::Decoder&lt;R&gt;,
+    limits: Limits,
+}
+
+<span class="kw">impl</span>&lt;R: Read&gt; GifDecoder&lt;R&gt; {
+    <span class="doccomment">/// Creates a new decoder that decodes the input steam `r`
+    </span><span class="kw">pub fn </span>new(r: R) -&gt; ImageResult&lt;GifDecoder&lt;R&gt;&gt; {
+        <span class="kw">let </span><span class="kw-2">mut </span>decoder = gif::DecodeOptions::new();
+        decoder.set_color_output(ColorOutput::RGBA);
+
+        <span class="prelude-val">Ok</span>(GifDecoder {
+            reader: decoder.read_info(r).map_err(ImageError::from_decoding)<span class="question-mark">?</span>,
+            limits: Limits::default(),
+        })
+    }
+
+    <span class="doccomment">/// Creates a new decoder that decodes the input steam `r`, using limits `limits`
+    </span><span class="kw">pub fn </span>with_limits(r: R, limits: Limits) -&gt; ImageResult&lt;GifDecoder&lt;R&gt;&gt; {
+        <span class="kw">let </span><span class="kw-2">mut </span>decoder = gif::DecodeOptions::new();
+        decoder.set_color_output(ColorOutput::RGBA);
+
+        <span class="prelude-val">Ok</span>(GifDecoder {
+            reader: decoder.read_info(r).map_err(ImageError::from_decoding)<span class="question-mark">?</span>,
+            limits,
+        })
+    }
+}
+
+<span class="doccomment">/// Wrapper struct around a `Cursor&lt;Vec&lt;u8&gt;&gt;`
+</span><span class="kw">pub struct </span>GifReader&lt;R&gt;(Cursor&lt;Vec&lt;u8&gt;&gt;, PhantomData&lt;R&gt;);
+<span class="kw">impl</span>&lt;R&gt; Read <span class="kw">for </span>GifReader&lt;R&gt; {
+    <span class="kw">fn </span>read(<span class="kw-2">&amp;mut </span><span class="self">self</span>, buf: <span class="kw-2">&amp;mut </span>[u8]) -&gt; io::Result&lt;usize&gt; {
+        <span class="self">self</span>.<span class="number">0</span>.read(buf)
+    }
+    <span class="kw">fn </span>read_to_end(<span class="kw-2">&amp;mut </span><span class="self">self</span>, buf: <span class="kw-2">&amp;mut </span>Vec&lt;u8&gt;) -&gt; io::Result&lt;usize&gt; {
+        <span class="kw">if </span><span class="self">self</span>.<span class="number">0</span>.position() == <span class="number">0 </span>&amp;&amp; buf.is_empty() {
+            mem::swap(buf, <span class="self">self</span>.<span class="number">0</span>.get_mut());
+            <span class="prelude-val">Ok</span>(buf.len())
+        } <span class="kw">else </span>{
+            <span class="self">self</span>.<span class="number">0</span>.read_to_end(buf)
+        }
+    }
+}
+
+<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, R: <span class="lifetime">&#39;a </span>+ Read&gt; ImageDecoder&lt;<span class="lifetime">&#39;a</span>&gt; <span class="kw">for </span>GifDecoder&lt;R&gt; {
+    <span class="kw">type </span>Reader = GifReader&lt;R&gt;;
+
+    <span class="kw">fn </span>dimensions(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; (u32, u32) {
+        (
+            u32::from(<span class="self">self</span>.reader.width()),
+            u32::from(<span class="self">self</span>.reader.height()),
+        )
+    }
+
+    <span class="kw">fn </span>color_type(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; ColorType {
+        ColorType::Rgba8
+    }
+
+    <span class="kw">fn </span>into_reader(<span class="self">self</span>) -&gt; ImageResult&lt;<span class="self">Self</span>::Reader&gt; {
+        <span class="prelude-val">Ok</span>(GifReader(
+            Cursor::new(image::decoder_to_vec(<span class="self">self</span>)<span class="question-mark">?</span>),
+            PhantomData,
+        ))
+    }
+
+    <span class="kw">fn </span>read_image(<span class="kw-2">mut </span><span class="self">self</span>, buf: <span class="kw-2">&amp;mut </span>[u8]) -&gt; ImageResult&lt;()&gt; {
+        <span class="macro">assert_eq!</span>(u64::try_from(buf.len()), <span class="prelude-val">Ok</span>(<span class="self">self</span>.total_bytes()));
+
+        <span class="kw">let </span>frame = <span class="kw">match </span><span class="self">self
+            </span>.reader
+            .next_frame_info()
+            .map_err(ImageError::from_decoding)<span class="question-mark">?
+        </span>{
+            <span class="prelude-val">Some</span>(frame) =&gt; FrameInfo::new_from_frame(frame),
+            <span class="prelude-val">None </span>=&gt; {
+                <span class="kw">return </span><span class="prelude-val">Err</span>(ImageError::Parameter(ParameterError::from_kind(
+                    ParameterErrorKind::NoMoreData,
+                )))
+            }
+        };
+
+        <span class="kw">let </span>(width, height) = <span class="self">self</span>.dimensions();
+
+        <span class="kw">if </span>frame.left == <span class="number">0
+            </span>&amp;&amp; frame.width == width
+            &amp;&amp; (frame.top <span class="kw">as </span>u64 + frame.height <span class="kw">as </span>u64 &lt;= height <span class="kw">as </span>u64)
+        {
+            <span class="comment">// If the frame matches the logical screen, or, as a more general case,
+            // fits into it and touches its left and right borders, then
+            // we can directly write it into the buffer without causing line wraparound.
+            </span><span class="kw">let </span>line_length = usize::try_from(width)
+                .unwrap()
+                .checked_mul(<span class="self">self</span>.color_type().bytes_per_pixel() <span class="kw">as </span>usize)
+                .unwrap();
+
+            <span class="comment">// isolate the portion of the buffer to read the frame data into.
+            // the chunks above and below it are going to be zeroed.
+            </span><span class="kw">let </span>(blank_top, rest) =
+                buf.split_at_mut(line_length.checked_mul(frame.top <span class="kw">as </span>usize).unwrap());
+            <span class="kw">let </span>(buf, blank_bottom) =
+                rest.split_at_mut(line_length.checked_mul(frame.height <span class="kw">as </span>usize).unwrap());
+
+            <span class="macro">debug_assert_eq!</span>(buf.len(), <span class="self">self</span>.reader.buffer_size());
+
+            <span class="comment">// this is only necessary in case the buffer is not zeroed
+            </span><span class="kw">for </span>b <span class="kw">in </span>blank_top {
+                <span class="kw-2">*</span>b = <span class="number">0</span>;
+            }
+            <span class="comment">// fill the middle section with the frame data
+            </span><span class="self">self</span>.reader
+                .read_into_buffer(buf)
+                .map_err(ImageError::from_decoding)<span class="question-mark">?</span>;
+            <span class="comment">// this is only necessary in case the buffer is not zeroed
+            </span><span class="kw">for </span>b <span class="kw">in </span>blank_bottom {
+                <span class="kw-2">*</span>b = <span class="number">0</span>;
+            }
+        } <span class="kw">else </span>{
+            <span class="comment">// If the frame does not match the logical screen, read into an extra buffer
+            // and &#39;insert&#39; the frame from left/top to logical screen width/height.
+            </span><span class="kw">let </span>buffer_size = <span class="self">self</span>.reader.buffer_size();
+
+            <span class="self">self</span>.limits.reserve_usize(buffer_size)<span class="question-mark">?</span>;
+
+            <span class="kw">let </span><span class="kw-2">mut </span>frame_buffer = <span class="macro">vec!</span>[<span class="number">0</span>; buffer_size];
+
+            <span class="self">self</span>.limits.free_usize(buffer_size);
+
+            <span class="self">self</span>.reader
+                .read_into_buffer(<span class="kw-2">&amp;mut </span>frame_buffer[..])
+                .map_err(ImageError::from_decoding)<span class="question-mark">?</span>;
+
+            <span class="kw">let </span>frame_buffer = ImageBuffer::from_raw(frame.width, frame.height, frame_buffer);
+            <span class="kw">let </span>image_buffer = ImageBuffer::from_raw(width, height, buf);
+
+            <span class="comment">// `buffer_size` uses wrapping arithmetic, thus might not report the
+            // correct storage requirement if the result does not fit in `usize`.
+            // `ImageBuffer::from_raw` detects overflow and reports by returning `None`.
+            </span><span class="kw">if </span>frame_buffer.is_none() || image_buffer.is_none() {
+                <span class="kw">return </span><span class="prelude-val">Err</span>(ImageError::Unsupported(
+                    UnsupportedError::from_format_and_kind(
+                        ImageFormat::Gif.into(),
+                        UnsupportedErrorKind::GenericFeature(<span class="macro">format!</span>(
+                            <span class="string">&quot;Image dimensions ({}, {}) are too large&quot;</span>,
+                            frame.width, frame.height
+                        )),
+                    ),
+                ));
+            }
+
+            <span class="kw">let </span>frame_buffer = frame_buffer.unwrap();
+            <span class="kw">let </span><span class="kw-2">mut </span>image_buffer = image_buffer.unwrap();
+
+            <span class="kw">for </span>(x, y, pixel) <span class="kw">in </span>image_buffer.enumerate_pixels_mut() {
+                <span class="kw">let </span>frame_x = x.wrapping_sub(frame.left);
+                <span class="kw">let </span>frame_y = y.wrapping_sub(frame.top);
+
+                <span class="kw">if </span>frame_x &lt; frame.width &amp;&amp; frame_y &lt; frame.height {
+                    <span class="kw-2">*</span>pixel = <span class="kw-2">*</span>frame_buffer.get_pixel(frame_x, frame_y);
+                } <span class="kw">else </span>{
+                    <span class="comment">// this is only necessary in case the buffer is not zeroed
+                    </span><span class="kw-2">*</span>pixel = Rgba([<span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>]);
+                }
+            }
+        }
+
+        <span class="prelude-val">Ok</span>(())
+    }
+}
+
+<span class="kw">struct </span>GifFrameIterator&lt;R: Read&gt; {
+    reader: gif::Decoder&lt;R&gt;,
+
+    width: u32,
+    height: u32,
+
+    non_disposed_frame: ImageBuffer&lt;Rgba&lt;u8&gt;, Vec&lt;u8&gt;&gt;,
+}
+
+<span class="kw">impl</span>&lt;R: Read&gt; GifFrameIterator&lt;R&gt; {
+    <span class="kw">fn </span>new(decoder: GifDecoder&lt;R&gt;) -&gt; GifFrameIterator&lt;R&gt; {
+        <span class="kw">let </span>(width, height) = decoder.dimensions();
+
+        <span class="comment">// TODO: Avoid this cast
+        </span><span class="kw">let </span>(width, height) = (width <span class="kw">as </span>u32, height <span class="kw">as </span>u32);
+
+        <span class="comment">// intentionally ignore the background color for web compatibility
+
+        // create the first non disposed frame
+        </span><span class="kw">let </span>non_disposed_frame = ImageBuffer::from_pixel(width, height, Rgba([<span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>]));
+
+        GifFrameIterator {
+            reader: decoder.reader,
+            width,
+            height,
+            non_disposed_frame,
+        }
+    }
+}
+
+<span class="kw">impl</span>&lt;R: Read&gt; Iterator <span class="kw">for </span>GifFrameIterator&lt;R&gt; {
+    <span class="kw">type </span>Item = ImageResult&lt;animation::Frame&gt;;
+
+    <span class="kw">fn </span>next(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;ImageResult&lt;animation::Frame&gt;&gt; {
+        <span class="comment">// begin looping over each frame
+
+        </span><span class="kw">let </span>frame = <span class="kw">match </span><span class="self">self</span>.reader.next_frame_info() {
+            <span class="prelude-val">Ok</span>(frame_info) =&gt; {
+                <span class="kw">if let </span><span class="prelude-val">Some</span>(frame) = frame_info {
+                    FrameInfo::new_from_frame(frame)
+                } <span class="kw">else </span>{
+                    <span class="comment">// no more frames
+                    </span><span class="kw">return </span><span class="prelude-val">None</span>;
+                }
+            }
+            <span class="prelude-val">Err</span>(err) =&gt; <span class="kw">return </span><span class="prelude-val">Some</span>(<span class="prelude-val">Err</span>(ImageError::from_decoding(err))),
+        };
+
+        <span class="kw">let </span><span class="kw-2">mut </span>vec = <span class="macro">vec!</span>[<span class="number">0</span>; <span class="self">self</span>.reader.buffer_size()];
+        <span class="kw">if let </span><span class="prelude-val">Err</span>(err) = <span class="self">self</span>.reader.read_into_buffer(<span class="kw-2">&amp;mut </span>vec) {
+            <span class="kw">return </span><span class="prelude-val">Some</span>(<span class="prelude-val">Err</span>(ImageError::from_decoding(err)));
+        }
+
+        <span class="comment">// create the image buffer from the raw frame.
+        // `buffer_size` uses wrapping arithmetic, thus might not report the
+        // correct storage requirement if the result does not fit in `usize`.
+        // on the other hand, `ImageBuffer::from_raw` detects overflow and
+        // reports by returning `None`.
+        </span><span class="kw">let </span><span class="kw-2">mut </span>frame_buffer = <span class="kw">match </span>ImageBuffer::from_raw(frame.width, frame.height, vec) {
+            <span class="prelude-val">Some</span>(frame_buffer) =&gt; frame_buffer,
+            <span class="prelude-val">None </span>=&gt; {
+                <span class="kw">return </span><span class="prelude-val">Some</span>(<span class="prelude-val">Err</span>(ImageError::Unsupported(
+                    UnsupportedError::from_format_and_kind(
+                        ImageFormat::Gif.into(),
+                        UnsupportedErrorKind::GenericFeature(<span class="macro">format!</span>(
+                            <span class="string">&quot;Image dimensions ({}, {}) are too large&quot;</span>,
+                            frame.width, frame.height
+                        )),
+                    ),
+                )))
+            }
+        };
+
+        <span class="comment">// blend the current frame with the non-disposed frame, then update
+        // the non-disposed frame according to the disposal method.
+        </span><span class="kw">fn </span>blend_and_dispose_pixel(
+            dispose: DisposalMethod,
+            previous: <span class="kw-2">&amp;mut </span>Rgba&lt;u8&gt;,
+            current: <span class="kw-2">&amp;mut </span>Rgba&lt;u8&gt;,
+        ) {
+            <span class="kw">let </span>pixel_alpha = current.channels()[<span class="number">3</span>];
+            <span class="kw">if </span>pixel_alpha == <span class="number">0 </span>{
+                <span class="kw-2">*</span>current = <span class="kw-2">*</span>previous;
+            }
+
+            <span class="kw">match </span>dispose {
+                DisposalMethod::Any | DisposalMethod::Keep =&gt; {
+                    <span class="comment">// do not dispose
+                    // (keep pixels from this frame)
+                    // note: the `Any` disposal method is underspecified in the GIF
+                    // spec, but most viewers treat it identically to `Keep`
+                    </span><span class="kw-2">*</span>previous = <span class="kw-2">*</span>current;
+                }
+                DisposalMethod::Background =&gt; {
+                    <span class="comment">// restore to background color
+                    // (background shows through transparent pixels in the next frame)
+                    </span><span class="kw-2">*</span>previous = Rgba([<span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>]);
+                }
+                DisposalMethod::Previous =&gt; {
+                    <span class="comment">// restore to previous
+                    // (dispose frames leaving the last none disposal frame)
+                </span>}
+            }
+        }
+
+        <span class="comment">// if `frame_buffer`&#39;s frame exactly matches the entire image, then
+        // use it directly, else create a new buffer to hold the composited
+        // image.
+        </span><span class="kw">let </span>image_buffer = <span class="kw">if </span>(frame.left, frame.top) == (<span class="number">0</span>, <span class="number">0</span>)
+            &amp;&amp; (<span class="self">self</span>.width, <span class="self">self</span>.height) == frame_buffer.dimensions()
+        {
+            <span class="kw">for </span>(x, y, pixel) <span class="kw">in </span>frame_buffer.enumerate_pixels_mut() {
+                <span class="kw">let </span>previous_pixel = <span class="self">self</span>.non_disposed_frame.get_pixel_mut(x, y);
+                blend_and_dispose_pixel(frame.disposal_method, previous_pixel, pixel);
+            }
+            frame_buffer
+        } <span class="kw">else </span>{
+            ImageBuffer::from_fn(<span class="self">self</span>.width, <span class="self">self</span>.height, |x, y| {
+                <span class="kw">let </span>frame_x = x.wrapping_sub(frame.left);
+                <span class="kw">let </span>frame_y = y.wrapping_sub(frame.top);
+                <span class="kw">let </span>previous_pixel = <span class="self">self</span>.non_disposed_frame.get_pixel_mut(x, y);
+
+                <span class="kw">if </span>frame_x &lt; frame_buffer.width() &amp;&amp; frame_y &lt; frame_buffer.height() {
+                    <span class="kw">let </span><span class="kw-2">mut </span>pixel = <span class="kw-2">*</span>frame_buffer.get_pixel(frame_x, frame_y);
+                    blend_and_dispose_pixel(frame.disposal_method, previous_pixel, <span class="kw-2">&amp;mut </span>pixel);
+                    pixel
+                } <span class="kw">else </span>{
+                    <span class="comment">// out of bounds, return pixel from previous frame
+                    </span><span class="kw-2">*</span>previous_pixel
+                }
+            })
+        };
+
+        <span class="prelude-val">Some</span>(<span class="prelude-val">Ok</span>(animation::Frame::from_parts(
+            image_buffer,
+            <span class="number">0</span>,
+            <span class="number">0</span>,
+            frame.delay,
+        )))
+    }
+}
+
+<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, R: Read + <span class="lifetime">&#39;a</span>&gt; AnimationDecoder&lt;<span class="lifetime">&#39;a</span>&gt; <span class="kw">for </span>GifDecoder&lt;R&gt; {
+    <span class="kw">fn </span>into_frames(<span class="self">self</span>) -&gt; animation::Frames&lt;<span class="lifetime">&#39;a</span>&gt; {
+        animation::Frames::new(Box::new(GifFrameIterator::new(<span class="self">self</span>)))
+    }
+}
+
+<span class="kw">struct </span>FrameInfo {
+    left: u32,
+    top: u32,
+    width: u32,
+    height: u32,
+    disposal_method: DisposalMethod,
+    delay: animation::Delay,
+}
+
+<span class="kw">impl </span>FrameInfo {
+    <span class="kw">fn </span>new_from_frame(frame: <span class="kw-2">&amp;</span>Frame) -&gt; FrameInfo {
+        FrameInfo {
+            left: u32::from(frame.left),
+            top: u32::from(frame.top),
+            width: u32::from(frame.width),
+            height: u32::from(frame.height),
+            disposal_method: frame.dispose,
+            <span class="comment">// frame.delay is in units of 10ms so frame.delay*10 is in ms
+            </span>delay: animation::Delay::from_ratio(Ratio::new(u32::from(frame.delay) * <span class="number">10</span>, <span class="number">1</span>)),
+        }
+    }
+}
+
+<span class="doccomment">/// Number of repetitions for a GIF animation
+</span><span class="attribute">#[derive(Clone, Copy, Debug)]
+</span><span class="kw">pub enum </span>Repeat {
+    <span class="doccomment">/// Finite number of repetitions
+    </span>Finite(u16),
+    <span class="doccomment">/// Looping GIF
+    </span>Infinite,
+}
+
+<span class="kw">impl </span>Repeat {
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>to_gif_enum(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; gif::Repeat {
+        <span class="kw">match </span><span class="self">self </span>{
+            Repeat::Finite(n) =&gt; gif::Repeat::Finite(<span class="kw-2">*</span>n),
+            Repeat::Infinite =&gt; gif::Repeat::Infinite,
+        }
+    }
+}
+
+<span class="doccomment">/// GIF encoder.
+</span><span class="kw">pub struct </span>GifEncoder&lt;W: Write&gt; {
+    w: <span class="prelude-ty">Option</span>&lt;W&gt;,
+    gif_encoder: <span class="prelude-ty">Option</span>&lt;gif::Encoder&lt;W&gt;&gt;,
+    speed: i32,
+    repeat: <span class="prelude-ty">Option</span>&lt;Repeat&gt;,
+}
+
+<span class="kw">impl</span>&lt;W: Write&gt; GifEncoder&lt;W&gt; {
+    <span class="doccomment">/// Creates a new GIF encoder.
+    </span><span class="kw">pub fn </span>new(w: W) -&gt; GifEncoder&lt;W&gt; {
+        <span class="self">Self</span>::new_with_speed(w, <span class="number">1</span>)
+    }
+
+    <span class="doccomment">/// Create a new GIF encoder, and has the speed parameter `speed`. See
+    /// [`Frame::from_rgba_speed`](https://docs.rs/gif/latest/gif/struct.Frame.html#method.from_rgba_speed)
+    /// for more information.
+    </span><span class="kw">pub fn </span>new_with_speed(w: W, speed: i32) -&gt; GifEncoder&lt;W&gt; {
+        <span class="macro">assert!</span>(
+            speed &gt;= <span class="number">1 </span>&amp;&amp; speed &lt;= <span class="number">30</span>,
+            <span class="string">&quot;speed needs to be in the range [1, 30]&quot;
+        </span>);
+        GifEncoder {
+            w: <span class="prelude-val">Some</span>(w),
+            gif_encoder: <span class="prelude-val">None</span>,
+            speed,
+            repeat: <span class="prelude-val">None</span>,
+        }
+    }
+
+    <span class="doccomment">/// Set the repeat behaviour of the encoded GIF
+    </span><span class="kw">pub fn </span>set_repeat(<span class="kw-2">&amp;mut </span><span class="self">self</span>, repeat: Repeat) -&gt; ImageResult&lt;()&gt; {
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(<span class="kw-2">ref mut </span>encoder) = <span class="self">self</span>.gif_encoder {
+            encoder
+                .set_repeat(repeat.to_gif_enum())
+                .map_err(ImageError::from_encoding)<span class="question-mark">?</span>;
+        }
+        <span class="self">self</span>.repeat = <span class="prelude-val">Some</span>(repeat);
+        <span class="prelude-val">Ok</span>(())
+    }
+
+    <span class="doccomment">/// Encode a single image.
+    </span><span class="kw">pub fn </span>encode(
+        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
+        data: <span class="kw-2">&amp;</span>[u8],
+        width: u32,
+        height: u32,
+        color: ColorType,
+    ) -&gt; ImageResult&lt;()&gt; {
+        <span class="kw">let </span>(width, height) = <span class="self">self</span>.gif_dimensions(width, height)<span class="question-mark">?</span>;
+        <span class="kw">match </span>color {
+            ColorType::Rgb8 =&gt; <span class="self">self</span>.encode_gif(Frame::from_rgb(width, height, data)),
+            ColorType::Rgba8 =&gt; {
+                <span class="self">self</span>.encode_gif(Frame::from_rgba(width, height, <span class="kw-2">&amp;mut </span>data.to_owned()))
+            }
+            <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(ImageError::Unsupported(
+                UnsupportedError::from_format_and_kind(
+                    ImageFormat::Gif.into(),
+                    UnsupportedErrorKind::Color(color.into()),
+                ),
+            )),
+        }
+    }
+
+    <span class="doccomment">/// Encode one frame of animation.
+    </span><span class="kw">pub fn </span>encode_frame(<span class="kw-2">&amp;mut </span><span class="self">self</span>, img_frame: animation::Frame) -&gt; ImageResult&lt;()&gt; {
+        <span class="kw">let </span>frame = <span class="self">self</span>.convert_frame(img_frame)<span class="question-mark">?</span>;
+        <span class="self">self</span>.encode_gif(frame)
+    }
+
+    <span class="doccomment">/// Encodes Frames.
+    /// Consider using `try_encode_frames` instead to encode an `animation::Frames` like iterator.
+    </span><span class="kw">pub fn </span>encode_frames&lt;F&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, frames: F) -&gt; ImageResult&lt;()&gt;
+    <span class="kw">where
+        </span>F: IntoIterator&lt;Item = animation::Frame&gt;,
+    {
+        <span class="kw">for </span>img_frame <span class="kw">in </span>frames {
+            <span class="self">self</span>.encode_frame(img_frame)<span class="question-mark">?</span>;
+        }
+        <span class="prelude-val">Ok</span>(())
+    }
+
+    <span class="doccomment">/// Try to encode a collection of `ImageResult&lt;animation::Frame&gt;` objects.
+    /// Use this function to encode an `animation::Frames` like iterator.
+    /// Whenever an `Err` item is encountered, that value is returned without further actions.
+    </span><span class="kw">pub fn </span>try_encode_frames&lt;F&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, frames: F) -&gt; ImageResult&lt;()&gt;
+    <span class="kw">where
+        </span>F: IntoIterator&lt;Item = ImageResult&lt;animation::Frame&gt;&gt;,
+    {
+        <span class="kw">for </span>img_frame <span class="kw">in </span>frames {
+            <span class="self">self</span>.encode_frame(img_frame<span class="question-mark">?</span>)<span class="question-mark">?</span>;
+        }
+        <span class="prelude-val">Ok</span>(())
+    }
+
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>convert_frame(
+        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
+        img_frame: animation::Frame,
+    ) -&gt; ImageResult&lt;Frame&lt;<span class="lifetime">&#39;static</span>&gt;&gt; {
+        <span class="comment">// get the delay before converting img_frame
+        </span><span class="kw">let </span>frame_delay = img_frame.delay().into_ratio().to_integer();
+        <span class="comment">// convert img_frame into RgbaImage
+        </span><span class="kw">let </span><span class="kw-2">mut </span>rbga_frame = img_frame.into_buffer();
+        <span class="kw">let </span>(width, height) = <span class="self">self</span>.gif_dimensions(rbga_frame.width(), rbga_frame.height())<span class="question-mark">?</span>;
+
+        <span class="comment">// Create the gif::Frame from the animation::Frame
+        </span><span class="kw">let </span><span class="kw-2">mut </span>frame = Frame::from_rgba_speed(width, height, <span class="kw-2">&amp;mut *</span>rbga_frame, <span class="self">self</span>.speed);
+        <span class="comment">// Saturate the conversion to u16::MAX instead of returning an error as that
+        // would require a new special cased variant in ParameterErrorKind which most
+        // likely couldn&#39;t be reused for other cases. This isn&#39;t a bad trade-off given
+        // that the current algorithm is already lossy.
+        </span>frame.delay = (frame_delay / <span class="number">10</span>).try_into().unwrap_or(std::u16::MAX);
+
+        <span class="prelude-val">Ok</span>(frame)
+    }
+
+    <span class="kw">fn </span>gif_dimensions(<span class="kw-2">&amp;</span><span class="self">self</span>, width: u32, height: u32) -&gt; ImageResult&lt;(u16, u16)&gt; {
+        <span class="kw">fn </span>inner_dimensions(width: u32, height: u32) -&gt; <span class="prelude-ty">Option</span>&lt;(u16, u16)&gt; {
+            <span class="kw">let </span>width = u16::try_from(width).ok()<span class="question-mark">?</span>;
+            <span class="kw">let </span>height = u16::try_from(height).ok()<span class="question-mark">?</span>;
+            <span class="prelude-val">Some</span>((width, height))
+        }
+
+        <span class="comment">// TODO: this is not very idiomatic yet. Should return an EncodingError.
+        </span>inner_dimensions(width, height).ok_or_else(|| {
+            ImageError::Parameter(ParameterError::from_kind(
+                ParameterErrorKind::DimensionMismatch,
+            ))
+        })
+    }
+
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>encode_gif(<span class="kw-2">&amp;mut </span><span class="self">self</span>, <span class="kw-2">mut </span>frame: Frame) -&gt; ImageResult&lt;()&gt; {
+        <span class="kw">let </span>gif_encoder;
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(<span class="kw-2">ref mut </span>encoder) = <span class="self">self</span>.gif_encoder {
+            gif_encoder = encoder;
+        } <span class="kw">else </span>{
+            <span class="kw">let </span>writer = <span class="self">self</span>.w.take().unwrap();
+            <span class="kw">let </span><span class="kw-2">mut </span>encoder = gif::Encoder::new(writer, frame.width, frame.height, <span class="kw-2">&amp;</span>[])
+                .map_err(ImageError::from_encoding)<span class="question-mark">?</span>;
+            <span class="kw">if let </span><span class="prelude-val">Some</span>(<span class="kw-2">ref </span>repeat) = <span class="self">self</span>.repeat {
+                encoder
+                    .set_repeat(repeat.to_gif_enum())
+                    .map_err(ImageError::from_encoding)<span class="question-mark">?</span>;
+            }
+            <span class="self">self</span>.gif_encoder = <span class="prelude-val">Some</span>(encoder);
+            gif_encoder = <span class="self">self</span>.gif_encoder.as_mut().unwrap()
+        }
+
+        frame.dispose = gif::DisposalMethod::Background;
+
+        gif_encoder
+            .write_frame(<span class="kw-2">&amp;</span>frame)
+            .map_err(ImageError::from_encoding)
+    }
+}
+
+<span class="kw">impl </span>ImageError {
+    <span class="kw">fn </span>from_decoding(err: gif::DecodingError) -&gt; ImageError {
+        <span class="kw">use </span>gif::DecodingError::<span class="kw-2">*</span>;
+        <span class="kw">match </span>err {
+            err @ Format(<span class="kw">_</span>) =&gt; {
+                ImageError::Decoding(DecodingError::new(ImageFormat::Gif.into(), err))
+            }
+            Io(io_err) =&gt; ImageError::IoError(io_err),
+        }
+    }
+
+    <span class="kw">fn </span>from_encoding(err: gif::EncodingError) -&gt; ImageError {
+        <span class="kw">use </span>gif::EncodingError::<span class="kw-2">*</span>;
+        <span class="kw">match </span>err {
+            err @ Format(<span class="kw">_</span>) =&gt; {
+                ImageError::Encoding(EncodingError::new(ImageFormat::Gif.into(), err))
+            }
+            Io(io_err) =&gt; ImageError::IoError(io_err),
+        }
+    }
+}
+
+<span class="attribute">#[cfg(test)]
+</span><span class="kw">mod </span>test {
+    <span class="kw">use super</span>::<span class="kw-2">*</span>;
+
+    <span class="attribute">#[test]
+    </span><span class="kw">fn </span>frames_exceeding_logical_screen_size() {
+        <span class="comment">// This is a gif with 10x10 logical screen, but a 16x16 frame + 6px offset inside.
+        </span><span class="kw">let </span>data = <span class="macro">vec!</span>[
+            <span class="number">0x47</span>, <span class="number">0x49</span>, <span class="number">0x46</span>, <span class="number">0x38</span>, <span class="number">0x39</span>, <span class="number">0x61</span>, <span class="number">0x0A</span>, <span class="number">0x00</span>, <span class="number">0x0A</span>, <span class="number">0x00</span>, <span class="number">0xF0</span>, <span class="number">0x00</span>, <span class="number">0x00</span>, <span class="number">0x00</span>,
+            <span class="number">0x00</span>, <span class="number">0x00</span>, <span class="number">0x0E</span>, <span class="number">0xFF</span>, <span class="number">0x1F</span>, <span class="number">0x21</span>, <span class="number">0xF9</span>, <span class="number">0x04</span>, <span class="number">0x09</span>, <span class="number">0x64</span>, <span class="number">0x00</span>, <span class="number">0x00</span>, <span class="number">0x00</span>, <span class="number">0x2C</span>,
+            <span class="number">0x06</span>, <span class="number">0x00</span>, <span class="number">0x06</span>, <span class="number">0x00</span>, <span class="number">0x10</span>, <span class="number">0x00</span>, <span class="number">0x10</span>, <span class="number">0x00</span>, <span class="number">0x00</span>, <span class="number">0x02</span>, <span class="number">0x23</span>, <span class="number">0x84</span>, <span class="number">0x8F</span>, <span class="number">0xA9</span>,
+            <span class="number">0xBB</span>, <span class="number">0xE1</span>, <span class="number">0xE8</span>, <span class="number">0x42</span>, <span class="number">0x8A</span>, <span class="number">0x0F</span>, <span class="number">0x50</span>, <span class="number">0x79</span>, <span class="number">0xAE</span>, <span class="number">0xD1</span>, <span class="number">0xF9</span>, <span class="number">0x7A</span>, <span class="number">0xE8</span>, <span class="number">0x71</span>,
+            <span class="number">0x5B</span>, <span class="number">0x48</span>, <span class="number">0x81</span>, <span class="number">0x64</span>, <span class="number">0xD5</span>, <span class="number">0x91</span>, <span class="number">0xCA</span>, <span class="number">0x89</span>, <span class="number">0x4D</span>, <span class="number">0x21</span>, <span class="number">0x63</span>, <span class="number">0x89</span>, <span class="number">0x4C</span>, <span class="number">0x09</span>,
+            <span class="number">0x77</span>, <span class="number">0xF5</span>, <span class="number">0x6D</span>, <span class="number">0x14</span>, <span class="number">0x00</span>, <span class="number">0x3B</span>,
+        ];
+
+        <span class="kw">let </span>decoder = GifDecoder::new(Cursor::new(data)).unwrap();
+        <span class="kw">let </span><span class="kw-2">mut </span>buf = <span class="macro">vec!</span>[<span class="number">0u8</span>; decoder.total_bytes() <span class="kw">as </span>usize];
+
+        <span class="macro">assert!</span>(decoder.read_image(<span class="kw-2">&amp;mut </span>buf).is_ok());
+    }
+}
+</code></pre></div>
+</section></div></main><div id="rustdoc-vars" data-root-path="../../../" data-current-crate="image" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.65.0 (897e37553 2022-11-02)" ></div></body></html>

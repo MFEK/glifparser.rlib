@@ -1,1 +1,1 @@
-initSidebarItems({"trait":[["DowngradeOutline",""],["ManageContourOperations",""],["UpgradeOutline",""]],"type":[["MFEKGlifContourOperations","Vec (layers) → Vec (contours) → which may or may not have any operations"],["MFEKOutlineContourOperations",""]]});
+window.SIDEBAR_ITEMS = {"trait":[["DowngradeOutline",""],["ManageContourOperations",""],["UpgradeOutline",""]],"type":[["MFEKGlifContourOperations","Vec (layers) → Vec (contours) → which may or may not have any operations"],["MFEKOutlineContourOperations",""]]};

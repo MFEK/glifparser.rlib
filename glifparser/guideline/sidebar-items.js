@@ -1,1 +1,1 @@
-initSidebarItems({"struct":[["Guideline",""],["GuidelinePoint",""]]});
+window.SIDEBAR_ITEMS = {"struct":[["Guideline",""],["GuidelinePoint",""]]};

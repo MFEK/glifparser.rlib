@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"enum":[["ChildPtr",""],["ChildType",""]],"mod":[["uniform",""]],"struct":[["Options",""]],"type":[["Child",""],["RuntimeEffect",""],["Uniform",""],["Variable",""],["Varying",""]]};
