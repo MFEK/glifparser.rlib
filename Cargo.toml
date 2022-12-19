@@ -1,6 +1,6 @@
 [package]
 name = "glifparser"
-version = "1.2.6"
+version = "1.2.7"
 authors = ["Fredrick Brennan <copypaste@kittens.ph>", "MFEK Authors"]
 edition = "2021"
 license = "Apache-2.0"
@@ -43,7 +43,8 @@ more-image-formats = ["image/gif", "image/jpeg", "image/webp", "image/bmp", "ima
 more-iof = ["integer_or_float/num-traits"]
 
 fat = ["glifimage", "glifserde", "skia", "mfek", "more-image-formats", "more-iof"]
+fat-no-skia = ["glifimage", "glifserde", "mfek", "more-image-formats", "more-iof"]
 
 [package.metadata.docs.rs]
 # Features to pass to Cargo (default: []) when building https://docs.rs/glifparser
-features = ["fat"]
+features = ["fat-no-skia"]
