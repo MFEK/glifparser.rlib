@@ -1,7 +1,10 @@
 /// Kurbo module — warning: only guaranteed to round trip closed contours!
 use kurbo::{BezPath, PathEl, PathEl::*};
 
-use super::{conv::{PenOperations, SplitPenOperations as _}, Contour, Outline, ToOutline as _};
+use super::{
+    conv::{PenOperations, SplitPenOperations as _},
+    Contour, Outline, ToOutline as _,
+};
 use crate::error::GlifParserError;
 use crate::point::PointLike as _;
 use crate::point::{GlifPoint, PointData, PointType, PointType::*};
@@ -59,21 +62,35 @@ impl Into<PathEl> for PenOperations {
 impl From<PathEl> for PenOperations {
     fn from(el: PathEl) -> PenOperations {
         match el {
-            PathEl::MoveTo(gp) => PenOperations::MoveTo(GlifPoint::from_x_y_type((gp.x as f32, gp.y as f32), PointType::Move)),
-            PathEl::LineTo(gp) => PenOperations::LineTo(GlifPoint::from_x_y_type((gp.x as f32, gp.y as f32), PointType::Line)),
-            PathEl::QuadTo(gpa, gp) => PenOperations::QuadTo(GlifPoint::from_x_y_type((gp.x as f32, gp.y as f32), PointType::OffCurve), GlifPoint::from_x_y_type((gpa.x as f32, gpa.y as f32), PointType::QCurve)),
-            PathEl::CurveTo(gpa, gp2b, gp) => {
-                PenOperations::CurveTo(GlifPoint::from_x_y_type((gp.x as f32, gp.y as f32), PointType::OffCurve), GlifPoint::from_x_y_type((gp2b.x as f32, gp2b.y as f32), PointType::OffCurve), GlifPoint::from_x_y_type((gpa.x as f32, gpa.y as f32), PointType::Curve))
-            }
+            PathEl::MoveTo(gp) => PenOperations::MoveTo(GlifPoint::from_x_y_type(
+                (gp.x as f32, gp.y as f32),
+                PointType::Move,
+            )),
+            PathEl::LineTo(gp) => PenOperations::LineTo(GlifPoint::from_x_y_type(
+                (gp.x as f32, gp.y as f32),
+                PointType::Line,
+            )),
+            PathEl::QuadTo(gpa, gp) => PenOperations::QuadTo(
+                GlifPoint::from_x_y_type((gp.x as f32, gp.y as f32), PointType::OffCurve),
+                GlifPoint::from_x_y_type((gpa.x as f32, gpa.y as f32), PointType::QCurve),
+            ),
+            PathEl::CurveTo(gpa, gp2b, gp) => PenOperations::CurveTo(
+                GlifPoint::from_x_y_type((gp.x as f32, gp.y as f32), PointType::OffCurve),
+                GlifPoint::from_x_y_type((gp2b.x as f32, gp2b.y as f32), PointType::OffCurve),
+                GlifPoint::from_x_y_type((gpa.x as f32, gpa.y as f32), PointType::Curve),
+            ),
             PathEl::ClosePath => PenOperations::Close,
         }
     }
 }
 
+/// Type (most useful on [`Outline`]) to [`kurbo::BezPath`]
 pub trait IntoKurbo: Sized {
+    /// Implemented via [`crate::outline::IntoPenOperations`].
     fn into_kurbo(self) -> Result<BezPath, GlifParserError> {
         Ok(BezPath::from_vec(self.into_kurbo_vec()?))
     }
+    /// In case you want to use [`PenOperations`].
     fn into_kurbo_vec(self) -> Result<Vec<PathEl>, GlifParserError>;
 }
 
@@ -104,6 +121,7 @@ impl<PD: PointData> IntoKurbo for Contour<PD> {
     }
 }
 
+/// [`kurbo::BezPath`] to type (most useful for [`Outline`])
 pub trait FromKurbo {
     fn from_kurbo(kpath: &BezPath) -> Self;
 }
@@ -130,7 +148,7 @@ impl IntoKurboPointsVec for PathEl {
 
 impl<PD: PointData> FromKurbo for Outline<PD> {
     fn from_kurbo(kpath: &BezPath) -> Self {
-        let gpself: Vec<PenOperations> = kpath.iter().map(|pe|pe.into()).collect();
+        let gpself: Vec<PenOperations> = kpath.iter().map(|pe| pe.into()).collect();
         let koutline = gpself.split_pen_operations();
         koutline.to_outline()
     }

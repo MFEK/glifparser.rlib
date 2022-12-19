@@ -16,6 +16,7 @@ pub enum End {
     Tail,
 }
 
+/// Generic prev/next given an index for [`Vec<T>`].
 pub trait GenericPrevNext {
     type Error;
     /// Return the previous and next index, given an index.
@@ -50,12 +51,15 @@ pub trait GenericPrevNext {
     }
 }
 
+/// Return the previous and next index, given an index. As opposed to ``GenericPrevNext``, this
+/// always considers a contour's open/closed state (`assert!(self[0].ptype == PointType::Move)`).
 pub trait PrevNext {
     type Error;
-    /// Return the previous and next index, given an index. As opposed to ``GenericPrevNext``, this always
-    /// considers a contour's open/closed state (`assert!(self[0].ptype == PointType::Move)`).
     fn contour_prev_next(&self, idx: usize) -> Result<(Option<usize>, Option<usize>), GlifParserError>;
-    fn contour_prev_next_handles(&self, idx: usize) -> Result<((Handle, Handle), (Handle, Handle)), GlifParserError>;
+    fn contour_prev_next_handles(
+        &self,
+        idx: usize,
+    ) -> Result<((Handle, Handle), (Handle, Handle)), GlifParserError>;
 }
 
 impl<T> GenericPrevNext for Vec<T> {
@@ -63,11 +67,11 @@ impl<T> GenericPrevNext for Vec<T> {
 
     fn idx_sane(&self, idx: usize) -> Result<(), GlifParserError> {
         if idx >= self.len() {
-            return Err(GlifParserError::PointIdxOutOfBounds { idx, len: self.len() })
+            return Err(GlifParserError::PointIdxOutOfBounds { idx, len: self.len() });
         } else if self.len() == 1 {
-            return Err(GlifParserError::ContourLenOneUnexpected)
+            return Err(GlifParserError::ContourLenOneUnexpected);
         } else if self.len() == 0 {
-            return Err(GlifParserError::ContourLenZeroUnexpected)
+            return Err(GlifParserError::ContourLenZeroUnexpected);
         }
         Ok(())
     }
@@ -75,17 +79,9 @@ impl<T> GenericPrevNext for Vec<T> {
     fn prev_next(&self, idx: usize) -> Result<(usize, usize), GlifParserError> {
         self.idx_sane(idx)?;
 
-        let prev = if idx == 0 {
-            self.len() - 1
-        } else {
-            idx - 1
-        };
+        let prev = if idx == 0 { self.len() - 1 } else { idx - 1 };
 
-        let next = if idx == self.len() - 1 {
-            0
-        } else {
-            idx + 1
-        };
+        let next = if idx == self.len() - 1 { 0 } else { idx + 1 };
 
         Ok((prev, next))
     }
@@ -102,6 +98,7 @@ impl<T> GenericPrevNext for Vec<T> {
     }
 }
 
+/// Is contour open or closed?
 pub trait State {
     fn is_open(&self) -> bool;
     fn is_closed(&self) -> bool {
@@ -113,18 +110,20 @@ impl<PD: PointData> State for Contour<PD> {
     fn is_open(&self) -> bool {
         match self.len() {
             0 | 1 => true,
-            _ => self[0].ptype == PointType::Move
+            _ => self[0].ptype == PointType::Move,
         }
     }
 }
 
+/// Error will always be GlifParserError::PointIdxOutOfBounds
 impl<PD: PointData> PrevNext for Contour<PD> {
     type Error = GlifParserError;
-    /// Error will always be GlifParserError::PointIdxOutOfBounds
     fn contour_prev_next(&self, idx: usize) -> Result<(Option<usize>, Option<usize>), GlifParserError> {
         let (prev, next) = self.prev_next(idx)?;
         if self.is_open() && self.idx_at_start_or_end(idx)? {
-            let end = self.idx_which_end(idx)?.expect("self.idx_at_start_or_end true but self.idx_which_end returned None???");
+            let end = self
+                .idx_which_end(idx)?
+                .expect("self.idx_at_start_or_end true but self.idx_which_end returned None???");
             match end {
                 End::Head => Ok((None, Some(next))),
                 End::Tail => Ok((Some(prev), None)),
@@ -133,14 +132,22 @@ impl<PD: PointData> PrevNext for Contour<PD> {
             Ok((Some(self.prev(idx)?), Some(self.next(idx)?)))
         }
     }
-    fn contour_prev_next_handles(&self, idx: usize) -> Result<((Handle, Handle), (Handle, Handle)), GlifParserError> {
+    fn contour_prev_next_handles(
+        &self,
+        idx: usize,
+    ) -> Result<((Handle, Handle), (Handle, Handle)), GlifParserError> {
         let (prev, next) = self.contour_prev_next(idx)?;
-        let prev = prev.map(|idx| (self[idx].a, self[idx].b)).unwrap_or((Handle::Colocated, Handle::Colocated));
-        let next = next.map(|idx| (self[idx].a, self[idx].b)).unwrap_or((Handle::Colocated, Handle::Colocated));
+        let prev = prev
+            .map(|idx| (self[idx].a, self[idx].b))
+            .unwrap_or((Handle::Colocated, Handle::Colocated));
+        let next = next
+            .map(|idx| (self[idx].a, self[idx].b))
+            .unwrap_or((Handle::Colocated, Handle::Colocated));
         Ok((prev, next))
     }
 }
 
+/// This validates the UFO `.glif` point `smooth` attribute.
 pub trait CheckSmooth {
     fn is_point_smooth_within(&self, idx: usize, within: f32) -> Result<bool, GlifParserError>;
     fn is_point_smooth(&self, idx: usize) -> Result<bool, GlifParserError> {
@@ -161,21 +168,24 @@ impl<PD: PointData> CheckSmooth for Contour<PD> {
                 if let Some(prev) = prev {
                     (p.a, self[prev].b)
                 } else {
-                    return Ok(false)
+                    return Ok(false);
                 }
             }
             Some(End::Tail) => {
                 if let Some(next) = next {
                     (self[next].a, p.b)
                 } else {
-                    return Ok(false)
+                    return Ok(false);
                 }
             }
         };
         let kp0 = kurbo::Point::new(p.x as f64, p.y as f64);
         let (kp1, kp2) = match (a, b) {
-            (Handle::At(x1, y1), Handle::At(x2, y2)) => (kurbo::Point::new(x1 as f64, y1 as f64), kurbo::Point::new(x2 as f64, y2 as f64)),
-            _ => return Ok(false)
+            (Handle::At(x1, y1), Handle::At(x2, y2)) => (
+                kurbo::Point::new(x1 as f64, y1 as f64),
+                kurbo::Point::new(x2 as f64, y2 as f64),
+            ),
+            _ => return Ok(false),
         };
         let line = kurbo::Line::new(kp1, kp2);
         let nearest = line.nearest(kp0, 0.000001);

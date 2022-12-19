@@ -9,8 +9,10 @@ use PointType::*;
 
 use float_cmp::ApproxEq;
 
+/// Representation of glyph data as pen operations, rather than as [`Point`]'s.
 #[derive(Debug, Clone, PartialEq, IsVariant, Unwrap)]
 pub enum PenOperations {
+    /// Should always be used even if first point at `(0. , 0.)`.
     MoveTo(GlifPoint),
     LineTo(GlifPoint),
     QuadTo(GlifPoint, GlifPoint),
@@ -145,14 +147,26 @@ impl<PD: PointData> IntoPenOperations for Contour<PD> {
     }
 }
 
-pub type PenOperationsPath = Vec<Vec<PenOperations>>;
+/// A list of pen operations that should contain one and only one contour.
+pub type PenOperationsContour = Vec<Vec<PenOperations>>;
+/// A list of lists of pen operations creating an outline of [`Vec::len()`] contours.
+pub type PenOperationsPath = Vec<PenOperationsContour>;
 
+/// Split a long vec of pen operations into constitutent contours.
 pub trait SplitPenOperations {
     fn split_pen_operations(self) -> PenOperationsPath;
+    fn has_n_contours(&self, n: usize) -> bool {
+        self.split_pen_operations().len() == n
+    }
 }
 
-impl SplitPenOperations for Vec<PenOperations> {
-    /// Split a long vec of pen operations into constitutent contours.
+impl IsValid for PenOperationsContour {
+    fn is_valid(&self) -> bool {
+        self.has_n_contours(1)
+    }
+}
+
+impl SplitPenOperations for PenOperationsContour {
     fn split_pen_operations(self) -> PenOperationsPath {
         let mut koutline = vec![];
         let mut kcontour = vec![];
@@ -204,7 +218,9 @@ impl<PD: PointData> ToOutline<PD> for PenOperationsPath {
             let mut next_points: Vec<GlifPoint>;
             for (i, el) in skc.iter().enumerate() {
                 let points: Vec<GlifPoint> = el.clone().into();
-                if points.len() == 0 { continue }
+                if points.len() == 0 {
+                    continue;
+                }
                 if i != skc_len - 1 {
                     next_points = skc[i + 1].clone().into();
                 } else {

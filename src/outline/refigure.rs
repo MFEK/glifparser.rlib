@@ -7,6 +7,9 @@ use std::collections::VecDeque;
 
 use integer_or_float::IntegerOrFloat::*;
 
+/// Only knocks out _exactly equal_ floats. For colocated within see
+/// [`MFEKmath::Fixup::assert_colocated_within`](
+/// https://docs.rs/MFEKmath/latest/MFEKmath/trait.Fixup.html#tymethod.assert_colocated_within ).
 pub trait RefigurePointTypes<PD: PointData> {
     fn refigure_point_types(&mut self);
 }
@@ -22,7 +25,6 @@ impl<PD: PointData> RefigurePointTypes<PD> for Outline<PD> {
 impl<PD: PointData> RefigurePointTypes<PD> for Contour<PD> {
     fn refigure_point_types(&mut self) {
         for i in 0..self.len() {
-            // Only knocks out exactly equal floats. For colocated within see MFEKmath
             if let Handle::At(ax, ay) = self[i].a {
                 if ax == self[i].x && ay == self[i].y {
                     self[i].a = Handle::Colocated;
@@ -72,10 +74,11 @@ impl<PD: PointData> PointTypeForIdx for Contour<PD> {
     }
 }
 
-/// This trait is primarily intended for easing .glif equality testing internally by our test
+/// This trait is primarily intended for easing `.glif` equality testing internally by our test
 /// suite. It therefore doesn't do any of the fancy things it could like change point types and
-/// assert handles as colocated. Consider MFEKmath::Refigure, RefigurePointTypes, etc., and not
-/// this (or perhaps together?).
+/// assert handles as colocated. Consider [`MFEKmath::Fixup`](
+/// https://docs.rs/MFEKmath/latest/MFEKmath/trait.Fixup.html ), [`RefigurePointTypes`], etc., not
+/// this. (…Or perhaps together?)
 pub trait RoundToInt {
     fn round_to_int(&mut self);
 }
@@ -103,7 +106,7 @@ macro_rules! impl_rti {
                 }
             }
         }
-    }
+    };
 }
 
 impl_rti!(Vec);
