@@ -7,7 +7,8 @@ use crate::point::IsValid;
 use crate::point::{GlifPoint, Handle, Point, PointData, PointType, WhichHandle};
 use PointType::*;
 
-use float_cmp::ApproxEq;
+use float_cmp::ApproxEq as _;
+const APPROXEQ_MARGIN: (f32, i32) = (f32::EPSILON, 4);
 
 /// Representation of glyph data as pen operations, rather than as [`Point`]'s.
 #[derive(Debug, Clone, PartialEq, IsVariant, Unwrap)]
@@ -154,7 +155,7 @@ pub type PenOperationsPath = Vec<PenOperationsContour>;
 
 /// Split a long vec of pen operations into constitutent contours.
 pub trait SplitPenOperations: Clone {
-    fn split_pen_operations(self) -> PenOperationsPath;
+    fn split_pen_operations(&self) -> PenOperationsPath;
     fn has_n_contours(&self, n: usize) -> bool {
         self.clone().split_pen_operations().len() == n
     }
@@ -167,14 +168,13 @@ impl IsValid for PenOperationsContour {
 }
 
 impl SplitPenOperations for PenOperationsContour {
-    fn split_pen_operations(self) -> PenOperationsPath {
+    fn split_pen_operations(&self) -> PenOperationsPath {
         let mut koutline = vec![];
         let mut kcontour = vec![];
-        let mut last_was_close = false;
-        let iterable: Vec<_> = if *self.iter().last().unwrap() != Close {
-            self.into_iter().chain([Close].into_iter()).collect()
+        let iterable: Vec<_> = if self.iter().last().unwrap() != &Close {
+            self.iter().chain([Close].iter()).collect()
         } else {
-            self.into_iter().collect()
+            self.iter().collect()
         };
         for p in iterable {
             let kpv = &p;
@@ -185,19 +185,12 @@ impl SplitPenOperations for PenOperationsContour {
                 kcontour = vec![p.clone()];
             } else if kpv.len() > 0 {
                 kcontour.push(p.clone());
-            } else if kpv.len() == 0 && !last_was_close {
-                let lp: Vec<GlifPoint> = kcontour.last().unwrap().clone().into();
-                let lp = lp.last().unwrap();
+            // NB: This can create in ToOutline two points on top of one another, one with a one with b set…
+            } else if kpv.len() == 0 {
                 let removed = kcontour.remove(0);
                 let rm = removed.unwrap_move_to();
-                let _fp = kcontour.first().unwrap().clone();
-                if rm.x.approx_eq(lp.x, (f32::EPSILON, 4)) && rm.y.approx_eq(lp.y, (f32::EPSILON, 4)) {
-                    kcontour.insert(0, PenOperations::CurveTo(rm.clone(), rm.clone(), rm));
-                } else {
-                    kcontour.insert(0, PenOperations::LineTo(rm));
-                }
+                kcontour.insert(0, PenOperations::CurveTo(rm.clone(), rm.clone(), rm.clone()));
             }
-            last_was_close = p.is_close();
         }
 
         if kcontour.len() > 0 {
@@ -265,8 +258,9 @@ impl<PD: PointData> ToOutline<PD> for PenOperationsPath {
 
             let first = contour.first().unwrap();
             let last = contour.last().unwrap();
-            let (x, y, _a, b) = (last.x, last.y, last.a, last.b);
-            if contour.len() >= 2 && x == first.x && y == first.y {
+            let (x, y, a, b) = (last.x, last.y, last.a, last.b);
+            // … a situation which is resolved here.
+            if contour.len() >= 2 && x.approx_eq(first.x, APPROXEQ_MARGIN) && y.approx_eq(first.y, APPROXEQ_MARGIN) {
                 contour.pop().unwrap();
                 contour.first_mut().unwrap().b = b;
             }
