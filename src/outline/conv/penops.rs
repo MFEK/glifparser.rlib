@@ -258,7 +258,7 @@ impl<PD: PointData> ToOutline<PD> for PenOperationsPath {
 
             let first = contour.first().unwrap();
             let last = contour.last().unwrap();
-            let (x, y, a, b) = (last.x, last.y, last.a, last.b);
+            let (x, y, b) = (last.x, last.y, last.b);
             // … a situation which is resolved here.
             if contour.len() >= 2 && x.approx_eq(first.x, APPROXEQ_MARGIN) && y.approx_eq(first.y, APPROXEQ_MARGIN) {
                 contour.pop().unwrap();
