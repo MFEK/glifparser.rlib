@@ -26,7 +26,7 @@ float-cmp = "0.9"
 
 # Our submodules
 # The default feature is serde, dep:serde syntax still (Oct '21) not stabilized
-integer_or_float = { version = "0.1.5-1", default-features = false, features = ["hash", "float-cmp"] }
+integer_or_float = { version = "0.3.0", default-features = false, features = ["hash", "float-cmp"] }
 
 [dev-dependencies]
 env_logger = "0.9"
