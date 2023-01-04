@@ -23,7 +23,7 @@ impl<PD: PointData> MFEKContourCommon<PD> for MFEKQuadInner<PD> {
     }
 
     fn get_type(&self) -> MFEKContourInnerType {
-        MFEKContourInnerType::Cubic
+        MFEKContourInnerType::Quad
     }
 
     fn is_open(&self) -> bool {
