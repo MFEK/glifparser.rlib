@@ -1,5 +1,5 @@
 use serde::{Serialize, Deserialize};
-use crate::{glif::{point::{hyper::HyperPoint, MFEKPointCommon}, contour::MFEKContourCommon}, PointData, Contour};
+use crate::{glif::{point::{hyper::HyperPoint, MFEKPointCommon}, contour::MFEKContourCommon}, PointData};
 
 use super::{MFEKContourInnerType, cubic::MFEKCubicInner, quad::MFEKQuadInner};
 
