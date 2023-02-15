@@ -8,8 +8,10 @@ use dyn_clone::DynClone;
 use self::{quad::QPoint, hyper::HyperPoint};
 
 pub trait MFEKPointCommon<PD: PointData>: DynClone {
+    fn has_handle(&self, handle: WhichHandle) -> bool;
     fn get_handle(&self, handle: WhichHandle) -> Option<Handle>;
     fn set_handle(&mut self, wh: WhichHandle, handle: Handle);
+    fn colocate_handle(&mut self, wh: WhichHandle);
     fn get_handle_position(&self, handle: WhichHandle) -> Option<(f32, f32)>;
     fn set_handle_position(&mut self, handle: WhichHandle, x: f32, y: f32);
     fn x(&self) -> f32;
@@ -25,6 +27,10 @@ pub trait MFEKPointCommon<PD: PointData>: DynClone {
 }
 
 impl<PD: PointData> MFEKPointCommon<PD> for Point<PD> {
+    fn has_handle(&self, _handle: WhichHandle) -> bool {
+        true
+    }
+
     fn get_handle(&self, handle: WhichHandle) -> Option<Handle> {
         match handle {
             WhichHandle::Neither => None,
@@ -122,5 +128,13 @@ impl<PD: PointData> MFEKPointCommon<PD> for Point<PD> {
 
     fn hyper(&self) -> Option<&HyperPoint<PD>> {
         None
+    }
+
+    fn colocate_handle(&mut self, wh: WhichHandle) {
+        match wh {
+            WhichHandle::Neither => {},
+            WhichHandle::A => self.a = Handle::Colocated,
+            WhichHandle::B => self.b = Handle::Colocated,
+        }
     }
 }

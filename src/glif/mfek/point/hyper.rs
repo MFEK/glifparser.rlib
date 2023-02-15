@@ -34,6 +34,10 @@ impl<PD: PointData> HyperPoint<PD> {
 }
 
 impl<PD: PointData> MFEKPointCommon<PD> for HyperPoint<PD> {
+    fn has_handle(&self, _handle: WhichHandle) -> bool {
+        true
+    }
+    
     fn get_handle(&self, wh: WhichHandle) -> Option<Handle> {
         match wh {
             WhichHandle::Neither => None,
@@ -115,6 +119,14 @@ impl<PD: PointData> MFEKPointCommon<PD> for HyperPoint<PD> {
 
     fn hyper(&self) -> Option<&HyperPoint<PD>> {
         return Some(self)
+    }
+
+    fn colocate_handle(&mut self, wh: WhichHandle) {
+        match wh {
+            WhichHandle::Neither => {},
+            WhichHandle::A => {self.a = Handle::Colocated}
+            WhichHandle::B => {self.b = Handle::Colocated}
+        }
     }
 }
 
