@@ -171,12 +171,21 @@ impl SplitPenOperations for PenOperationsContour {
     fn split_pen_operations(&self) -> PenOperationsPath {
         let mut koutline = vec![];
         let mut kcontour = vec![];
-        let iterable: Vec<_> = if self.iter().last().unwrap() != &Close {
-            self.iter().chain([Close].iter()).collect()
+        let mut last_was_close = false;
+        
+        // if the contour doesn't have more than one point return an empty outline
+        if self.len() <= 1 {
+            koutline.push(kcontour);
+            return koutline
+        }
+
+        /*let iterable: Vec<_> = if *self.iter().last().unwrap() != Close {
+            self.into_iter().chain([Close].into_iter()).collect()
         } else {
-            self.iter().collect()
-        };
-        for p in iterable {
+            self.into_iter().collect()
+        };*/
+        
+        for p in self.iter() {
             let kpv = &p;
             if p.is_move_to() {
                 if kcontour.len() > 0 {
@@ -233,7 +242,8 @@ impl<PD: PointData> ToOutline<PD> for PenOperationsPath {
                 };
 
                 match point.ptype {
-                    PointType::Move => {}
+                    PointType::Move => {
+                    }
                     PointType::Curve => {
                         if next_points.len() == 3 {
                             point.a = Handle::At(next_points[2].x.into(), next_points[2].y.into());
@@ -256,15 +266,15 @@ impl<PD: PointData> ToOutline<PD> for PenOperationsPath {
                 contour.push(point);
             }
 
-            let first = contour.first().unwrap();
-            let last = contour.last().unwrap();
-            let (x, y, b) = (last.x, last.y, last.b);
-            // … a situation which is resolved here.
-            if contour.len() >= 2 && x.approx_eq(first.x, APPROXEQ_MARGIN) && y.approx_eq(first.y, APPROXEQ_MARGIN) {
-                contour.pop().unwrap();
-                contour.first_mut().unwrap().b = b;
+            if contour.len() > 1 {
+                let first = contour.first().unwrap();
+                let last = contour.last().unwrap();
+                let (x, y, _a, b) = (last.x, last.y, last.a, last.b);
+                if x == first.x && y == first.y {
+                    contour.pop().unwrap();
+                    contour.first_mut().unwrap().b = b;
+                }
             }
-
             ret.push(contour);
         }
 

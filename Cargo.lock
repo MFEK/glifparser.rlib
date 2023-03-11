@@ -182,6 +182,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "dyn-clone"
+version = "1.0.9"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "4f94fa09c2aeea5b8839e414b7b841bf429fd25b9c522116ac97ee87856d88b2"
+
+[[package]]
 name = "either"
 version = "1.8.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -263,10 +269,11 @@ dependencies = [
 
 [[package]]
 name = "glifparser"
-version = "1.2.7"
+version = "1.2.8"
 dependencies = [
  "derivative",
  "derive_more",
+ "dyn-clone",
  "env_logger",
  "flo_curves",
  "float-cmp",
@@ -279,6 +286,7 @@ dependencies = [
  "plist",
  "serde",
  "skia-safe",
+ "spline",
  "test-log",
  "trees",
  "xmltree",
@@ -764,6 +772,12 @@ name = "spin"
 version = "0.5.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "6e63cff320ae2c57904679ba7cb63280a3dc4613885beafb148ee7bf9aa9042d"
+
+[[package]]
+name = "spline"
+version = "0.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "4c845fbdc07cb9555a94806496be14d51dcda6d3bf6894d92af2c3a93bebc2c5"
 
 [[package]]
 name = "syn"
