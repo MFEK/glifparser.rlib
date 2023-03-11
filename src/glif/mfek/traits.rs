@@ -1,5 +1,6 @@
-use super::*;
-use crate::{outline, point};
+use super::{contour_operations::ContourOperations, inner::MFEKContourInner, MFEKOutline};
+use crate::{outline, point, PointData, error::mfek::UpgradeContourOpsError};
+use crate::{Outline, MFEKGlif};
 
 use std::collections::VecDeque;
 
@@ -34,13 +35,25 @@ pub trait ManageContourOperations {
 
 impl<PD: PointData> DowngradeOutline<PD> for MFEKOutline<PD> {
     fn cleanly_downgradable(&self) -> bool {
-        self.iter().all(|c| c.operation.is_none())
+        for contour in self {
+            match contour.inner() {
+                MFEKContourInner::Cubic(_) => {},
+                _ => return false
+            }
+        }
+        
+        self.iter().all(|c| c.operation().is_none())
     }
 
     fn downgrade(self) -> Outline<PD> {
         let mut ret = Outline::new();
         for contour in self {
-            ret.push(contour.inner);
+            match contour.inner() {
+                MFEKContourInner::Cubic(cubic_contour) => {
+                    ret.push(cubic_contour.clone());
+                }
+                _ => panic!("Tried to downgrade a non-cubic glyph!")
+            }
         }
         ret
     }
@@ -49,7 +62,7 @@ impl<PD: PointData> DowngradeOutline<PD> for MFEKOutline<PD> {
 impl<PD: PointData> UpgradeOutline<PD> for Outline<PD> {
     fn upgrade(self) -> MFEKOutline<PD> {
         let mut ret = MFEKOutline::new();
-        for contour in self {
+        for contour in &self {
             ret.push(contour.into());
         }
         ret
@@ -60,10 +73,11 @@ impl<PD: PointData> ManageContourOperations for MFEKOutline<PD> {
     type Output = MFEKOutlineContourOperations<PD>;
     fn upgrade_contour_ops(&mut self, mut ops: Self::Output) -> Result<(), UpgradeContourOpsError> {
         let mut iter = self.iter_mut();
-        while let Some(mut contour) = iter.next() {
-            contour.operation = ops
+        while let Some(contour) = iter.next() {
+            contour.set_operation(ops
                 .pop_front()
-                .ok_or(UpgradeContourOpsError::MoreContoursThanOps)?;
+                .ok_or(UpgradeContourOpsError::MoreContoursThanOps)?
+            );
         }
         if !ops.is_empty() {
             ops.clear();
@@ -75,7 +89,7 @@ impl<PD: PointData> ManageContourOperations for MFEKOutline<PD> {
     fn downgrade_contour_ops(&mut self) -> Self::Output {
         let mut o_vec = VecDeque::with_capacity(self.len());
         for contour in self.iter_mut() {
-            o_vec.push_back(contour.operation.take());
+            o_vec.push_back(contour.operation().clone());
         }
         o_vec
     }
