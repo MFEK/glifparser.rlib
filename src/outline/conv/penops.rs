@@ -7,9 +7,6 @@ use crate::point::IsValid;
 use crate::point::{GlifPoint, Handle, Point, PointData, PointType, WhichHandle};
 use PointType::*;
 
-use float_cmp::ApproxEq as _;
-const APPROXEQ_MARGIN: (f32, i32) = (f32::EPSILON, 4);
-
 /// Representation of glyph data as pen operations, rather than as [`Point`]'s.
 #[derive(Debug, Clone, PartialEq, IsVariant, Unwrap)]
 pub enum PenOperations {
@@ -171,19 +168,12 @@ impl SplitPenOperations for PenOperationsContour {
     fn split_pen_operations(&self) -> PenOperationsPath {
         let mut koutline = vec![];
         let mut kcontour = vec![];
-        let mut last_was_close = false;
         
         // if the contour doesn't have more than one point return an empty outline
         if self.len() <= 1 {
             koutline.push(kcontour);
             return koutline
         }
-
-        /*let iterable: Vec<_> = if *self.iter().last().unwrap() != Close {
-            self.into_iter().chain([Close].into_iter()).collect()
-        } else {
-            self.into_iter().collect()
-        };*/
         
         for p in self.iter() {
             let kpv = &p;
