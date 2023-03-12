@@ -48,6 +48,7 @@ pub struct MFEKGlif<PD: PointData> {
     /// This is an arbitrary glyph comment, exactly like the comment field in FontForge SFD.
     pub note: Option<String>,
     /// It's up to the API consumer to set this.
+    #[cfg_attr(feature = "glifserde", serde(skip_serializing))]
     pub filename: Option<stdpath::PathBuf>,
 }
 
