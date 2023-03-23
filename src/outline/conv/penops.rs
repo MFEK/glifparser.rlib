@@ -221,7 +221,6 @@ impl<PD: PointData> ToOutline<PD> for PenOperationsPath {
 
                 let mut point = Point::<PD> {
                     name: None,
-                    data: None,
                     x: points[0].x.into(),
                     y: points[0].y.into(),
                     smooth: false,
@@ -229,6 +228,7 @@ impl<PD: PointData> ToOutline<PD> for PenOperationsPath {
                     a: Handle::Colocated,
                     b: Handle::Colocated,
                     ptype: (el).into(),
+                    ..Default::default()
                 };
 
                 match point.ptype {

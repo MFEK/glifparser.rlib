@@ -33,7 +33,7 @@ impl<PD: PointData> IsValid for Point<PD> {
     /// be defined as an Option<PD>, but removing that's TODO. This API will change when that does
     /// and should be considered unstable/testing.
     fn is_valid(&self) -> bool {
-        if let Some(pd) = self.data.as_ref() {
+        for pd in self.data.values() {
             if !pd.is_valid() {
                 return false;
             }

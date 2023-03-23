@@ -188,7 +188,7 @@ impl<PD: PointData> FromSkOutline for Outline<PD> {
 
                 let mut point = Point::<PD> {
                     name: None,
-                    data: None,
+                    data: Default::default(),
                     x: points[0].x,
                     y: points[0].y,
                     smooth: false,

@@ -2,10 +2,13 @@
 
 mod conv;
 pub use self::conv::kurbo::*;
+mod data;
+pub use self::data::PointData;
 mod valid;
 pub use self::valid::{IsValid, PointLike};
 mod xml;
 
+use std::collections::HashMap;
 use std::fmt::{Display, Debug};
 use std::str::FromStr;
 
@@ -100,43 +103,6 @@ impl From<()> for Handle {
     }
 }
 
-// The nightly feature is superior because it means people don't need to write e.g.
-// `impl PointData for TheirPointDataType {}`
-/// API consumers may put any clonable type as an associated type to Glif, which will appear along
-/// with each Point. You could use this to implement, e.g., hyperbeziers. The Glif Point's would
-/// still represent a Bézier curve, but you could put hyperbezier info along with the Point.
-///
-/// Note that anchors and guidelines receive *the same type*. So, if you wanted to put *different*
-/// data along with each, you would need to make an enum like:
-///
-/// ```rust
-/// use glifparser::{Point, PointData};
-///
-/// #[derive(Debug, Copy, Clone, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
-/// pub enum MyPointData {
-///     Point(bool),
-///     Guideline(u8),
-///     Anchor { good: bool },
-/// }
-/// impl Default for MyPointData {
-///     fn default() -> Self {
-///         Self::Point(false)
-///     }
-/// }
-/// impl PointData for MyPointData {}
-///
-/// fn testing() {
-///     let mut point = Point::default();
-///     point.data = Some(MyPointData::Point(true));
-/// }
-/// ```
-#[cfg(feature = "glifserde")]
-pub trait PointData where Self: Clone + Default + Debug + Serialize {}
-#[cfg(not(feature = "glifserde"))]
-pub trait PointData where Self: Clone + Default + Debug {}
-impl PointData for () {}
-impl<PD: PointData> IsValid for PD {}
-
 /// A Skia-friendly point
 #[cfg_attr(feature = "glifserde", derive(Serialize, Deserialize))]
 #[derive(Debug, Default, Clone, PartialEq)]
@@ -153,7 +119,7 @@ pub struct Point<PD: PointData> {
     #[cfg_attr(feature = "glifserde", serde(default))]
     pub smooth: bool,
     #[cfg_attr(feature = "glifserde", serde(default))]
-    pub data: Option<PD>,
+    pub data: HashMap<String, PD>,
 }
 
 /// For use by ``Point::handle_or_colocated``
@@ -186,7 +152,7 @@ impl<PD: PointData> Point<PD> {
     }
 
     /// Make a point from its x and y position, handles and type
-    pub fn from_fields((x, y): (f32, f32), (a, b): (Handle, Handle), smooth: bool, ptype: PointType, name: Option<String>, data: Option<PD>) -> Point<PD> {
+    pub fn from_fields((x, y): (f32, f32), (a, b): (Handle, Handle), smooth: bool, ptype: PointType, name: Option<String>, data: HashMap<String, PD>) -> Point<PD> {
         #[cfg(debug_assertions)] Self::check_ptype(ptype);
         Point { x, y, a, b, smooth, ptype, name, data }
     }
