@@ -204,5 +204,6 @@ impl<PD: PointData> GlifLike for MFEKGlif<PD> {
 
 #[test]
 fn test_tostring() {
-  assert!(format!("{}", CapType::Circle) == CapType::Circle.to_string() && CapType::Circle.to_string() == String::from("circle"));
+    use crate::CapType;
+    assert!(format!("{}", CapType::Circle) == CapType::Circle.to_string() && CapType::Circle.to_string() == String::from("circle"));
 }

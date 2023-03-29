@@ -7,9 +7,9 @@ use std::collections::VecDeque;
 pub type MFEKOutlineContourOperations<PD> = VecDeque<Option<ContourOperations<PD>>>;
 /// Vec (layers) → Vec (contours) → which may or may not have any operations
 /// ```
-/// # use glifparser::glif::mfek::ContourOperations;
+/// # use glifparser::glif::contour_operations::ContourOperations;
 /// # fn doctest<PD: glifparser::PointData>() ->
-/// Vec<Vec<Option<ContourOperations<PD>>>>
+/// # Vec<Vec<Option<ContourOperations<PD>>>>
 /// # { vec![] }
 /// ```
 pub type MFEKGlifContourOperations<PD> = VecDeque<MFEKOutlineContourOperations<PD>>;
