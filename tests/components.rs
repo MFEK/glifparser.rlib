@@ -26,7 +26,7 @@ fn test_components() {
     assert!(sanity.is_ok() && sanity.unwrap());
     assert!(glif.components.vec.len() == 2);
     assert!(&glif.components.vec[0].base == "acute");
-    let forest: Result<trees::Forest<glifparser::Component<()>>, _> = (&glif.components).into();
+    let forest: Result<trees::Forest<glifparser::Component<()>>, _> = (glif.components.clone()).into();
     match forest {
         Ok(mut f) => {
             eprintln!("(Glif: {})", &glif.name);
