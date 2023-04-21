@@ -21,7 +21,7 @@ image = { version = "0.24", features = ["png"], default-features = false, option
 serde = { version = "1.0", features = ["derive"], optional = true }
 plist = "1.3"
 itertools = "0.10"
-flo_curves = { version = "0.6", optional = true }
+flo_curves = { version = "0.7", optional = true }
 float-cmp = "0.9"
 dyn-clone = "1.0.9"
 # Our submodules

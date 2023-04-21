@@ -230,9 +230,9 @@ dependencies = [
 
 [[package]]
 name = "flo_curves"
-version = "0.6.1"
+version = "0.7.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9deedc0ff8e4848dbc1029e555af16390a8d2ff406f05a2f46c8bd14b2f4de4d"
+checksum = "e9c28a18e81b10d676e4ec5ba46d9a5fe042a3f78b14f0097bc1f086a708e152"
 dependencies = [
  "itertools",
  "roots",
@@ -646,9 +646,9 @@ dependencies = [
 
 [[package]]
 name = "roots"
-version = "0.0.7"
+version = "0.0.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1c36d2bbc763f480668d6d6790ae2fdd2e52ac0c21a3a26d156f3534a3d9eea9"
+checksum = "082f11ffa03bbef6c2c6ea6bea1acafaade2fd9050ae0234ab44a2153742b058"
 
 [[package]]
 name = "rustc-hash"
