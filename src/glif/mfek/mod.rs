@@ -142,10 +142,7 @@ pub type MFEKOutline<PD> = Vec<MFEKContour<PD>>;
 #[cfg(feature = "skia")]
 impl<PD: PointData> ToSkiaPaths for MFEKOutline<PD> {
     fn to_skia_paths(&self, spt: Option<SkiaPointTransforms>) -> SkiaPaths {
-        let mut ret = SkiaPaths {
-            open: None,
-            closed: None
-        };
+        let mut ret = SkiaPaths::default();
 
         let mut open = Path::new();
         let mut closed = Path::new();

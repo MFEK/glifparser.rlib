@@ -3,21 +3,22 @@
 mod xml;
 
 use crate::error::GlifParserError;
-use crate::glif::{self, Glif};
 #[cfg(feature = "mfek")]
 use crate::glif::mfek::MFEKGlif;
+use crate::glif::{self, Glif};
 use crate::matrix::GlifMatrix;
-use crate::point::PointData;
 use crate::outline::Outline;
+use crate::point::PointData;
 
 use integer_or_float::IntegerOrFloat;
-use IntegerOrFloat::Float;
 use kurbo::Affine;
-pub use trees::{Forest, Tree, Node};
+pub use trees::{Forest, Node, Tree};
+use IntegerOrFloat::Float;
 
 #[cfg(feature = "glifserde")]
-use serde::{Serialize, Deserialize};
+use serde::{Deserialize, Serialize};
 
+use std::collections::HashSet;
 use std::path::{Path, PathBuf};
 
 #[allow(non_snake_case)] // to match UFO spec https://unifiedfontobject.org/versions/ufo3/glyphs/glif/#component
@@ -32,22 +33,24 @@ pub struct GlifComponent {
     pub yScale: IntegerOrFloat,
     pub xOffset: IntegerOrFloat,
     pub yOffset: IntegerOrFloat,
-    pub identifier: Option<String>
+    pub identifier: Option<String>,
 }
 
 #[cfg_attr(feature = "glifserde", derive(Serialize, Deserialize))]
 #[derive(Clone, Debug, Default, PartialEq)]
+/// A container meant for yelding a [`Forest<Component<PD>>`].
+///
+/// Please see [`impl From<GlifComponents> for Result<Forest<Component<PD>>,
+/// GlifParserError>`](#conversion).
 pub struct GlifComponents {
     pub root: String,
     pub vec: Vec<GlifComponent>,
+    pub uniques: HashSet<String>
 }
 
 impl GlifComponents {
     pub fn new() -> Self {
-        Self {
-            root: String::new(),
-            vec: vec![]
-        }
+        Default::default()
     }
 }
 
@@ -63,7 +66,14 @@ impl GlifComponent {
 
 impl GlifComponent {
     pub fn matrix(&self) -> GlifMatrix {
-        GlifMatrix(self.xScale, self.xyScale, self.yxScale, self.yScale, self.xOffset, self.yOffset)
+        GlifMatrix(
+            self.xScale,
+            self.xyScale,
+            self.yxScale,
+            self.yScale,
+            self.xOffset,
+            self.yOffset,
+        )
     }
 }
 
@@ -71,7 +81,7 @@ impl GlifComponent {
 #[derive(Clone, Debug, Default, PartialEq)]
 pub struct Component<PD: PointData> {
     pub glif: Glif<PD>,
-    pub matrix: Affine
+    pub matrix: Affine,
 }
 
 impl<PD: PointData> Component<PD> {
@@ -92,7 +102,13 @@ pub struct ComponentRect {
 
 impl ComponentRect {
     pub fn from_rect_and_name(minx: f32, miny: f32, maxx: f32, maxy: f32, name: String) -> Self {
-        Self { minx, miny, maxx, maxy, name }
+        Self {
+            minx,
+            miny,
+            maxx,
+            maxy,
+            name,
+        }
     }
 }
 
@@ -107,13 +123,18 @@ impl GlifComponent {
 
     /// Must have filename set, and that file must be readable, for this to work.
     pub fn to_component<PD: PointData>(&self) -> Result<Component<PD>, GlifParserError> {
-        let gliffn = &self.filename.as_ref().ok_or(GlifParserError::GlifFilenameNotSet(self.base.clone()))?;
+        let gliffn = &self
+            .filename
+            .as_ref()
+            .ok_or(GlifParserError::GlifFilenameNotSet(self.base.clone()))?;
 
         let mut ret = Component::new();
         ret.matrix = self.matrix().into();
         ret.glif.name = self.base.clone();
         ret.glif.filename = self.filename.clone();
-        let component_xml = fs::read_to_string(&gliffn).or(Err(GlifParserError::GlifFilenameNotSet("Glif filename leads to unreadable file".to_string())))?;
+        let component_xml = fs::read_to_string(&gliffn).or(Err(GlifParserError::GlifFilenameNotSet(
+            "Glif filename leads to unreadable file".to_string(),
+        )))?;
         let mut newglif: Glif<PD> = glif::read(&component_xml)?;
         for component in newglif.components.vec.iter_mut() {
             component.set_file_name(&gliffn);
@@ -129,14 +150,24 @@ impl GlifComponent {
     }
 }
 
-pub trait FlattenedGlif where Self: Clone {
+pub trait FlattenedGlif
+where
+    Self: Clone,
+{
     /// Check that all components in your .glif file really resolve, and if they do, get their
     /// contours and apply their matrices. If you want bounding rectangles as this process is done
-    /// with a logical name for each rectangle you can draw, pass in `rects` as a `&mut` 
+    /// with a logical name for each rectangle you can draw, pass in `rects` as a `&mut`
     fn flattened(&self, rects: &mut Option<Vec<ComponentRect>>) -> Result<Self, GlifParserError>;
 }
 
-fn apply_component_rect<PD: PointData>(last: &Node<Component<PD>>, minx: &mut f32, miny: &mut f32, maxx: &mut f32, maxy: &mut f32, final_outline: &mut Outline<PD>) {
+fn apply_component_rect<PD: PointData>(
+    last: &Node<Component<PD>>,
+    minx: &mut f32,
+    miny: &mut f32,
+    maxx: &mut f32,
+    maxy: &mut f32,
+    final_outline: &mut Outline<PD>,
+) {
     let mut matrices = vec![];
     matrices.push((*last).data().matrix);
 
@@ -154,10 +185,18 @@ fn apply_component_rect<PD: PointData>(last: &Node<Component<PD>>, minx: &mut f3
                 for j in 0..to_transform[i].len() {
                     let is_first = i == 0 && j == 0;
                     let mut p = to_transform[i][j].clone();
-                    if p.x < *minx || is_first { *minx = p.x; }
-                    if p.y < *miny || is_first { *miny = p.y; }
-                    if p.x > *maxx || is_first { *maxx = p.x; }
-                    if p.y > *maxy || is_first { *maxy = p.y; }
+                    if p.x < *minx || is_first {
+                        *minx = p.x;
+                    }
+                    if p.y < *miny || is_first {
+                        *miny = p.y;
+                    }
+                    if p.x > *maxx || is_first {
+                        *maxx = p.x;
+                    }
+                    if p.y > *maxy || is_first {
+                        *maxy = p.y;
+                    }
 
                     for m in &matrices {
                         p.apply_matrix(*m);
@@ -167,12 +206,12 @@ fn apply_component_rect<PD: PointData>(last: &Node<Component<PD>>, minx: &mut f3
                 }
             }
             final_outline.extend(to_transform);
-        },
+        }
         None => {}
     }
 }
 
-
+#[rustfmt::skip]
 macro_rules! impl_flattened_glif {
     ($glifstruct:ident, $outline:ident) => { 
 
@@ -186,7 +225,7 @@ macro_rules! impl_flattened_glif {
             // and consider ourselves as no longer being made up of components.
             fn flattened(&self, rects: &mut Option<Vec<ComponentRect>>) -> Result<Self, GlifParserError> {
                 let mut ret = self.clone();
-                let components_r: Result<Forest<Component<PD>>, _> = (&ret.components).into();
+                let components_r: Result<Forest<Component<PD>>, _> = (ret.components).into();
                 let components = components_r?;
                 let mut final_outline: Outline<PD> = Outline::new();
                 let mut component_rects = vec![];
@@ -223,76 +262,70 @@ impl_flattened_glif!(Glif, outline);
 #[cfg(feature = "mfek")]
 impl_flattened_glif!(MFEKGlif, flattened);
 
-// This impl builds up a forest of trees for a glyph's components. Imagine a hungarumlaut (˝).
-//
-// This character may be built of glyph components, as such:
-//
-// hungarumlaut
-//    /    \
-//   /      \
-// grave  grave
-//   |      | 
-// acute  acute
-//
-// This function will give you a Forest of both of the sub-trees. (Forest<Component>). The elements
-// of a Forest are Tree<Component>. For safety reasons, this function cannot always return a
-// Forest, however. Sometimes, .glif files can be malformed, containing components which refer to
-// themselves, or to components higher up the tree. Therefore, the inner recursive function
-// `component_to_tree` receives a Tree of `uniques`, calculated for each sub-tree, and also a global
-// mutable `unique_found` flag, for the entire Forest.
-//
-// If a loop is found in the tree (for example, grave refers to grave), `unique_found` is set,
-// poisoning the function, returning an error. unique_found is (String, String) for error formatting;
-// however, should be considered basically equivalent to a boolean.
-impl<PD: PointData> From<&GlifComponents> for Result<Forest<Component<PD>>, GlifParserError> {
-    fn from(glifcs: &GlifComponents) -> Self {
-        let mut unique_found = None;
-
-        fn component_to_tree<PD: PointData>(component: Component<PD>, uniques: &mut Tree<String>, unique_found: &mut Option<(String, String)>) -> Result<Tree<Component<PD>>, GlifParserError> {
-            let mut tree = Tree::new(component.clone());
-            for gc in component.glif.components.vec.iter() {
-                let component_inner = gc.to_component()?;
-                uniques.back_mut().unwrap().push_back(Tree::new(gc.base.clone()));
-                // Generate a list of parents for the backmost node
-                let parents = match uniques.back() {
-                    Some(mut node) => {
-                        while let Some(nn) = node.back() {
-                            node = nn;
-                        };
-                        let mut parents: Vec<String> = vec![];
-                        while let Some(p) = node.parent() {
-                            parents.push(p.data().clone());
-                            node = p;
-                        }
-                        parents
-                    },
-                    None => vec![]
-                };
-                if parents.contains(&gc.base) || gc.base == component.glif.name {
-                    return {
-                        *unique_found = Some((component.glif.name.clone(), gc.base.clone()));
-                        Ok(tree)
-                    }
-                }
-                tree.push_back(component_to_tree(component_inner, uniques, unique_found)?);
-            }
-            Ok(tree)
-        }
-
+/// # Conversion
+///
+/// This impl builds up a forest of trees for a glyph's components. Imagine a hungarumlaut (˝).
+///
+/// This character may be built of glyph components, as such:
+///
+/// ```plain
+/// hungarumlaut
+///    /    \
+///   /      \
+/// grave  grave
+///   |      |
+/// acute  acute
+/// ```
+///
+/// This function will give you a Forest of both of the sub-trees. ([`Forest<Component>`]). The elements
+/// of a [`Forest`] are [`Tree<Component>`]. For safety reasons, this function cannot always return a
+/// [`Forest`]. Sometimes, .glif files can be malformed, containing components which refer to
+/// themselves or to components higher up the tree.
+impl<PD: PointData> From<GlifComponents> for Result<Forest<Component<PD>>, GlifParserError> {
+    fn from(mut glifcs: GlifComponents) -> Self {
         let mut forest = Forest::new();
-        let cs: Vec<_> = glifcs.vec.iter().map(|gc| {
-            let mut uniques: Tree<String> = Tree::new(glifcs.root.clone());
-            uniques.push_back(Tree::new(gc.base.clone()));
-            component_to_tree(gc.to_component()?, &mut uniques, &mut unique_found)
-        }).collect();
+        let components: Vec<_> = glifcs.vec.drain(..).collect();
+
+        let cs  = components.into_iter().map(|c| {
+            glifcs.build_component_tree(c.to_component()?)
+        }).collect::<Result<Vec<_>, GlifParserError>>()?;
 
         for c in cs {
-            forest.push_back(c?);
+            forest.push_back(c);
         }
 
-        match unique_found {
-            Some((base, unique)) => {Err(GlifParserError::GlifComponentsCyclical(format!("in glif {}, {} refers to {}", &glifcs.root, base, unique)))},
-            None => Ok(forest)
+        Ok(forest)
+    }
+}
+
+/// Builds a tree of components in a recursive manner. It takes a mutable reference to a `HashSet`
+/// called `uniques`, which keeps track of the unique component names seen so far in the current
+/// subtree. This prevents cycles from occurring.
+///
+/// If a loop is found in the tree (for example, gershayim refers to grave refers to grave), an
+/// error is returned with the appropriate message. The error type is
+/// [`GlifParserError::GlifComponentsCyclical`], which takes a formatted string to provide more
+/// details about the error.
+impl GlifComponents {
+    /// You should not need to call this function directly; see [§ Conversion](#conversion).
+    pub fn build_component_tree<PD: PointData>(
+        &mut self,
+        component: Component<PD>,
+    ) -> Result<Tree<Component<PD>>, GlifParserError> {
+        let mut tree = Tree::new(component.clone());
+
+        for gc in component.glif.components.vec.into_iter() {
+            if !self.uniques.insert(gc.base.clone()) {
+                return Err(GlifParserError::GlifComponentsCyclical(format!(
+                    "in glif {}, {} refers to {} (trying to flatten {})",
+                    gc.base, component.glif.name, gc.base, self.root
+                )));
+            }
+
+            tree.push_back(self.build_component_tree(gc.to_component()?)?);
+            self.uniques.remove(&gc.base);
         }
+
+        Ok(tree)
     }
 }
