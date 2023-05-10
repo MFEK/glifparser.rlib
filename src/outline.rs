@@ -135,10 +135,10 @@ impl GlifOutline {
     fn warn_type(&mut self) {
         self.warned_type = true;
         match self.otype {
-            GlifOutlineType::Mixed => log::warn!("Outline contains a mix of quadratic and cubic contours! This could lead to all kinds of bugs. What software produced this, anyway…?"),
+            GlifOutlineType::Mixed => log::debug!("Outline contains a mix of quadratic and cubic contours! This could lead to all kinds of bugs. What software produced this, anyway…?"),
             GlifOutlineType::OnlyCorners => log::debug!("Outline only has corners; Outline<PD> type will treat it as a cubic."),
-            GlifOutlineType::Quadratic => log::warn!("Quadratic curve support in MFEK, while ahead of e.g. Runebender, is still spotty. You are likely to find many bugs, it is recommended you convert to cubic contours."),
             GlifOutlineType::Cubic => log::trace!("Loaded a cubic/corner-only outline (as expected)"),
+            _ => {}
         }
     }
 

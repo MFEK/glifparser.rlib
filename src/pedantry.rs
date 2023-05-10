@@ -1,5 +1,5 @@
-//! When reading .glif files, how strict ought we to be? Can we make fixes to bad input, or ought
-//! we to error out and make the user do it?
+//! When reading .glif files, how strict ought we to be? Can we make fixes to
+//! bad input, or ought we to error out and make the user do it?
 use integer_or_float::IntegerOrFloat;
 
 #[derive(Constructor, Debug, Default, Copy, Clone, PartialEq, Eq)]
@@ -32,13 +32,13 @@ pub enum Level {
     GlifParser,
     /// Strict to the UFO spec
     Ufo,
-    /// Strict to a UFO that will be used to make an OpenType font. For example, this places limits
-    /// on anchor values: a UfoPedantic `<anchor>` can have float placement, while an
-    /// OpenTypePedantic anchor cannot.
+    /// Strict to a UFO that will be used to make an OpenType font. For example,
+    /// this places limits on anchor values: a UfoPedantic `<anchor>` can have
+    /// float placement, while an OpenTypePedantic anchor cannot.
     OpenType,
-    /// Strict to a UFO that will be used to make a TrueType font. This will refuse floats
-    /// everywhere but matrices, with the more important consequence being every point location
-    /// gets rounded to integer.
+    /// Strict to a UFO that will be used to make a TrueType font. This will
+    /// refuse floats everywhere but matrices, with the more important
+    /// consequence being every point location gets rounded to integer.
     TrueType,
 }
 
