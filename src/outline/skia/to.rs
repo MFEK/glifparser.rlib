@@ -1,7 +1,7 @@
 use skia_safe as skia;
 
 use crate::point::{Point, PointData, PointType, WhichHandle};
-use crate::{Contour, Outline, OutlineType};
+use crate::{Contour, Outline};
 
 /// glifparser returns for you two Skia paths when called on an outline, because it is extremely
 /// liekly that you are going to want to draw open paths in a different way than you draw closed
@@ -94,14 +94,13 @@ impl<PD: PointData> ToSkiaPaths for Outline<PD> {
 
 impl<PD: PointData> ToSkiaPath for Contour<PD> {
     fn to_skia_path(&self, spt: Option<SkiaPointTransforms>) -> Option<skia::Path> {
-        if self.len() == 0 {
+        if self.is_empty() {
             return None;
         }
 
         let mut path = skia::Path::new();
         let firstpoint: &Point<PD> = self.first().unwrap();
         let mut prevpoint: &Point<PD> = self.first().unwrap();
-        let mut outline_type = OutlineType::Cubic;
 
         let transforms = spt.unwrap_or(SkiaPointTransforms::new());
         let calc_x: &dyn Fn(f32) -> f32 = transforms.calc_x;
@@ -110,8 +109,7 @@ impl<PD: PointData> ToSkiaPath for Contour<PD> {
         path.move_to((calc_x(self[0].x), calc_y(self[0].y)));
 
         for (i, point) in self.iter().enumerate() {
-            // the move_to handles the first point
-            if i == 0 {
+            if i == 0 { // the move_to handles the first point
                 continue;
             };
             match point.ptype {
@@ -119,15 +117,11 @@ impl<PD: PointData> ToSkiaPath for Contour<PD> {
                     path.line_to((calc_x(point.x), calc_y(point.y)));
                 }
                 PointType::Curve => {
-                    if outline_type == OutlineType::Quadratic {
-                        panic!("Got a cubic point after a quadratic point");
-                    }
                     let h1 = prevpoint.handle_or_colocated(WhichHandle::A, &calc_x, &calc_y);
                     let h2 = point.handle_or_colocated(WhichHandle::B, &calc_x, &calc_y);
                     path.cubic_to(h1, h2, (calc_x(point.x), calc_y(point.y)));
                 }
                 PointType::QCurve => {
-                    outline_type = OutlineType::Quadratic;
                     let h1 = prevpoint.handle_or_colocated(WhichHandle::A, &calc_x, &calc_y);
                     path.quad_to(h1, (calc_x(point.x), calc_y(point.y)));
                 }
@@ -137,31 +131,17 @@ impl<PD: PointData> ToSkiaPath for Contour<PD> {
         }
 
         if firstpoint.ptype != PointType::Move {
-            match self.last() {
-                Some(lastpoint) => {
-                    let h1 = lastpoint.handle_or_colocated(WhichHandle::A, &calc_x, &calc_y);
-                    match outline_type {
-                        OutlineType::Cubic => {
-                            let h2 = firstpoint.handle_or_colocated(WhichHandle::B, &calc_x, &calc_y);
-                            path.cubic_to(h1, h2, (calc_x(firstpoint.x), calc_y(firstpoint.y)))
-                        }
-                        OutlineType::Quadratic => {
-                            match lastpoint.ptype {
-                                PointType::QClose => {
-                                    // This is safe as a lone QClose is illegal and should
-                                    // cause a crash anyway if it's happening.
-                                    let prevpoint = &self[self.len() - 2];
-                                    let ph =
-                                        prevpoint.handle_or_colocated(WhichHandle::A, &calc_x, &calc_y);
-                                    path.quad_to(ph, h1)
-                                }
-                                _ => path.quad_to(h1, (calc_x(firstpoint.x), calc_y(firstpoint.y))),
-                            }
-                        }
-                        OutlineType::Spiro => panic!("Spiro as yet unimplemented."),
-                    };
+            let lastpoint = self.last().unwrap();
+            let h1 = lastpoint.handle_or_colocated(WhichHandle::A, &calc_x, &calc_y);
+            match firstpoint.ptype {
+                PointType::Curve => {
+                    let h2 = firstpoint.handle_or_colocated(WhichHandle::B, &calc_x, &calc_y);
+                    path.cubic_to(h1, h2, (calc_x(firstpoint.x), calc_y(firstpoint.y)));
                 }
-                None => {}
+                PointType::QCurve => {
+                    path.quad_to(h1, (calc_x(firstpoint.x), calc_y(firstpoint.y)));
+                }
+                _ => {}
             }
             path.close();
         }
