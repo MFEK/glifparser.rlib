@@ -6,7 +6,7 @@ use crate::error::GlifParserError;
 #[cfg(feature = "mfek")]
 use crate::glif::mfek::MFEKGlif;
 use crate::glif::{self, Glif};
-use crate::matrix::GlifMatrix;
+use crate::matrix::{ApplyMatrix as _, GlifMatrix};
 use crate::outline::Outline;
 use crate::point::PointData;
 

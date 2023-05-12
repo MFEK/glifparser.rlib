@@ -22,8 +22,12 @@ impl Into<Affine> for GlifMatrix {
     }
 }
 
-impl<PD: PointData> Point<PD> {
-    pub fn apply_matrix(&mut self, matrix: Affine) {
+pub trait ApplyMatrix {
+    fn apply_matrix(&mut self, matrix: Affine);
+}
+
+impl<PD: PointData> ApplyMatrix for Point<PD> {
+    fn apply_matrix(&mut self, matrix: Affine) {
         let kbp = matrix * KurboPoint::new(self.x as f64, self.y as f64);
         self.x = kbp.x as f32;
         self.y = kbp.y as f32;
