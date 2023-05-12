@@ -307,10 +307,7 @@ pub fn read_ufo_glif_pedantic<PD: PointData>(glif: &str, pedantry: Pedantry) -> 
         log::warn!("Without glifserde, cannot decode plist!")
     }
 
-    goutline.figure_type();
-    ret.order = goutline.otype.into();
-
-    let outline: Outline<PD> = goutline.try_into()?;
+    let outline: Outline<PD> = goutline.into();
 
     if outline.len() > 0 || ret.components.vec.len() > 0 {
         ret.outline = Some(outline);

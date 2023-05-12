@@ -12,7 +12,7 @@ use crate::anchor::Anchor;
 use crate::component::{ComponentRect, GlifComponents};
 use crate::glif::Glif;
 use crate::guideline::Guideline;
-use crate::outline::{Outline, OutlineType};
+use crate::outline::Outline;
 #[cfg(feature = "skia")]
 use crate::outline::skia::{SkiaPaths, SkiaPointTransforms, ToSkiaPath, ToSkiaPaths};
 use crate::point::PointData;
@@ -34,7 +34,6 @@ pub use contour::MFEKContour;
 pub struct MFEKGlif<PD: PointData> {
     pub layers: Vec<Layer<PD>>,
     pub history: Vec<HistoryEntry<PD>>,
-    pub order: OutlineType,
     pub anchors: Vec<Anchor<PD>>,
     /// Note that these components are not yet parsed or checked for infinite loops. You need to
     /// call either ``GlifComponent::to_component_of`` on each of these, or ``Glif::flatten``.
@@ -64,7 +63,6 @@ impl<PD: PointData> From<Glif<PD>> for MFEKGlif<PD> {
             history,
             flattened: None,
             component_rects: None,
-            order: glif.order,
             anchors: glif.anchors,
             components: glif.components,
             guidelines: glif.guidelines,
@@ -110,7 +108,6 @@ impl<PD: PointData> From<MFEKGlif<PD>> for Glif<PD> {
         }).collect();
 
         Glif {
-            order: glif.order,
             anchors: glif.anchors.clone(),
             components: glif.components.clone(),
             guidelines: glif.guidelines.clone(),

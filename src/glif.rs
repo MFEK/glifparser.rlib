@@ -9,7 +9,7 @@ use crate::guideline::Guideline;
 #[cfg(feature = "glifimage")]
 use crate::image::GlifImage;
 use crate::point::PointData;
-use crate::outline::{Outline, OutlineType};
+use crate::outline::Outline;
 
 mod conv;
 mod lib;
@@ -41,7 +41,6 @@ pub use mfek::*;
 #[derive(Clone, Debug, Default, PartialEq)]
 pub struct Glif<PD: PointData> {
     pub outline: Option<Outline<PD>>,
-    pub order: OutlineType,
     pub anchors: Vec<Anchor<PD>>,
     /// Note that these components are not yet parsed or checked for infinite loops. You need to
     /// call either ``GlifComponent::to_component_of`` on each of these, or ``Glif::flatten``.
