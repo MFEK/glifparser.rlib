@@ -37,7 +37,7 @@ impl<PD: PointData> ApplyMatrix for Point<PD> {
             self.a = Handle::At(kbpa.x as f32, kbpa.y as f32);
         }
 
-        if let Handle::At(bx, by) = self.a {
+        if let Handle::At(bx, by) = self.b {
             let kbpb = matrix * KurboPoint::new(bx as f64, by as f64);
             self.b = Handle::At(kbpb.x as f32, kbpb.y as f32);
         }
