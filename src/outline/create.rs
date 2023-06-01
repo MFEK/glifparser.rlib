@@ -125,6 +125,7 @@ pub fn cubic_contour<PD: PointData>(gc: &GlifContour) -> Contour<PD> {
                 contour.push(Point {
                     x,
                     y,
+                    a: Handle::from(h1),
                     b: Handle::from(h2),
                     smooth: gp.smooth,
                     name: gp.name.clone(),
@@ -168,7 +169,7 @@ impl<PD: PointData> Into<Outline<PD>> for GlifOutline {
         for gc in self.contours.iter() {
             let contour: Contour<PD> = match gc[0].ptype {
                 PointType::Curve | PointType::Line | PointType::Move => cubic_contour(gc),
-                PointType::QCurve => quadratic_contour(gc),
+                PointType::QCurve | PointType::QClose => quadratic_contour(gc),
                 _ => Vec::new(), // Handle other cases as necessary
             };
 
