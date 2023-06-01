@@ -1,6 +1,6 @@
-# glifparser v1.2.8 (⏫︎2022-12-20)
+# glifparser v2.0.1 (⏫︎2023-06-01)
 
-(c) 2020–2022 Fredrick R. Brennan and MFEK Authors
+(c) 2020–2023 Fredrick R. Brennan and MFEK Authors
 
 A parser and writer for UFO `.glif` files.
 
@@ -176,7 +176,7 @@ image in.
 
 ## License
 
-    Copyright 2020–2022 Fredrick R. Brennan and MFEK Authors
+    Copyright 2020–2023 Fredrick R. Brennan and MFEK Authors
     
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.

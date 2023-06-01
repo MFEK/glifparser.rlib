@@ -1,6 +1,6 @@
 [package]
 name = "glifparser"
-version = "2.0.0"
+version = "2.0.1"
 authors = ["Fredrick Brennan <copypaste@kittens.ph>", "MFEK Authors"]
 edition = "2021"
 license = "Apache-2.0"
