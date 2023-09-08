@@ -18,7 +18,7 @@ use super::point::MFEKPointCommon;
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct MFEKContour<PD: PointData> {
     inner: MFEKContourInner<PD>,
-    operation: Option<ContourOperations<PD>>,
+    pub operation: Option<ContourOperations<PD>>,
 }
 
 impl<PD: PointData> MFEKContour<PD> {
