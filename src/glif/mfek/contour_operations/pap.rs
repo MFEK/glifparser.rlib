@@ -5,21 +5,31 @@ use crate::PointData;
 
 use super::ContourOperation;
 
-#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Copy, Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub enum PatternCopies {
     Single,
     Repeated,
-    Fixed(usize) // TODO: Implement
 }
 
-#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Copy, Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub enum PatternSubdivide {
     /// no splitting
     Off,
     /// split each curve at its midpoint
     Simple(usize), // The value here is how many times we'll subdivide simply
     // split the input pattern each x degrees in change in direction on the path
-    //Angle(f64) TODO: Implement.
+    Angle(f64),
+}
+
+
+#[derive(Copy, Clone, Debug, PartialEq, Serialize, Deserialize)]
+pub enum PatternCulling {
+    /// no splitting
+    Off,
+    /// don't draw the pattern if it'd overlap an existing contour
+    RemoveOverlapping,
+    // erase the pattern underneath around the contour
+    EraseOverlapping(f64, f64),
 }
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
@@ -54,10 +64,12 @@ pub struct PAPContour<PD: PointData> {
     pub tangent_offset: f64,
     pub pattern_scale: (f64, f64),
     pub center_pattern: bool,
-    pub prevent_overdraw: f64,
+    pub prevent_overdraw: PatternCulling,
     pub two_pass_culling: bool,
     pub reverse_path: bool,
     pub reverse_culling: bool,
+    pub warp_pattern: bool,
+    pub split_path: bool,
 }
 
 impl<PD: PointData> ContourOperation<PD> for PAPContour<PD> {

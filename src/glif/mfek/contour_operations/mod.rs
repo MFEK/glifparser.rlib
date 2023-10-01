@@ -3,7 +3,7 @@ pub mod pap;
 pub mod dash;
 
 use serde::{Serialize, Deserialize};
-use self::{vws::VWSContour, pap::PAPContour, dash::DashContour};
+pub use self::{vws::VWSContour, pap::PAPContour, dash::DashContour};
 use crate::{PointData, glif::MFEKContour};
 
 use super::{pointdata::MFEKPointData, MFEKOutline};
