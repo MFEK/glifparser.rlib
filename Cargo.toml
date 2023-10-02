@@ -14,7 +14,7 @@ derive_more = "0.99"
 derivative = "2.2"
 xmltree = { version = "0.10", features = ["attribute-order"] }
 log = "0.4"
-kurbo = { git = "https://github.com/MFEK/kurbo.rlib" }
+kurbo = { git = "https://github.com/MFEK/kurbo.rlib", branch = "master" }
 trees = "0.4"
 skia-safe = { version = ">0.0", optional = true }
 image = { version = "0.24", features = ["png"], default-features = false, optional = true }

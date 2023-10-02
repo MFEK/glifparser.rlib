@@ -489,7 +489,7 @@ dependencies = [
 [[package]]
 name = "kurbo"
 version = "0.9.5"
-source = "git+https://github.com/MFEK/kurbo.rlib#b0bec8ab69d41f638aaf4feb41736c4943399a7b"
+source = "git+https://github.com/MFEK/kurbo.rlib?branch=master#b0bec8ab69d41f638aaf4feb41736c4943399a7b"
 dependencies = [
  "arrayvec",
  "serde",
