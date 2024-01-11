@@ -51,8 +51,6 @@ pub struct MFEKGlif<PD: PointData> {
     pub filename: Option<stdpath::PathBuf>,
 }
 
-pub struct MFEKCubicGlif<PD: PointData>(MFEKGlif<PD>);
-
 impl<PD: PointData> From<Glif<PD>> for MFEKGlif<PD> {
     fn from(glif: Glif<PD>) -> Self {
         let mut layers = Vec::new();
