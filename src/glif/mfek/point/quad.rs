@@ -124,4 +124,12 @@ impl<PD: PointData> MFEKPointCommon<PD> for QPoint<PD> {
             self.a = Handle::Colocated
         }
     }
+
+    fn get_smooth(&self) -> Option<bool> {
+        None
+    }
+
+    fn set_smooth(&mut self, _: bool) {
+        // Do nothing
+    }
 }

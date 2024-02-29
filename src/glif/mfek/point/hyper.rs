@@ -128,6 +128,14 @@ impl<PD: PointData> MFEKPointCommon<PD> for HyperPoint<PD> {
             WhichHandle::B => {self.b = Handle::Colocated}
         }
     }
+
+    fn get_smooth(&self) -> Option<bool> {
+        None
+    }
+
+    fn set_smooth(&mut self, _: bool) {
+        // Do nothing
+    }
 }
 
 #[derive(Clone, Serialize, Deserialize, Debug, PartialEq, Default)]

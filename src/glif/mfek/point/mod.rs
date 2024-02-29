@@ -21,6 +21,8 @@ pub trait MFEKPointCommon<PD: PointData>: DynClone {
     fn get_position(&self) -> (f32, f32);
     fn set_position(&mut self, x: f32, y:f32);
     fn set_position_no_handles(&mut self, x: f32, y:f32);
+    fn get_smooth(&self) -> Option<bool>;
+    fn set_smooth(&mut self, smooth: bool);
     fn cubic(&self) -> Option<&Point<PD>>;
     fn quad(&self) -> Option<&QPoint<PD>>;
     fn hyper(&self) -> Option<&HyperPoint<PD>>;
@@ -136,5 +138,13 @@ impl<PD: PointData> MFEKPointCommon<PD> for Point<PD> {
             WhichHandle::A => self.a = Handle::Colocated,
             WhichHandle::B => self.b = Handle::Colocated,
         }
+    }
+
+    fn get_smooth(&self) -> Option<bool> {
+        Some(self.smooth)
+    }
+
+    fn set_smooth(&mut self, smooth: bool) {
+        self.smooth = smooth;
     }
 }
